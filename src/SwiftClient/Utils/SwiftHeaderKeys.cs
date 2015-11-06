@@ -1,0 +1,23 @@
+﻿
+namespace SwiftClient.Utils
+{
+    public static class SwiftHeaderKeys
+    {
+        public static string AuthUser = "X-Auth-User";
+        public static string AuthKey = "X-Auth-Key";
+        public static string AuthToken = "X-Auth-Token";
+        public static string StorageUrl = "X-Storage-Url";
+        public static string ObjectManifest = "X-Object-Manifest";
+        public static string CopyFrom = "X-Copy-From";
+
+        public static string AccountObjectCount = "X-Account-Object-Count";
+        public static string AccountBytesUsed = "X-Account-Bytes-Used";
+        public static string AccountContainerCount = "X-Account-Container-Count";
+        public static string AccountMetaFormat = "X-Account-Meta-{0}";
+
+        public static string ContainerObjectCount = "X-Container-Object-Count";
+        public static string ContainerBytesUsed = "X-Container-Bytes-Used";
+        public static string ContainerMetaFormat = "X-Container-Meta-{0}";
+
+    }
+}

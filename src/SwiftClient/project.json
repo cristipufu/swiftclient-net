@@ -1,0 +1,27 @@
+﻿{
+  "version": "1.1.0-b-*",
+  "description": "OpenStack Swift client for .NET",
+  "authors": [ "Cristi Pufu" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "net45": {
+      "dependencies": {
+        "System.Net.Http": "4.0.1-beta-23409"
+      }
+    },
+    "dnx451": {
+      "dependencies": {
+        "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-beta8"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Linq": "4.0.1-beta-23409",
+        "System.Runtime": "4.0.21-beta-*",
+        "System.Net.Requests": "4.0.10-beta-23019"
+      }
+    }
+  }
+}

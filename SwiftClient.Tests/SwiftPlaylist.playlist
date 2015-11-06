@@ -1,0 +1,8 @@
+﻿<Playlist Version="1.0">
+  <Add Test="SwiftClient.Tests.SwiftClientTests.AuthenticateTest" />
+  <Add Test="SwiftClient.Tests.SwiftClientTests.PutContainerTest" />
+  <Add Test="SwiftClient.Tests.SwiftClientTests.PutObjectTest" />
+  <Add Test="SwiftClient.Tests.SwiftClientTests.PutChunkedObjectTest" />
+  <Add Test="SwiftClient.Tests.SwiftClientTests.GetAccountTest" />
+  <Add Test="SwiftClient.Tests.SwiftClientTests.GetContainerTest" />
+</Playlist>
