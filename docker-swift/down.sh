@@ -4,4 +4,4 @@
 docker stop SWIFT_AIO
 docker rm SWIFT_AIO
 docker rm SWIFT_DATA
-docker rmi SWIFT_AIO_IMG
+#docker rmi swift-aio
