@@ -40,6 +40,8 @@ dlldata.c
 
 # DNX
 project.lock.json
+src/SwiftClient.Demo/project.lock.json
+test/SwiftClient.Test/project.lock.json
 artifacts/
 
 *_i.c
