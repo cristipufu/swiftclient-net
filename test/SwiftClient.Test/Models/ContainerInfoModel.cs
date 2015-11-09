@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace SwiftClient.Test
 {
     public class ContainerInfoModel

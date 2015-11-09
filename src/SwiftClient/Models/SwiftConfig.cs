@@ -1,5 +1,5 @@
 ﻿
-namespace SwiftClient.Models
+namespace SwiftClient
 {
     public class SwiftConfig
     {

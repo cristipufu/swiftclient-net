@@ -2,7 +2,7 @@
 
 namespace SwiftClient.Extensions
 {
-    public static class IListExtensions
+    internal static class IListExtensions
     {
         public static void MoveFirstToLast(this IList list)
         {

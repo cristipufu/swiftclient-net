@@ -1,7 +1,7 @@
 ﻿using SwiftClient.Extensions;
 using System.Collections.Generic;
 
-namespace SwiftClient.Utils
+namespace SwiftClient
 {
     public static class SwiftUrlBuilder
     {

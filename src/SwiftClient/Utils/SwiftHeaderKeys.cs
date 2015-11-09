@@ -1,5 +1,5 @@
 ﻿
-namespace SwiftClient.Utils
+namespace SwiftClient
 {
     public static class SwiftHeaderKeys
     {

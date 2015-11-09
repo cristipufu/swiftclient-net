@@ -1,7 +1,7 @@
 ﻿
 namespace SwiftClient.Extensions
 {
-    public static class StringExtensions
+    internal static class StringExtensions
     {
         public static string Encode(this string string_to_encode)
         {

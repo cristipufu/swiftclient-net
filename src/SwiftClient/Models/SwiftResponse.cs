@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace SwiftClient.Models
+namespace SwiftClient
 {
     public class SwiftResponse : SwiftBaseResponse
     {

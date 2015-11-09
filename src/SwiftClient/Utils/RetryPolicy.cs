@@ -4,7 +4,7 @@ using System.Linq;
 using SwiftClient.Extensions;
 using System.Threading.Tasks;
 
-namespace SwiftClient.Utils
+namespace SwiftClient
 {
     public class RetryPolicy
     {

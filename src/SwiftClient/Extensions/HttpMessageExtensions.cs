@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SwiftClient.Extensions
 {
-    public static class HttpMessageExtensions
+    internal static class HttpMessageExtensions
     {
         public static void SetHeaders(this HttpRequestMessage request, Dictionary<string, string> headers = null)
         {

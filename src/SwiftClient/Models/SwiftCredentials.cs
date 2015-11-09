@@ -1,7 +1,7 @@
 ﻿
 using System.Collections.Generic;
 
-namespace SwiftClient.Models
+namespace SwiftClient
 {
     public class SwiftCredentials
     {

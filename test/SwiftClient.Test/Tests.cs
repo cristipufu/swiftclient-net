@@ -5,7 +5,6 @@ using Microsoft.Framework.Configuration;
 
 using Newtonsoft.Json;
 using Xunit;
-using SwiftClient.Models;
 
 namespace SwiftClient.Test
 {
