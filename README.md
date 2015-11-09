@@ -188,8 +188,8 @@ Use swift credentials in a controller:
 ***HomeController.cs***
 
 ```cs
-    public class HomeController : Controller
-    {
+public class HomeController : Controller
+{
         SwiftClient client = new SwiftClient();
 
         public HomeController(IOptions<SwiftCredentials> credentials)
@@ -199,5 +199,9 @@ Use swift credentials in a controller:
                   .SetLogger(new SwiftLogger());
 
         }
-    }
+}
 ```
+
+### Running the ASP.NET 5 MVC demo site
+
+The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against swift, do chunked upload for an mp4 file and playing it using the HTML5 `video` tag. For dev/test environments we provide a docker image with a single swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/docker-swift).
