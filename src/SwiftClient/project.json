@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.2.0-b-*",
-  "description": "OpenStack Swift client for .NET",
+  "description": "OpenStack Swift client for .NET 4.5 and 5.0",
   "authors": [ "Cristi Pufu" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "tags": [ "OpenStack Swift aspnet5" ],
+  "projectUrl": "https://github.com/vtfuture/SwiftClient",
+  "licenseUrl": "https://github.com/vtfuture/SwiftClient/blob/master/LICENSE.md",
   "frameworks": {
     "net45": {
       "dependencies": {
