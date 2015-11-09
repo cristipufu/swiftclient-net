@@ -1,14 +1,25 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
+﻿using System.Threading.Tasks;
 using System.IO;
+using Microsoft.AspNet.Mvc;
+using Microsoft.Framework.OptionsModel;
 
 namespace SwiftClient.Demo.Controllers
 {
     public class HomeController : Controller
     {
-        private string _containerName = "democontainer";
-        private string _objectName = "demo-video";
+        string containerId = "democontainer";
+        string objectId = "demo-video";
+
+        SwiftClient client = new SwiftClient();
+
+        public HomeController(IOptions<SwiftCredentials> credentials)
+        {
+            client.WithCredentials(credentials.Value)
+                  .SetRetryCount(2)
+                  .SetLogger(new SwiftLogger());
+
+            client.PutContainer(containerId);
+        }
 
         public IActionResult Index()
         {
@@ -23,9 +34,7 @@ namespace SwiftClient.Demo.Controllers
 
                 Request.Body.CopyTo(memoryStream);
 
-                SwiftClient client = GetSwiftClient();
-
-                await client.PutChunkedObject(_containerName, _objectName, memoryStream.ToArray(), segment);
+                await client.PutChunkedObject(containerId, objectId, memoryStream.ToArray(), segment);
 
                 return new JsonResult(new
                 {
@@ -41,32 +50,12 @@ namespace SwiftClient.Demo.Controllers
 
         public async Task<IActionResult> UploadDone()
         {
-            SwiftClient client = GetSwiftClient();
-
-            await client.PutManifest(_containerName, _objectName);
+            await client.PutManifest(containerId, objectId);
 
             return new JsonResult(new
             {
                 Success = true
             });
         }
-
-        private SwiftClient GetSwiftClient()
-        {
-            SwiftClient client = new SwiftClient();
-
-            client.WithCredentials(new SwiftCredentials
-            {
-                Username = "preview:root",
-                Password = "swift@VT!@#",
-                Endpoints = new List<string> { "http://192.168.3.21:8080" }
-            })
-            .SetRetryCount(2);
-
-            client.PutContainer(_containerName);
-
-            return client;
-        }
-
     }
 }
