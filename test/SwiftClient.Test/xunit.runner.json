@@ -1,7 +1,3 @@
 ﻿{
-  "Credentials": {
-    "Username": "test:tester",
-    "Password": "testing",
-    "Endpoints": "http://192.168.3.23:8080"
-  }
+  "diagnosticMessages":  true
 }

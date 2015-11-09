@@ -44,6 +44,8 @@ namespace SwiftClient
             {
                 using (var response = await _client.SendAsync(request))
                 {
+                    response.EnsureSuccessStatusCode();
+
                     return new SwiftAuthData
                     {
                         AuthToken = response.GetHeader(SwiftHeaderKeys.AuthToken),
@@ -51,11 +53,11 @@ namespace SwiftClient
                     };
                 }
             }
-            catch (WebException e)
+            catch (Exception ex)
             {
                 if (_logger != null)
                 {
-                    _logger.LogAuthenticationError(e, username, password, endpoint);
+                    _logger.LogAuthenticationError(ex, username, password, endpoint);
                 }
 
                 return null;

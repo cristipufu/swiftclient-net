@@ -151,11 +151,7 @@ namespace SwiftClient
 
         private bool IsSuccessStatusCode(HttpStatusCode statusCode)
         {
-            return statusCode == HttpStatusCode.OK ||
-                statusCode == HttpStatusCode.Created ||
-                statusCode == HttpStatusCode.Accepted ||
-                statusCode == HttpStatusCode.NoContent ||
-                statusCode == HttpStatusCode.PartialContent;
+            return ((int)statusCode >= 200) && ((int)statusCode <= 299);
         }
 
         public void SetRetryCount(int retryCount)

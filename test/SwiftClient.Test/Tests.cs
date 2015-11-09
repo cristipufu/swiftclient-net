@@ -5,16 +5,19 @@ using Microsoft.Framework.Configuration;
 
 using Newtonsoft.Json;
 using Xunit;
+using Xunit.Abstractions;
+using System.Reflection;
+using Microsoft.Framework.DependencyInjection;
 
 namespace SwiftClient.Test
 {
     public class SwiftInitFixture
     {
-        public ISwiftClient Client;
+        public SwiftClient Client;
         public string ContainerId = "testcontainer";
         public string ObjectId = "testfile";
         public string ChunckedObjectId = "testfilechunks";
-        public int MaxBufferSize = 10 * 1024;
+        public int MaxBufferSize = 10 * 1024;        
 
         public SwiftInitFixture()
         {
@@ -22,17 +25,17 @@ namespace SwiftClient.Test
 
             if (Client == null)
             {
-                Client = new SwiftClient()
-                    .WithCredentials(credentials)
-                    .SetRetryCount(2)
-                    .SetLogger(new SwiftLogger());
+                Client = new SwiftClient();
+
+                Client.WithCredentials(credentials)
+                    .SetRetryCount(2);
             }
         }
 
         SwiftCredentials GetConfigCredentials()
         {
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("xunit.runner.json");
+                .AddJsonFile("appsettings.json");
 
             var configuration = builder.Build();
 
@@ -52,7 +55,7 @@ namespace SwiftClient.Test
         #region Ctor and Properties
 
         SwiftInitFixture fixture;
-        ISwiftClient client
+        SwiftClient client
         {
             get
             {
@@ -90,9 +93,11 @@ namespace SwiftClient.Test
             }
         }
 
-        public Tests(SwiftInitFixture fixture)
+        public Tests(SwiftInitFixture fixture, ITestOutputHelper output)
         {
             this.fixture = fixture;
+
+            client.SetLogger(new SwiftLogger(output));
         }
 
         #endregion
