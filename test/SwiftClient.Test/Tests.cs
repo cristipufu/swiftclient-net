@@ -6,47 +6,30 @@ using Microsoft.Framework.Configuration;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
-using System.Reflection;
 using Microsoft.Framework.DependencyInjection;
 
 namespace SwiftClient.Test
 {
     public class SwiftInitFixture
     {
-        public SwiftClient Client;
-        public string ContainerId = "testcontainer";
-        public string ObjectId = "testfile";
-        public string ChunckedObjectId = "testfilechunks";
-        public int MaxBufferSize = 10 * 1024;        
+        public SwiftCredentials Credentials;
 
         public SwiftInitFixture()
         {
-            var credentials = GetConfigCredentials();
-
-            if (Client == null)
-            {
-                Client = new SwiftClient();
-
-                Client.WithCredentials(credentials)
-                    .SetRetryCount(2);
-            }
+            Credentials = GetConfigCredentials();   
         }
 
         SwiftCredentials GetConfigCredentials()
         {
+            var services = new ServiceCollection();
             var builder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json");
 
-            var configuration = builder.Build();
+            IConfigurationRoot configuration = builder.Build();
 
             var section = configuration.GetSection("Credentials");
 
-            return new SwiftCredentials()
-            {
-                Username = section["Username"],
-                Password = section["Password"],
-                Endpoints = section["Endpoints"].Split(',').ToList()
-            };
+            return CustomConfigReader.Get<SwiftCredentials>(section);
         }
     }
 
@@ -54,56 +37,50 @@ namespace SwiftClient.Test
     {
         #region Ctor and Properties
 
+        public string containerId = "testcontainer";
+        public string objectId = "testfile";
+        public string chunkedObjectId = "testfilechunks";
+        public int maxBufferSize = 10 * 1024;
+
         SwiftInitFixture fixture;
-        SwiftClient client
-        {
-            get
-            {
-                return fixture.Client;
-            }
-        }
-        string containerId
-        {
-            get
-            {
-                return fixture.ContainerId;
-            }
-        }
-        string objectId
-        {
-            get
-            {
-                return fixture.ObjectId;
-            }
-        }
+        ITestOutputHelper output;
 
-        string chunkedObjectId
+        SwiftCredentials credentials
         {
             get
             {
-                return fixture.ChunckedObjectId;
-            }
-        }
-
-        int maxBufferSize
-        {
-            get
-            {
-                return fixture.MaxBufferSize;
+                return fixture.Credentials;
             }
         }
 
         public Tests(SwiftInitFixture fixture, ITestOutputHelper output)
         {
             this.fixture = fixture;
-
-            client.SetLogger(new SwiftLogger(output));
+            this.output = output;
         }
 
         #endregion
 
+        public SwiftClient GetClient()
+        {
+            var client = new SwiftClient(credentials);
+
+            client.SetLogger(new SwiftLogger(output));
+            client.SetRetryCount(2);
+
+            return client;
+        }
+
         [Fact()]
         public async Task AuthenticateTest()
+        {
+            using(var client = GetClient())
+            {
+                await Authenticate(client);
+            }
+        }
+
+        public async Task Authenticate(SwiftClient client)
         {
             // auth
             var rsp = await client.Authenticate();
@@ -114,9 +91,16 @@ namespace SwiftClient.Test
         [Fact()]
         public async Task PutContainerTest()
         {
-            // auth
-            await AuthenticateTest();
+            using (var client = GetClient())
+            {
+                await Authenticate(client);
 
+                await PutContainer(client);
+            }
+        }
+
+        public async Task PutContainer(SwiftClient client)
+        {
             // create
             var createRsp = await client.PutContainer(containerId);
 
@@ -131,12 +115,18 @@ namespace SwiftClient.Test
         [Fact()]
         public async Task PutObjectTest()
         {
-            // auth
-            await AuthenticateTest();
+            using (var client = GetClient())
+            {
+                await Authenticate(client);
 
-            // upload container
-            await PutContainerTest();
+                await PutContainer(client);
 
+                await PutObject(client);
+            }
+        }
+
+        public async Task PutObject(SwiftClient client)
+        {
             // generate random byte array
             RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
             var data = generator.GenerateBufferFromSeed(maxBufferSize);
@@ -160,12 +150,18 @@ namespace SwiftClient.Test
         [Fact()]
         public async Task PutChunkedObjectTest()
         {
-            // auth
-            await AuthenticateTest();
+            using (var client = GetClient())
+            {
+                await Authenticate(client);
 
-            // upload container
-            await PutContainerTest();
+                await PutContainer(client);
 
+                await PutChunkedObject(client);
+            }
+        }
+
+        public async Task PutChunkedObject(SwiftClient client)
+        {
             var chunks = 10;
 
             // upload chunks
@@ -205,12 +201,18 @@ namespace SwiftClient.Test
         [Fact()]
         public async Task GetAccountTest()
         {
-            // auth
-            await AuthenticateTest();
+            using (var client = GetClient())
+            {
+                await Authenticate(client);
 
-            // upload container
-            await PutContainerTest();
+                await PutContainer(client);
 
+                await GetAccount(client);
+            }
+        }
+
+        public async Task GetAccount(SwiftClient client)
+        {
             var resp = await client.GetAccount(new Dictionary<string, string>() { { "format", "json" } });
 
             Assert.True(resp.IsSuccess);
@@ -223,15 +225,20 @@ namespace SwiftClient.Test
         [Fact()]
         public async Task GetContainerTest()
         {
-            // auth
-            await AuthenticateTest();
+            using (var client = GetClient())
+            {
+                await Authenticate(client);
 
-            // upload container
-            await PutContainerTest();
+                await PutContainer(client);
 
-            // upload object
-            await PutObjectTest();
+                await PutObject(client);
 
+                await GetContainer(client);
+            }
+        }
+
+        public async Task GetContainer(SwiftClient client)
+        {
             var resp = await client.GetContainer(containerId, null, new Dictionary<string, string>() { { "format", "json" } });
 
             Assert.True(resp.IsSuccess);

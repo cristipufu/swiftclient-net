@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient
+    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
     {
 
         public Task<SwiftContainerResponse> HeadContainer(string containerId, Dictionary<string, string> headers = null)

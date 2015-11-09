@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient
+    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
     {
         /// <summary>
         /// Get authentication token and storage url

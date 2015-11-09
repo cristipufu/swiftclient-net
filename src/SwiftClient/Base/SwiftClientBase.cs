@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient
+    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
     {
         protected ISwiftLogger _logger;
         protected SwiftCredentials _credentials;
@@ -110,5 +110,9 @@ namespace SwiftClient
             return result;
         }
 
+        public void Dispose()
+        {
+            _client.Dispose();
+        }
     }
 }
