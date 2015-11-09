@@ -16,6 +16,8 @@ namespace SwiftClient
         protected SwiftRetryManager _manager;
         protected HttpClient _client = new HttpClient();
 
+        bool disposed = false;
+
         public SwiftClientBase()
         {
             _manager = new SwiftRetryManager(
@@ -112,7 +114,21 @@ namespace SwiftClient
 
         public void Dispose()
         {
-            _client.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                _client.Dispose();
+            }
+
+            disposed = true;
         }
     }
 }
