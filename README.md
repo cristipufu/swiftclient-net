@@ -6,9 +6,17 @@
 (http://tcoss.veritech.io/viewType.html?buildTypeId=SwiftClient_Windows&guest=1)
 [![NuGet version](https://img.shields.io/nuget/vpre/SwiftClient.svg)](https://www.nuget.org/packages/SwiftClient/)
 
-### Usage
-
 SwiftClient is a HTTP wrapper over OpenStack Swift REST API and follows the [Object Storage API Reference](http://developer.openstack.org/api-ref-objectstorage-v1.html). It can be installed via NuGet from [nuget.org/packages/SwiftClient](https://www.nuget.org/packages/SwiftClient/) and it's compatible with .NET 4.5.1 and 5.0.
+
+### Running the ASP.NET 5 MVC demo
+
+The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against swift, do chunked upload for an mp4 file and playing it using the HTML5 `video` tag. 
+
+You will need at least one Ubuntu 14.04 box to host OpenStack Swfit proxy and storage. For dev/test environments we provide a docker image with a single swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/docker-swift) to build and run the swift container. After you've started the swift all-in-one container, put your Ubuntu box IP in the `appsettings.json` from the demo project and your good to go.
+
+If you want to setup Swift for production on a Ubuntu cluster check out the [documentation](https://github.com/vtfuture/SwiftClient/wiki) from the our wiki.
+
+### Usage
 
 The client implements a configurable retry mechanism, so you don't have to worry about the token expiration date or a temporary request failure. 
 It also supports multiple endpoints (swfit proxy addreses), if you chose to use some of your proxy nodes for backup and not load balance exclude those from the endpoint list.
@@ -198,7 +206,3 @@ public class HomeController : Controller
 }
 ```
 
-### Running the ASP.NET 5 MVC demo site
-
-The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against swift, do chunked upload for an mp4 file and playing it using the HTML5 `video` tag. 
-You will need at least one Ubuntu 14.04 box to host OpenStack Swfit proxy and storage. For dev/test environments we provide a docker image with a single swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/docker-swift) to build and run the swift container. After you've started the swift all-in-one container, put your Ubuntu box IP in the appsettings.json from the demo project and your good to go.
