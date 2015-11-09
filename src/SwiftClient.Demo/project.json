@@ -15,7 +15,7 @@
     "Microsoft.Framework.Logging.Console": "1.0.0-beta8",
     "Microsoft.Framework.Logging.Debug": "1.0.0-beta8",
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-beta8",
-    "SwiftClient": "1.1.0-b-21"
+    "SwiftClient": "1.2.0-b-*"
   },
   "exclude": [
     "wwwroot",

@@ -1,9 +1,8 @@
-﻿using SwiftClient;
-using System;
-using System.Net;
+﻿using System;
 using System.Diagnostics;
+using System.Net;
 
-namespace SwiftClient.Tests
+namespace SwiftClient.Test
 {
     public class SwiftLogger : ISwiftLogger
     {
@@ -28,5 +27,4 @@ namespace SwiftClient.Tests
             Trace.WriteLine(string.Format(_unauthorizedError, token));
         }
     }
-
 }

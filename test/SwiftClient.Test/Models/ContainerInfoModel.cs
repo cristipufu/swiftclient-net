@@ -1,5 +1,5 @@
 ﻿
-namespace SwiftClient.Tests
+namespace SwiftClient.Test
 {
     public class ContainerInfoModel
     {

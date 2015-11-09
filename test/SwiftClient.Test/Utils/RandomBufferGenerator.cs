@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SwiftClient.Tests
+namespace SwiftClient.Test
 {
     public class RandomBufferGenerator
     {
