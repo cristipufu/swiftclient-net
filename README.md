@@ -10,11 +10,11 @@ SwiftClient is a HTTP wrapper over OpenStack Swift REST API and follows the [Obj
 
 ### Running the ASP.NET 5 MVC demo
 
-The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against swift, do chunked upload for an mp4 file and playing it using the HTML5 `video` tag. 
+The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against swift, do chunked upload for a mp4 file and playing it using the HTML5 `video` tag. 
 
 You will need at least one Ubuntu 14.04 box to host OpenStack Swfit proxy and storage. For dev/test environments we provide a docker image with a single swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/docker-swift) to build and run the swift container. After you've started the swift all-in-one container, put your Ubuntu box IP in the `appsettings.json` from the demo project and your good to go.
 
-If you want to setup Swift for production on a Ubuntu cluster check out the [documentation](https://github.com/vtfuture/SwiftClient/wiki) from the our wiki.
+If you want to setup Swift for production on a Ubuntu cluster check out the [documentation](https://github.com/vtfuture/SwiftClient/wiki) from our wiki.
 
 ### Usage
 
