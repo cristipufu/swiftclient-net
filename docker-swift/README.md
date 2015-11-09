@@ -36,7 +36,7 @@ sudo usermod -aG docker your-username
 
 You'll need to copy all files inside `vtfuture/SwiftClient/docker-swift` on your Ubuntu server and run `up.sh`, this will build and start a swfit container that exposes port 8080 on your server.
 
-Optionally you could follow the follow steps:
+Optionally you could follow these steps:
 
 ***Download project using git***
 
