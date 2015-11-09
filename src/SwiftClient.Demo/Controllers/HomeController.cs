@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using System.IO;
-using SwiftClient.Models;
 
 namespace SwiftClient.Demo.Controllers
 {

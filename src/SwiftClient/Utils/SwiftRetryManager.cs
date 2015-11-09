@@ -1,10 +1,9 @@
-﻿using SwiftClient.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SwiftClient.Utils
+namespace SwiftClient
 {
     /// <summary>
     /// Handles authentication, token expiration reauthorization, retry logic with multiple proxy endpoints
