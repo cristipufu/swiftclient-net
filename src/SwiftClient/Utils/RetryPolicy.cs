@@ -133,9 +133,9 @@ namespace SwiftClient
             });
         }
 
-        public async Task<bool> DoAsync(Func<T, Task<bool>> func)
+        public Task<bool> DoAsync(Func<T, Task<bool>> func)
         {
-            return await DoAsync(async () =>
+            return DoAsync(async () =>
             {
                 var retrier = RetryPolicy.Create().WithCount(_nRetryPerStep);
 

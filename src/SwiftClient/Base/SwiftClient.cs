@@ -1,65 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.IO;
 
 using SwiftClient.Extensions;
 using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
+    public partial class SwiftClient : ISwiftClient, IDisposable
     {
         protected ISwiftLogger _logger;
-        protected SwiftCredentials _credentials;
         protected SwiftRetryManager _manager;
         protected HttpClient _client = new HttpClient();
 
-        bool disposed = false;
+        public SwiftClient() { }
 
-        public SwiftClientBase()
+        public SwiftClient(SwiftCredentials credentials) : this(new SwiftAuthManager(credentials)) { }
+
+        public SwiftClient(SwiftCredentials credentials, ISwiftLogger logger) : this(credentials)
         {
-            _manager = new SwiftRetryManager(
-                GetCredentials,
-                Authenticate,
-                SetAuthData,
-                GetAuthData,
-                SetEndpoints,
-                GetEndpoints);
+            SetLogger(logger);
         }
 
-        public SwiftClientBase(SwiftCredentials credentials) : this()
+        public SwiftClient(ISwiftAuthManager authManager)
         {
-            _credentials = credentials;
-        }
-
-        public SwiftClientBase(SwiftCredentials credentials, SwiftConfig config) : this(credentials)
-        {
-            if (config != null)
+            if (authManager.Authenticate == null)
             {
-                if (config.RetryCount.HasValue)
-                {
-                    _manager.SetRetryCount(config.RetryCount.Value);
-                }
-
-                if (config.RetryCountPerEndpoint.HasValue)
-                {
-                    _manager.SetRetryPerEndpointCount(config.RetryCountPerEndpoint.Value);
-                }
+                authManager.Authenticate = Authenticate;
             }
+
+            _manager = new SwiftRetryManager(authManager);
         }
 
-        public SwiftClientBase(SwiftCredentials credentials, ISwiftLogger logger) : this(credentials)
+        public SwiftClient(ISwiftAuthManager authManager, ISwiftLogger logger) : this(authManager)
         {
-            _logger = logger;
-            _manager.SetLogger(logger);
-        }
-
-        public SwiftClientBase(SwiftCredentials credentials, SwiftConfig config, ISwiftLogger logger) : this(credentials, config)
-        {
-            _logger = logger;
-            _manager.SetLogger(logger);
+            SetLogger(logger);
         }
 
         private void FillRequest(HttpRequestMessage request, SwiftAuthData auth, Dictionary<string, string> headers = null)
@@ -111,6 +86,8 @@ namespace SwiftClient
             result.ContentLength = rsp.Content.Headers.ContentLength ?? 0;
             return result;
         }
+
+        bool disposed = false;
 
         public void Dispose()
         {

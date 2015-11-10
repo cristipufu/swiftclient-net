@@ -10,12 +10,13 @@ namespace SwiftClient.Demo.Controllers
         string containerId = "democontainer";
         string objectId = "demo-video";
 
-        SwiftClient client = new SwiftClient();
+        SwiftClient client;
 
         public HomeController(IOptions<SwiftCredentials> credentials)
         {
-            client.WithCredentials(credentials.Value)
-                  .SetRetryCount(2)
+            client = new SwiftClient(credentials.Value);
+
+            client.SetRetryCount(2)
                   .SetLogger(new SwiftLogger());
 
             client.PutContainer(containerId);

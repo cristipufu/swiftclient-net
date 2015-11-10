@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.IO;
 
 using SwiftClient.Extensions;
 using System.Net.Http;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
+    public partial class SwiftClient : ISwiftClient, IDisposable
     {
 
         public Task<SwiftAccountResponse> HeadAccount()

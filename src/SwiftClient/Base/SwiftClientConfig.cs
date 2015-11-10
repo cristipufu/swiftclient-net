@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.IO;
-
-using SwiftClient.Extensions;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
+    public partial class SwiftClient : ISwiftClient, IDisposable
     {
 
         /// <summary>
@@ -17,9 +10,18 @@ namespace SwiftClient
         /// </summary>
         /// <param name="credentials"></param>
         /// <returns></returns>
-        public SwiftClientBase WithCredentials(SwiftCredentials credentials)
+        public SwiftClient WithCredentials(SwiftCredentials credentials)
         {
-            _credentials = credentials;
+            if (_manager == null)
+            {
+                var authManager = new SwiftAuthManager(credentials);
+
+                authManager.Authenticate = Authenticate;
+
+                authManager.Credentials = credentials;
+
+                _manager = new SwiftRetryManager(authManager);
+            }
 
             return this;
         }
@@ -29,9 +31,10 @@ namespace SwiftClient
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public SwiftClientBase SetLogger(ISwiftLogger logger)
+        public SwiftClient SetLogger(ISwiftLogger logger)
         {
             _logger = logger;
+            _manager.SetLogger(logger);
 
             return this;
         }
@@ -41,7 +44,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="retryCount">Default value 1</param>
         /// <returns></returns>
-        public SwiftClientBase SetRetryCount(int retryCount)
+        public SwiftClient SetRetryCount(int retryCount)
         {
             _manager.SetRetryCount(retryCount);
 
@@ -53,7 +56,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="retryPerEndpointCount">Default value 1</param>
         /// <returns></returns>
-        public SwiftClientBase SetRetryPerEndpointCount(int retryPerEndpointCount)
+        public SwiftClient SetRetryPerEndpointCount(int retryPerEndpointCount)
         {
             _manager.SetRetryPerEndpointCount(retryPerEndpointCount);
 

@@ -163,6 +163,7 @@ namespace SwiftClient.Test
         public async Task PutChunkedObject(SwiftClient client)
         {
             var chunks = 10;
+            var tasks = new List<Task>();
 
             // upload chunks
             for (var i = 0; i < chunks; i++)
@@ -171,11 +172,12 @@ namespace SwiftClient.Test
                 RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
                 var data = generator.GenerateBufferFromSeed(maxBufferSize);
 
-                // upload
-                var createRsp = await client.PutChunkedObject(containerId, chunkedObjectId, data, i);
+                var task = client.PutChunkedObject(containerId, chunkedObjectId, data, i);
 
-                Assert.True(createRsp.IsSuccess);
+                tasks.Add(task);
             }
+
+            await Task.WhenAll(tasks);
 
             // upload manifest
             var manifestResp = await client.PutManifest(containerId, chunkedObjectId);

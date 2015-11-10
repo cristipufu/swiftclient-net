@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.IO;
 
 using SwiftClient.Extensions;
 using System.Net.Http;
@@ -9,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SwiftClient
 {
-    public abstract partial class SwiftClientBase : ISwiftClient, IDisposable
+    public partial class SwiftClient : ISwiftClient, IDisposable
     {
         /// <summary>
         /// Get authentication token and storage url
@@ -21,11 +19,6 @@ namespace SwiftClient
         public Task<SwiftAuthData> Authenticate()
         {
             return _manager.Authenticate();
-        }
-
-        private SwiftCredentials GetCredentials()
-        {
-            return _credentials;
         }
 
         private async Task<SwiftAuthData> Authenticate(string username, string password, string endpoint)
@@ -68,6 +61,5 @@ namespace SwiftClient
         {
             return _manager.AuthorizeAndExecute(func);
         }
-
     }
 }
