@@ -8,6 +8,7 @@ namespace SwiftClient
         public static string AuthToken = "X-Auth-Token";
         public static string StorageUrl = "X-Storage-Url";
         public static string ObjectManifest = "X-Object-Manifest";
+        public static string ObjectManifestValueFormat = "{0}/{1}";
         public static string CopyFrom = "X-Copy-From";
 
         public static string AccountObjectCount = "X-Account-Object-Count";
@@ -19,5 +20,8 @@ namespace SwiftClient
         public static string ContainerBytesUsed = "X-Container-Bytes-Used";
         public static string ContainerMetaFormat = "X-Container-Meta-{0}";
 
+        public static string ContentLength = "Content-Length";
+        public static string Range = "Range";
+        public static string RangeValueFormat = "bytes={0}-{1}";
     }
 }

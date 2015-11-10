@@ -7,16 +7,44 @@ using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Framework.DependencyInjection;
+using System;
 
 namespace SwiftClient.Test
 {
-    public class SwiftInitFixture
+    public class SwiftInitFixture : IDisposable
     {
         public SwiftCredentials Credentials;
+        public string ContainerId = "testcontainer";
+        public string ObjectId = "testfile";
+        public string ChunkedObjectId = "testfilechunks";
+        public int MaxBufferSize = 10 * 1024;
+        public int Chunks = 10;
 
         public SwiftInitFixture()
         {
             Credentials = GetConfigCredentials();   
+        }
+
+        public void Dispose()
+        {
+            using (var client = new SwiftClient(Credentials))
+            {
+                var deleteFilesTasks = new List<Task>();
+
+                deleteFilesTasks.Add(client.DeleteObject(ContainerId, ObjectId));
+                deleteFilesTasks.Add(client.DeleteObject(ContainerId, ChunkedObjectId));
+
+                for (var i = 0; i < Chunks; i++)
+                {
+                    deleteFilesTasks.Add(client.DeleteObjectChunk(ContainerId, ChunkedObjectId, i));
+                }
+
+                var delContainerTask = client.DeleteContainer(ContainerId);
+
+                Task.WhenAll(deleteFilesTasks)
+                .ContinueWith((rsp) => delContainerTask)
+                .Wait();
+            }
         }
 
         SwiftCredentials GetConfigCredentials()
@@ -36,14 +64,49 @@ namespace SwiftClient.Test
     public class Tests : IClassFixture<SwiftInitFixture>
     {
         #region Ctor and Properties
-
-        public string containerId = "testcontainer";
-        public string objectId = "testfile";
-        public string chunkedObjectId = "testfilechunks";
-        public int maxBufferSize = 10 * 1024;
-
+        
         SwiftInitFixture fixture;
         ITestOutputHelper output;
+
+        int maxBufferSize
+        {
+            get
+            {
+                return fixture.MaxBufferSize;
+            }
+        }
+
+        int Chunks
+        {
+            get
+            {
+                return fixture.Chunks;
+            }
+        }
+
+        string containerId
+        {
+            get
+            {
+                return fixture.ContainerId;
+            }
+        }
+
+        string objectId
+        {
+            get
+            {
+                return fixture.ObjectId;
+            }
+        }
+
+        string chunkedObjectId
+        {
+            get
+            {
+                return fixture.ChunkedObjectId;
+            }
+        }
 
         SwiftCredentials credentials
         {
@@ -93,8 +156,6 @@ namespace SwiftClient.Test
         {
             using (var client = GetClient())
             {
-                await Authenticate(client);
-
                 await PutContainer(client);
             }
         }
@@ -117,8 +178,6 @@ namespace SwiftClient.Test
         {
             using (var client = GetClient())
             {
-                await Authenticate(client);
-
                 await PutContainer(client);
 
                 await PutObject(client);
@@ -152,8 +211,6 @@ namespace SwiftClient.Test
         {
             using (var client = GetClient())
             {
-                await Authenticate(client);
-
                 await PutContainer(client);
 
                 await PutChunkedObject(client);
@@ -162,11 +219,10 @@ namespace SwiftClient.Test
 
         public async Task PutChunkedObject(SwiftClient client)
         {
-            var chunks = 10;
             var tasks = new List<Task>();
 
             // upload chunks
-            for (var i = 0; i < chunks; i++)
+            for (var i = 0; i < Chunks; i++)
             {
                 // generate random byte array
                 RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
@@ -187,12 +243,12 @@ namespace SwiftClient.Test
             // exists
             var existsRsp = await client.HeadObject(containerId, chunkedObjectId);
 
-            Assert.True(existsRsp.IsSuccess && existsRsp.ContentLength == maxBufferSize * chunks);
+            Assert.True(existsRsp.IsSuccess && existsRsp.ContentLength == maxBufferSize * Chunks);
 
             // get object
             var getRsp = await client.GetObject(containerId, chunkedObjectId);
 
-            Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize * chunks);
+            Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize * Chunks);
 
             // get chunk
             var chunkResp = await client.GetObjectRange(containerId, chunkedObjectId, 0, maxBufferSize - 1);
@@ -205,8 +261,6 @@ namespace SwiftClient.Test
         {
             using (var client = GetClient())
             {
-                await Authenticate(client);
-
                 await PutContainer(client);
 
                 await GetAccount(client);
@@ -229,8 +283,6 @@ namespace SwiftClient.Test
         {
             using (var client = GetClient())
             {
-                await Authenticate(client);
-
                 await PutContainer(client);
 
                 await PutObject(client);

@@ -45,5 +45,10 @@ namespace SwiftClient
         {
             return rootUrl + "/auth/v1.0";
         }
+
+        public static string GetObjectChunkId(string objectId, int segment)
+        {
+            return string.Format("{0}/{1}", objectId, segment.ToString("0000"));
+        }
     }
 }

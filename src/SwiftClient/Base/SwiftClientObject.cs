@@ -71,7 +71,7 @@ namespace SwiftClient
                 headers = new Dictionary<string, string>();
             }
 
-            headers["Range"] = string.Format("bytes={0}-{1}", start, end);
+            headers[SwiftHeaderKeys.Range] = string.Format(SwiftHeaderKeys.RangeValueFormat, start, end);
 
             return GetObject(containerId, objectId, headers, queryParams);
         }
@@ -154,62 +154,22 @@ namespace SwiftClient
 
         public Task<SwiftResponse> PutChunkedObject(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
-            return AuthorizeAndExecute(async (auth) =>
-            {
-                var url = SwiftUrlBuilder.GetObjectUrl(auth.StorageUrl, containerId, string.Format("{0}.seg{1}", objectId, segment.ToString("00000")), queryParams);
-
-                var request = new HttpRequestMessage(HttpMethod.Put, url);
-
-                FillRequest(request, auth, headers);
-
-                try
-                {
-                    request.Content = new ByteArrayContent(data);
-
-                    using (var response = await _client.SendAsync(request))
-                    {
-                        return GetResponse<SwiftResponse>(response);
-                    }
-                }
-                catch (WebException e)
-                {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
-                }
-            });
+            return PutObject(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment), data, headers, queryParams);
         }
 
         public Task<SwiftResponse> PutManifest(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
-            return AuthorizeAndExecute(async (auth) =>
+            if (headers == null)
             {
-                var url = SwiftUrlBuilder.GetObjectUrl(auth.StorageUrl, containerId, objectId, queryParams);
+                headers = new Dictionary<string, string>();
+            }
 
-                if (headers == null)
-                {
-                    headers = new Dictionary<string, string>();
-                }
+            int contentLength = 0;
 
-                headers[SwiftHeaderKeys.ObjectManifest] = string.Format("{0}/{1}.seg", containerId, objectId);
-                headers["Content-Length"] = "0";
+            headers[SwiftHeaderKeys.ObjectManifest] = string.Format(SwiftHeaderKeys.ObjectManifestValueFormat, containerId, objectId);
+            headers[SwiftHeaderKeys.ContentLength] = contentLength.ToString();
 
-                var request = new HttpRequestMessage(HttpMethod.Put, url);
-
-                FillRequest(request, auth, headers);
-
-                try
-                {
-                    request.Content = new ByteArrayContent(new byte[0]);
-
-                    using (var response = await _client.SendAsync(request))
-                    {
-                        return GetResponse<SwiftResponse>(response);
-                    }
-                }
-                catch (WebException e)
-                {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
-                }
-            });
+            return PutObject(containerId, objectId, new byte[contentLength], headers, queryParams);
         }
 
         public Task<SwiftResponse> CopyObject(string containerFromId, string objectFromId, string containerToId, string objectToId, Dictionary<string, string> headers = null)
@@ -219,7 +179,7 @@ namespace SwiftClient
                 headers = new Dictionary<string, string>();
             }
 
-            headers[SwiftHeaderKeys.CopyFrom] = containerFromId + "/" + objectFromId;
+            headers[SwiftHeaderKeys.CopyFrom] = string.Format(SwiftHeaderKeys.ObjectManifestValueFormat, containerFromId, objectFromId);
 
             return PutObject(containerToId, objectToId, new byte[0], headers);
         }
@@ -228,6 +188,8 @@ namespace SwiftClient
         {
             return AuthorizeAndExecute(async (auth) =>
             {
+                // unfortunately no api support for DLO delete
+                // so deleting the manifest file won't delete the object segments
                 var queryParams = new Dictionary<string, string>() { { "multipart-manifest", "delete" } };
 
                 var url = SwiftUrlBuilder.GetObjectUrl(auth.StorageUrl, containerId, objectId, queryParams);
@@ -249,5 +211,10 @@ namespace SwiftClient
                 }
             });
         } 
+
+        public Task<SwiftResponse> DeleteObjectChunk(string containerId, string objectId, int segment)
+        {
+            return DeleteObject(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment));
+        }
     }
 }
