@@ -36,61 +36,7 @@ var swiftClient = new SwiftClient()
 .SetRetryPerEndpointCount(2);
 ```
 
-You have to implement the abstract class SwiftClientBase and provide a caching mechanism for the ***authentication token*** so that each swift request is not being preceded by an authentication request.
-Below is a SwiftClient implementation that stores the authentication token in memory, it is recommended to use a dedicated cache storage like Redis so multiple instances of your app can reuse the authentication token.
-
-```cs
-public class SwiftClient : SwiftClientBase
-{
-	protected SwiftAuthData _authData;
-	protected List<string> _endpoints;
-
-	public SwiftClient() : base() { }
-
-	public SwiftClient(SwiftCredentials credentials) : base(credentials) { }
-
-	public SwiftClient(SwiftCredentials credentials, SwiftConfig config) : base(credentials, config) { }
-
-	public SwiftClient(SwiftCredentials credentials, ISwiftLogger logger) : base(credentials, logger) { }
-
-	public SwiftClient(SwiftCredentials credentials, SwiftConfig config, ISwiftLogger logger) : base(credentials, config, logger) { }
-
-	/// <summary>
-	/// Use for caching the authentication token
-	/// If you don't cache the authentication token, each swift call will be preceded by an auth call 
-	///     to obtain the token
-	/// </summary>
-	protected override void SetAuthData(SwiftAuthData authData)
-	{
-		_authData = authData;
-	}
-
-	/// <summary>
-	/// Get authentication token from cache
-	/// </summary>
-	protected override SwiftAuthData GetAuthData()
-	{
-		return _authData;
-	}
-
-	/// <summary>
-	/// Get cached proxy endpoints (ordered by priority)
-	/// If you don't cache the list, each swift call will try the proxy nodes in the initial priority order
-	/// </summary>
-	protected override List<string> GetEndpoints()
-	{
-		return _endpoints ?? _credentials.Endpoints;
-	}
-
-	/// <summary>
-	/// Save new endpoints order in cache
-	/// </summary>
-	protected override void SetEndpoints(List<string> endpoints)
-	{
-		_endpoints = endpoints;
-	}
-}
-```
+You have to supply your own implementation of `SwiftAuthManager` class and provide a caching mechanism for the ***authentication token*** so that each swift request is not being preceded by an authentication request. It is recommended to use a dedicated cache storage like Redis so multiple instances of your app can reuse the authentication token.
 
 If you want to log swift failure events, just pass the client your implementation of the `ISwiftLogger` interface. Below is a stdout example:
 
@@ -206,3 +152,16 @@ public class HomeController : Controller
 }
 ```
 
+# Achieve high availability and scalability with OpenStack Swift and SwiftClient
+
+OpenStack Swift is an eventually consistent storage system designed to scale horizontally without any single point of failure. All objects are stored with multiple copies and are replicated across zones and regions making Swift  withstand failures in storage and network hardware. Swift can be used as a stand-alone distributed storage system on top of Linux without the need of expensive hardware solutions like NAS or SAN. 
+Because data is stored and served directly over HTTP makes Swift the ideal solution when dealing with applications running in Docker containers.
+
+Lets assume you have an ASP.NET 5 MVC app that needs to manage documents, photos and video files uploaded by users. To achieve HA and scalability of your application you can host the app inside a container and lunch a minimum of two container with a load balancer in front. Now days this can be easily done with Docker and Nginx on Ubuntu Server. The same architecture can be applied to the storage with Swift, you'll need to set-up a minimum of two swift server each containing a proxy and a storage node, ideally these servers or VMs should be hosted in a different region/datacenter. Adding both swift proxy endpoints to SwfitClient config will ensure that any app instance will share the same storage and if a swift node becomes unreachable due to a restart or network failure all app instances will silently fail-over to the 2ed node.
+
+Below is a schematic view of our HA setup:
+
+![Cluster](https://github.com/vtfuture/SwiftClient/blob/master/src/SwiftClient.Demo/wwwroot//img/app-cluster.png)
+
+
+ 
