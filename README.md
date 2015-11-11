@@ -43,9 +43,7 @@ You have to supply your own implementation of `SwiftAuthManager` class and provi
 
 ### ASP.NET 5 usage
 
-You can load Swift credentials from an json file in aspnet5 project. Add an app settings file to your project:
-
-***appsettings.json***
+You can load Swift credentials from an json file in aspnet5 project. Add an `appsettings.json` file in the root your project:
 
 ```json
 {
@@ -59,9 +57,7 @@ You can load Swift credentials from an json file in aspnet5 project. Add an app 
   }
 }
 ```
-Load the settings at start-up:
-
-***Startup.cs***
+Load the settings in `Startup.cs`:
 
 ```cs
 public Startup(IHostingEnvironment env, IApplicationEnvironment appEnv)
@@ -84,8 +80,6 @@ public void ConfigureServices(IServiceCollection services)
 ```
 
 Using Swift credentials in a controller:
-
-***HomeController.cs***
 
 ```cs
 public class HomeController : Controller
