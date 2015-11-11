@@ -11,8 +11,8 @@ docker run -v /srv --name SWIFT_DATA busybox
 # Start swift server
 ID=$(docker run --name SWIFT_AIO -d -p 8080:8080 --volumes-from SWIFT_DATA -t swift-aio)
 
-# Wait 
-sleep 5s
+# Wait for supervisord to start
+sleep 10s
 
 # print swift server logs
 docker logs $ID
