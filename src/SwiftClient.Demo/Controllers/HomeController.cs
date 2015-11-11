@@ -2,44 +2,71 @@
 using System.IO;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.OptionsModel;
+using System.Collections.Generic;
+using Microsoft.Framework.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace SwiftClient.Demo.Controllers
 {
     public class HomeController : Controller
     {
+        string containerTempId = "demotempcontainer";
         string containerId = "democontainer";
-        string objectId = "demo-video";
-
         SwiftClient client;
 
-        public HomeController(IOptions<SwiftCredentials> credentials)
+        public HomeController(IOptions<SwiftCredentials> credentials, IMemoryCache cache)
         {
-            client = new SwiftClient(credentials.Value);
+            client = new SwiftClient(new SwiftCustomAuthManager(credentials.Value, cache));
 
             client.SetRetryCount(2)
                   .SetLogger(new SwiftLogger());
-
-            client.PutContainer(containerId);
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            await client.PutContainer(containerId);
+
+            await client.PutContainer(containerTempId);
+
+            var containerData = await client.GetContainer(containerId, null, new Dictionary<string, string> { { "format", "json" } });
+
+            var viewModel = new ContainerViewModel();
+
+            if (containerData.IsSuccess)
+            {
+                if (!string.IsNullOrEmpty(containerData.Info))
+                {
+                    viewModel.Objects = JsonConvert.DeserializeObject<List<ObjectViewModel>>(containerData.Info);
+                }
+            }
+            else
+            {
+                viewModel.Message = containerData.Reason;
+            }
+
+            return View(viewModel);
         }
 
         public async Task<IActionResult> UploadChunk(int segment)
         {
-            if (Request.Body != null && Request.Body.CanRead)
+            if (Request.Form.Files != null && Request.Form.Files.Count > 0)
             {
+                var file = Request.Form.Files[0];
+                var fileStream = file.OpenReadStream();
                 var memoryStream = new MemoryStream();
+                var fileName = file.GetFileName();
 
-                Request.Body.CopyTo(memoryStream);
+                await fileStream.CopyToAsync(memoryStream);
 
-                await client.PutChunkedObject(containerId, objectId, memoryStream.ToArray(), segment);
+                var resp = await client.PutChunkedObject(containerTempId, fileName, memoryStream.ToArray(), segment);
 
                 return new JsonResult(new
                 {
-                    Success = true
+                    ContentType = file.ContentType,
+                    FileName = fileName ?? "demofile",
+                    Status = resp.StatusCode,
+                    Message = resp.Reason,
+                    Success = resp.IsSuccess
                 });
             }
 
@@ -49,14 +76,88 @@ namespace SwiftClient.Demo.Controllers
             });
         }
 
-        public async Task<IActionResult> UploadDone()
+        public async Task<IActionResult> UploadDone(int segmentsCount, string fileName, string contentType)
         {
-            await client.PutManifest(containerId, objectId);
+            // use manifest to merge chunks
+            await client.PutManifest(containerTempId, fileName);
+
+            // copy chunks to new file and set some meta data info about the file (filename, contentype)
+            await client.CopyObject(containerTempId, fileName, containerId, fileName, new Dictionary<string, string>
+                {
+                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Filename"), fileName },
+                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Contenttype"), contentType }
+                });
+
+            // cleanup temp chunks
+            var deleteTasks = new List<Task>();
+
+            for (var i = 0; i <= segmentsCount; i++)
+            {
+                deleteTasks.Add(client.DeleteObjectChunk(containerTempId, fileName, i));
+            }
+
+            // cleanup manifest
+            deleteTasks.Add(client.DeleteObject(containerTempId, fileName));
+
+            // cleanup temp container
+            await Task.WhenAll(deleteTasks);
 
             return new JsonResult(new
             {
                 Success = true
             });
+        }
+
+        public async Task<IActionResult> PlayVideo(string fileId)
+        {
+            var headObject = await client.HeadObject(containerId, fileId);
+
+            if (headObject.IsSuccess)
+            {
+                var fileName = headObject.GetMeta("Filename");
+                var contentType = headObject.GetMeta("Contenttype");
+
+                var stream = new BufferedHTTPStream((start, end) =>
+                {
+                    var response = client.GetObjectRange(containerId, fileId, start, end).Result;
+
+                    return response.Stream;
+
+                }, () => headObject.ContentLength);
+
+                Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
+
+                return new FileStreamResult(stream, contentType);
+
+                //return new VideoStreamResult(stream, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("video/mp4"));
+            }
+
+            return new HttpNotFoundResult();
+        }
+
+        public async Task<IActionResult> DownloadFile(string fileId)
+        {
+            var headObject = await client.HeadObject(containerId, fileId);
+
+            if (headObject.IsSuccess && headObject.ContentLength > 0)
+            {
+                var fileName = headObject.GetMeta("Filename");
+                var contentType = headObject.GetMeta("Contenttype");
+
+                Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
+
+                var stream = new BufferedHTTPStream((start, end) =>
+                {
+                    var response = client.GetObjectRange(containerId, fileId, start, end).Result;
+
+                    return response.Stream;
+
+                }, () => headObject.ContentLength);
+
+                return new FileStreamResult(stream, contentType);
+            }
+
+            return new HttpNotFoundResult();
         }
     }
 }

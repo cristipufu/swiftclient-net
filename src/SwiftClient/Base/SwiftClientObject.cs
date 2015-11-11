@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Net;
 using System.IO;
-
 using System.Net.Http;
 using System.Threading.Tasks;
+using SwiftClient.Extensions;
 
 namespace SwiftClient
 {
@@ -166,7 +166,7 @@ namespace SwiftClient
 
             int contentLength = 0;
 
-            headers[SwiftHeaderKeys.ObjectManifest] = string.Format(SwiftHeaderKeys.ObjectManifestValueFormat, containerId, objectId);
+            headers[SwiftHeaderKeys.ObjectManifest] = SwiftHeaderKeys.GetObjectManifestValue(containerId, objectId);
             headers[SwiftHeaderKeys.ContentLength] = contentLength.ToString();
 
             return PutObject(containerId, objectId, new byte[contentLength], headers, queryParams);
@@ -179,7 +179,7 @@ namespace SwiftClient
                 headers = new Dictionary<string, string>();
             }
 
-            headers[SwiftHeaderKeys.CopyFrom] = string.Format(SwiftHeaderKeys.ObjectManifestValueFormat, containerFromId, objectFromId);
+            headers[SwiftHeaderKeys.CopyFrom] = SwiftHeaderKeys.GetObjectManifestValue(containerFromId, objectFromId);
 
             return PutObject(containerToId, objectToId, new byte[0], headers);
         }

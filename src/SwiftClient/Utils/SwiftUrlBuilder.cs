@@ -48,7 +48,7 @@ namespace SwiftClient
 
         public static string GetObjectChunkId(string objectId, int segment)
         {
-            return string.Format("{0}/{1}", objectId, segment.ToString("0000"));
+            return string.Format("{0}/{1}", objectId.Encode(), segment.ToString("0000"));
         }
     }
 }

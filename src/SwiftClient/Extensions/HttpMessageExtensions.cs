@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Linq;
+using System.Net.Http.Headers;
 
 namespace SwiftClient.Extensions
 {
@@ -19,6 +20,20 @@ namespace SwiftClient.Extensions
         {
             IEnumerable<string> headers = new List<string>();
             return rsp.Headers.TryGetValues(headerName, out headers) ? headers.FirstOrDefault() : null;
+        }
+
+        public static Dictionary<string, string> ToDictionary(this HttpResponseHeaders headers)
+        {
+            if (headers == null) return null;
+
+            var result = new Dictionary<string, string>();
+
+            foreach (var header in headers)
+            {
+                result.Add(header.Key, header.Value.FirstOrDefault());
+            }
+
+            return result;
         }
     }
 }

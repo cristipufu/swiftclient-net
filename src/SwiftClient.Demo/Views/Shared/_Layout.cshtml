@@ -7,11 +7,15 @@
 
         <environment names="Development">
             <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+            <link rel="stylesheet" href="~/lib/video-js/dist/video-js.css" />
             <link rel="stylesheet" href="~/css/site.css" />
         </environment>
         <environment names="Staging,Production">
             <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.0.0/css/bootstrap.min.css"
                   asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+                  asp-fallback-test-class="hidden" asp-fallback-test-property="visibility" asp-fallback-test-value="hidden" />
+            <link rel="stylesheet" href="http://vjs.zencdn.net/5.0/video-js.min.css"
+                  asp-fallback-href="~/lib/video-js/dist/video-js.css"
                   asp-fallback-test-class="hidden" asp-fallback-test-property="visibility" asp-fallback-test-value="hidden" />
             <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
         </environment>
@@ -33,6 +37,7 @@
             <script src="~/lib/jquery-ui/jquery.ui.widget.js" asp-append-version="true"></script>
             <script src="~/lib/iframe-transport/jquery.iframe-transport.js" asp-append-version="true"></script>
             <script src="~/lib/jquery-file-upload/jquery.fileupload.js" asp-append-version="true"></script>
+            <script src="~/lib/video-js/dist/video.js" asp-append-version="true"></script>
             <script src="~/js/site.js" asp-append-version="true"></script>
         </environment>
         <environment names="Staging,Production">
@@ -51,6 +56,10 @@
             <script src="~/lib/jquery-ui/jquery.ui.widget.js" asp-append-version="true"></script>
             <script src="~/lib/iframe-transport/jquery.iframe-transport.js" asp-append-version="true"></script>
             <script src="~/lib/jquery-file-upload/jquery.fileupload.js" asp-append-version="true"></script>
+            <script src="http://vjs.zencdn.net/5.0/video.min.js"
+                    asp-fallback-src="~/lib/video-js/dist/video.js"
+                    asp-fallback-test="window.videojs">
+            </script>
             <script src="~/js/site.js" asp-append-version="true"></script>
         </environment>
 

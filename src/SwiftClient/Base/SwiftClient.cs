@@ -82,6 +82,8 @@ namespace SwiftClient
         {
             var result = new T();
             result.StatusCode = rsp.StatusCode;
+            var headersIndex = rsp.Headers.GetEnumerator();
+            result.Headers = rsp.Headers.ToDictionary();
             result.Reason = rsp.ReasonPhrase;
             result.ContentLength = rsp.Content.Headers.ContentLength ?? 0;
             return result;

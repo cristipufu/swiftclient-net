@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 
 namespace SwiftClient
 {
@@ -11,5 +12,7 @@ namespace SwiftClient
         public long ContentLength { get; set; }
 
         public bool IsSuccess { get; set; }
+
+        public Dictionary<string, string> Headers { get; set; }
     }
 }

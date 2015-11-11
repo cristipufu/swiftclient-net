@@ -24,6 +24,9 @@ namespace SwiftClient.Demo
         // This method gets called by the runtime.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Adds a default in-memory implementation of IDistributedCache
+            services.AddCaching();
+
             // Add MVC services to the services container.
             services.AddMvc();
 

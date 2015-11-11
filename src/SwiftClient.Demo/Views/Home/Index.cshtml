@@ -1,4 +1,6 @@
-﻿@{
+﻿@model ContainerViewModel
+
+@{
     ViewData["Title"] = "Swift Client Demo";
 }
 
@@ -7,3 +9,46 @@
     <input id="fileupload" type="file" name="file" data-url="home/uploadchunk/" multiple>
 
 </div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="error-message">@Model.Message</div>
+}
+
+@if (Model.Objects != null)
+{
+    <div>
+        @if (Model.Objects.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Bytes</th>
+                        <th>Content Type</th>
+                        <th>Last Modified</th>
+                        <th>Hash</th>
+                    </tr>
+                </thead>
+                @foreach(var obj in Model.Objects)
+                {
+                    <tr>
+                        <td> @obj.name </td>
+                        <td> @obj.bytes </td>
+                        <td> @obj.content_type </td>
+                        <td> @obj.last_modified </td>
+                        <td> @obj.hash </td>
+                        <td> <a href="home/downloadfile?fileId=@obj.name" id="downloadFile">Download</a> </td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+}
+
+@*<div>
+    <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" preload="none" poster="~/images/cinema.png" data-error="~/images/default-video-thumb.png">
+        <source src="/home/playvideo" type='video/mp4'>
+        <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+    </video>
+</div>*@
