@@ -20,7 +20,7 @@ namespace SwiftClient.Test
 
         public void LogAuthenticationError(Exception e, string username, string password, string endpoint)
         {
-            Output.WriteLine(string.Format(_authError, e.Message, username, password, endpoint));
+            Output.WriteLine(string.Format(_authError, e.InnerException != null ? e.InnerException.Message : e.Message, username, password, endpoint));
         }
 
         public void LogRequestError(WebException e, HttpStatusCode statusCode, string reason, string requestUrl)

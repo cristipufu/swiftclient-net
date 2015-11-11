@@ -16,7 +16,7 @@ namespace SwiftClient.Demo.Controllers
 
         public HomeController(IOptions<SwiftCredentials> credentials, IMemoryCache cache)
         {
-            client = new SwiftClient(new SwiftCustomAuthManager(credentials.Value, cache));
+            client = new SwiftClient(new SwiftAuthManagerWithCache(credentials.Value, cache));
 
             client.SetRetryCount(2)
                   .SetLogger(new SwiftLogger());

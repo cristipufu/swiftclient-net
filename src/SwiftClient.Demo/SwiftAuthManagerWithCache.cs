@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace SwiftClient.Demo
 {
-    public class SwiftCustomAuthManager : ISwiftAuthManager
+    public class SwiftAuthManagerWithCache : ISwiftAuthManager
     {
         IMemoryCache cache;
         string authCacheKey = "swift_authdata";
         string endpointsKey = "swift_endpoints";
 
-        public SwiftCustomAuthManager(SwiftCredentials credentials, IMemoryCache cache)
+        public SwiftAuthManagerWithCache(SwiftCredentials credentials, IMemoryCache cache)
         {
             Credentials = credentials;
             this.cache = cache;
