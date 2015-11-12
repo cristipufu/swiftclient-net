@@ -26,7 +26,7 @@ namespace SwiftClient
         Task<SwiftResponse> PutChunkedObject(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null);
         Task<SwiftResponse> PutManifest(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null);
         Task<SwiftResponse> CopyObject(string containerFromId, string objectFromId, string containerToId, string objectToId, Dictionary<string, string> headers = null);
-        Task<SwiftResponse> DeleteObject(string containerId, string objectId);
+        Task<SwiftResponse> DeleteObject(string containerId, string objectId, Dictionary<string, string> queryParams = null);
         Task<SwiftResponse> DeleteObjectChunk(string containerId, string objectId, int segment);
     }
 }

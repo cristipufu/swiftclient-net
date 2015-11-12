@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using SwiftClient.Extensions;
+using System.Linq;
+using System.Text;
 
 namespace SwiftClient
 {
@@ -184,14 +184,18 @@ namespace SwiftClient
             return PutObject(containerToId, objectToId, new byte[0], headers);
         }
 
-        public Task<SwiftResponse> DeleteObject(string containerId, string objectId)
+        /// <summary>
+        /// Delete object. 
+        /// If SLO ([filter:slo]) is enabled and you want to delete file including segments add {"multipart-manifest", "delete"} to queryParams
+        /// </summary>
+        /// <param name="containerId"></param>
+        /// <param name="objectId"></param>
+        /// <param name="queryParams"></param>
+        /// <returns></returns>
+        public Task<SwiftResponse> DeleteObject(string containerId, string objectId, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
-                // unfortunately no api support for DLO delete
-                // so deleting the manifest file won't delete the object segments
-                var queryParams = new Dictionary<string, string>() { { "multipart-manifest", "delete" } };
-
                 var url = SwiftUrlBuilder.GetObjectUrl(auth.StorageUrl, containerId, objectId, queryParams);
 
                 var request = new HttpRequestMessage(HttpMethod.Delete, url);
@@ -210,11 +214,80 @@ namespace SwiftClient
                     return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
-        } 
+        }
 
+        /// <summary>
+        /// Delete object chunk.
+        /// Unfortunately no api support for DLO delete ([filter:dlo]). 
+        /// Deleting the manifest file won't delete the object segments.
+        /// </summary>
+        /// <param name="containerId"></param>
+        /// <param name="objectId"></param>
+        /// <param name="segment"></param>
+        /// <returns></returns>
         public Task<SwiftResponse> DeleteObjectChunk(string containerId, string objectId, int segment)
         {
             return DeleteObject(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment));
+        }
+
+        /// <summary>
+        /// Bulk delete objects in a specified container (option available for [filter:bulk] in proxy-server.conf)
+        /// </summary>
+        /// <param name="containerId"></param>
+        /// <param name="objectIds"></param>
+        /// <returns></returns>
+        public Task<SwiftResponse> DeleteObjects(string containerId, IEnumerable<string> objectIds)
+        {
+            return DeleteObjects(objectIds.Select(x => containerId + "/" + x).ToList());
+        }
+
+        /// <summary>
+        /// Bulk delete objects (option available for [filter:bulk] in proxy-server.conf)
+        /// Object id can be <container_id>, <container_id>/<object_id>
+        /// Example input: 
+        /// alpha/one.txt
+        /// alpha/two.txt
+        /// alpha
+        /// beta/three.txt
+        /// beta/four.txt
+        /// beta
+        /// </summary>
+        /// <param name="objectIds"></param>
+        /// <returns>Json formatted string with info about the delete operation</returns>
+        public Task<SwiftResponse> DeleteObjects(IEnumerable<string> objectIds)
+        {
+            return AuthorizeAndExecute(async (auth) =>
+            {
+                var url = auth.StorageUrl + "?bulk-delete";
+
+                var request = new HttpRequestMessage(HttpMethod.Delete, url);
+
+                request.Headers.Add("Accept", "application:json");
+
+                FillRequest(request, auth);
+
+                var data = string.Join(Environment.NewLine, objectIds);
+
+                request.Content = new ByteArrayContent(Encoding.UTF8.GetBytes(data));
+
+                try
+                {
+                    using (var response = await _client.SendAsync(request))
+                    {
+                        var result = GetResponse<SwiftResponse>(response);
+
+                        result.Stream = new MemoryStream();
+                        await response.Content.CopyToAsync(result.Stream);
+                        result.Stream.Position = 0;
+
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
+                }
+            });
         }
     }
 }
