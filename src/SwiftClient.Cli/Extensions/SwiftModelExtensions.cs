@@ -23,4 +23,15 @@ namespace SwiftClient.Cli
             }
         }
     }
+
+    public class SwiftAccountStats : SwiftAccountResponse
+    {
+        public string Size
+        {
+            get
+            {
+                return TotalBytes.Bytes().Humanize("0.00");
+            }
+        }
+    }
 }

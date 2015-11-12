@@ -1,9 +1,11 @@
 ﻿using Humanizer.Bytes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Humanizer;
 
 namespace SwiftClient.Cli
 {
@@ -13,14 +15,15 @@ namespace SwiftClient.Cli
 
         public static int Run(PutOptions options, SwiftClient client)
         {
+            var stopwatch = Stopwatch.StartNew();
             options.File = options.File.Replace('"', ' ').Trim();
             if (!File.Exists(options.File))
             {
-                Console.WriteLine($"File not found {options.File}");
+                Logger.LogError($"File not found {options.File}");
                 return 404;
             }
 
-            Console.WriteLine($"Uploading {options.File} to {options.Object}");
+            Logger.Log($"Uploading {options.File} to {options.Object}");
 
             var response = new SwiftBaseResponse();
             var fileName = Path.GetFileNameWithoutExtension(options.File);
@@ -31,7 +34,7 @@ namespace SwiftClient.Cli
 
             if (!response.IsSuccess)
             {
-                Console.WriteLine($"Put tmp container error {response.Reason}");
+                Logger.LogError($"Put temporary container error {response.Reason}");
                 return 500;
             }
 
@@ -39,39 +42,43 @@ namespace SwiftClient.Cli
 
             if (!response.IsSuccess)
             {
-                Console.WriteLine($"Put container error {response.Reason}");
+                Logger.LogError($"Put container error {response.Reason}");
                 return 500;
             }
 
             using (var stream = File.OpenRead(options.File))
             {
+                Console.Write($"\rUploading...");
+
                 int chunks = 0;
                 int bytesRead;
                 while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    Console.Write('.');
                     using (MemoryStream tmpStream = new MemoryStream())
                     {
                         tmpStream.Write(buffer, 0, bytesRead);
+                        var data = tmpStream.ToArray();
+                        response = client.PutChunkedObject(containerTemp, fileName, data, chunks).Result;
 
-                        response = client.PutChunkedObject(containerTemp, fileName, tmpStream.ToArray(), chunks).Result;
+                        Console.Write($"\rUploaded {((chunks * 2).Megabytes() + data.LongLength.Bytes()).Humanize("MB")}");
+
                         if (!response.IsSuccess)
                         {
-                            Console.WriteLine($"Uploading error {response.Reason}");
+                            Logger.LogError($"Uploading error {response.Reason}");
                             return 500;
                         }
                     }
                     chunks++;
                 }
 
-                Console.Write(Environment.NewLine);
+                Console.Write("\rMerging chunks... ");
 
                 // use manifest to merge chunks
                 response = client.PutManifest(containerTemp, fileName).Result;
 
                 if (!response.IsSuccess)
                 {
-                    Console.WriteLine($"Put manifest error {response.Reason}");
+                    Logger.LogError($"Put manifest error {response.Reason}");
                     return 500;
                 }
 
@@ -84,7 +91,7 @@ namespace SwiftClient.Cli
 
                 if (!response.IsSuccess)
                 {
-                    Console.WriteLine($"Copy object error {response.Reason}");
+                    Logger.LogError($"Copy object error {response.Reason}");
                     return 500;
                 }
 
@@ -93,11 +100,12 @@ namespace SwiftClient.Cli
 
                 if (!response.IsSuccess)
                 {
-                    Console.WriteLine($"Cleanup error {response.Reason}");
+                    Logger.LogError($"Cleanup error {response.Reason}");
                     return 500;
                 }
 
-                Console.WriteLine($"Upload done");
+                Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()}");
+                Console.Write(Environment.NewLine);
             }
 
             return 0;

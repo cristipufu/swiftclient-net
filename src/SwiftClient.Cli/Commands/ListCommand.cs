@@ -41,7 +41,7 @@ namespace SwiftClient.Cli
                 }
                 else
                 {
-                    Console.WriteLine(accountData.Reason);
+                    Logger.LogError(accountData.Reason);
                 }
             }
             else
@@ -73,12 +73,12 @@ namespace SwiftClient.Cli
                     }
                     else
                     {
-                        Console.WriteLine($"No objects found in container {options.Container}");
+                        Console.WriteLine($"Container is empty");
                     }
                 }
                 else
                 {
-                    Console.WriteLine(containerData.Reason);
+                    Logger.LogError(containerData.Reason);
                 }
             }
             return 0;

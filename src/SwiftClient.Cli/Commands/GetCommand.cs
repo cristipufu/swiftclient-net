@@ -18,6 +18,11 @@ namespace SwiftClient.Cli
                 {
                     var response = client.GetObjectRange(options.Container, options.Object, start, end).Result;
 
+                    if (!response.IsSuccess)
+                    {
+                        Logger.LogError(response.Reason);
+                    }
+
                     return response.Stream;
 
                 }, () => headObject.ContentLength);
@@ -34,7 +39,7 @@ namespace SwiftClient.Cli
             }
             else
             {
-                Console.WriteLine(headObject.Reason);
+                Logger.LogError(headObject.Reason);
                 return 404;
             }
         }

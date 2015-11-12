@@ -32,7 +32,7 @@ namespace SwiftClient.Cli
                 }
                 else
                 {
-                    Console.WriteLine(response.Reason);
+                    Logger.LogError(response.Reason);
                     return 404;
                 }
             }
