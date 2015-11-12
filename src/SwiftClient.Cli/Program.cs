@@ -14,18 +14,18 @@ namespace SwiftClient.Cli
         SwiftClient client = null;
         SwiftCredentials credentials = new SwiftCredentials();
 
-        public void Main(string[] args)
+        public async Task Main(string[] args)
         {
             var endpoint = Environment.GetEnvironmentVariable("SWIFT_URL");
             var username = Environment.GetEnvironmentVariable("SWIFT_USER");
             var password = Environment.GetEnvironmentVariable("SWIFT_KEY");
 
-            var shouldExit = false;
+            var needsAuth = false;
 
             if(string.IsNullOrEmpty(endpoint))
             {
                 Console.WriteLine("SWIFT_URL environment variable not set");
-                shouldExit = true;
+                needsAuth = true;
             }
             else
             {
@@ -35,7 +35,7 @@ namespace SwiftClient.Cli
             if (string.IsNullOrEmpty(username))
             {
                 Console.WriteLine("SWIFT_USER environment variable not set");
-                shouldExit = true;
+                needsAuth = true;
             }
             else
             {
@@ -45,16 +45,31 @@ namespace SwiftClient.Cli
             if (string.IsNullOrEmpty(password))
             {
                 Console.WriteLine("SWIFT_KEY environment variable not set");
-                shouldExit = true;
+                needsAuth = true;
             }
             else
             {
                 credentials.Password = password;
             }
 
-            if (shouldExit)
+            if (needsAuth)
             {
-                return;
+                Console.WriteLine($"Connect to swift using command: login -h http://localhost:8080 -u username -p password");
+                var loginCommand = Console.ReadLine();
+
+                var exitCode = CommandLine.Parser.Default.ParseArguments<LoginOptions>(loginCommand.ParseArguments()).MapResult(
+                    options => {
+                        endpoint = options.Endpoint;
+                        username = options.User;
+                        password = options.Password;
+                        credentials.Endpoints = new List<string> { options.Endpoint };
+                        credentials.Username = options.User;
+                        credentials.Password = options.Password;
+                        return 0;
+                    },
+                    errs => 1);
+
+               if (exitCode != 0) return;
             }
 
             Console.WriteLine($"Connecting to {endpoint} as {username}");
@@ -63,14 +78,12 @@ namespace SwiftClient.Cli
                 .SetRetryCount(2)
                 .SetLogger(new SwiftLogger());
 
-            var data = client.Authenticate().Result;
+            var data = await client.Authenticate();
 
             if (data != null)
             {
                 Console.WriteLine($"Connected to {data.StorageUrl}");
             }
-
-            CommandLine.Parser.Default.Settings.HelpWriter = null;
 
             var command = Console.ReadLine();
             var regex = new Regex(@"\w+|""[\w\s]*""");
