@@ -8,10 +8,10 @@ using CommandLine.Text;
 
 namespace SwiftClient.Cli
 {
-    [Verb("ls", HelpText = "list objects in container")]
+    [Verb("ls", HelpText = "list containers or objects in container if a container is specified")]
     public class ListOptions
     {
-        [Option('c', "container", Required = true, HelpText = "container name")]
-        public string Object { get; set; }
+        [Option('c', "container", Required = false, HelpText = "container name")]
+        public string Container { get; set; }
     }
 }

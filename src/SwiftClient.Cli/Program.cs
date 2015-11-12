@@ -6,6 +6,8 @@ using CommandLine;
 using System.Text.RegularExpressions;
 using System.IO;
 using Newtonsoft.Json;
+using Humanizer;
+using Humanizer.Bytes;
 
 namespace SwiftClient.Cli
 {
@@ -13,81 +15,14 @@ namespace SwiftClient.Cli
     {
         SwiftClient client = null;
         SwiftCredentials credentials = new SwiftCredentials();
-        long bufferSize = 1000000;
+        long bufferSize = Convert.ToInt64(ByteSize.FromMegabytes(2).Bytes);
 
         public async Task Main(string[] args)
         {
-            var endpoint = Environment.GetEnvironmentVariable("SWIFT_URL");
-            var username = Environment.GetEnvironmentVariable("SWIFT_USER");
-            var password = Environment.GetEnvironmentVariable("SWIFT_KEY");
-
-            var needsAuth = false;
-
-            if(string.IsNullOrEmpty(endpoint))
-            {
-                Console.WriteLine("SWIFT_URL environment variable not set");
-                needsAuth = true;
-            }
-            else
-            {
-                credentials.Endpoints = new List<string> { endpoint };
-            }
-
-            if (string.IsNullOrEmpty(username))
-            {
-                Console.WriteLine("SWIFT_USER environment variable not set");
-                needsAuth = true;
-            }
-            else
-            {
-                credentials.Username = username;
-            }
-
-            if (string.IsNullOrEmpty(password))
-            {
-                Console.WriteLine("SWIFT_KEY environment variable not set");
-                needsAuth = true;
-            }
-            else
-            {
-                credentials.Password = password;
-            }
-
-            if (needsAuth)
-            {
-                Console.WriteLine($"Connect to swift using command: login -h http://localhost:8080 -u username -p password");
-                var loginCommand = Console.ReadLine();
-
-                var exitCode = CommandLine.Parser.Default.ParseArguments<LoginOptions>(loginCommand.ParseArguments()).MapResult(
-                    options => {
-                        endpoint = options.Endpoint;
-                        username = options.User;
-                        password = options.Password;
-                        credentials.Endpoints = new List<string> { options.Endpoint };
-                        credentials.Username = options.User;
-                        credentials.Password = options.Password;
-                        return 0;
-                    },
-                    errs => 1);
-
-               if (exitCode != 0) return;
-            }
-
-            Console.WriteLine($"Connecting to {endpoint} as {username}");
-
-            client = new SwiftClient(new SwiftAuthManager(credentials))
-                .SetRetryCount(2)
-                .SetLogger(new SwiftLogger());
-
-            var data = await client.Authenticate();
-
-            if (data != null)
-            {
-                Console.WriteLine($"Connected to {data.StorageUrl}");
-            }
+            var isConnected = await Connect();
 
             var command = Console.ReadLine();
-            var regex = new Regex(@"\w+|""[\w\s]*""");
+
             while (command != "exit")
             {
                 
@@ -122,7 +57,7 @@ namespace SwiftClient.Cli
 
             if (!response.IsSuccess)
             {
-                Console.WriteLine($"Put container error {response.Reason}");
+                Console.WriteLine($"Put tmp container error {response.Reason}");
                 return 500;
             }
 
@@ -140,6 +75,7 @@ namespace SwiftClient.Cli
                 int bytesRead;
                 while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
+                    Console.Write('.');
                     using (MemoryStream tmpStream = new MemoryStream())
                     {
                         tmpStream.Write(buffer, 0, bytesRead);
@@ -224,30 +160,153 @@ namespace SwiftClient.Cli
 
         private int RunList(ListOptions options)
         {
-            var containerData = client.GetContainer(options.Object, null, new Dictionary<string, string> { { "format", "json" } }).Result;
-            if (containerData.IsSuccess)
+            if (string.IsNullOrEmpty(options.Container))
             {
-                if (!string.IsNullOrEmpty(containerData.Info))
+                var accountData = client.GetAccount(new Dictionary<string, string>() { { "format", "json" } }).Result;
+                if (accountData.IsSuccess)
                 {
-                    var viewModel = new ContainerViewModel();
-                    viewModel.Objects = JsonConvert.DeserializeObject<List<ObjectViewModel>>(containerData.Info);
-                    var table = viewModel.Objects.ToStringTable(
-                        u => u.name,
-                        u => u.hash,
-                        u => u.content_type,
-                        u => u.bytes,
-                        u => u.last_modified
-                    );
-                    Console.WriteLine(table);
+                    if (!string.IsNullOrEmpty(accountData.Info))
+                    {
+                        var list = JsonConvert.DeserializeObject<List<ContainerInfoModel>>(accountData.Info);
+                        var table = list.ToStringTable(
+                            u => u.Container,
+                            u => u.Objects,
+                            u => u.Size
+                        );
+                        Console.WriteLine(table);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(accountData.Reason);
                 }
             }
             else
             {
-                Console.WriteLine(containerData.Reason);
+                var containerData = client.GetContainer(options.Container, null, new Dictionary<string, string> { { "format", "json" } }).Result;
+                if (containerData.IsSuccess)
+                {
+                    if (!string.IsNullOrEmpty(containerData.Info))
+                    {
+                        var viewModel = new ContainerViewModel();
+                        viewModel.Objects = JsonConvert.DeserializeObject<List<ObjectViewModel>>(containerData.Info);
+                        var table = viewModel.Objects.ToStringTable(
+                            u => u.Object,
+                            u => u.Size,
+                            u => u.LastModified
+                        );
+                        Console.WriteLine(table);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(containerData.Reason);
+                }
             }
             return 0;
         }
 
+        private async Task<bool> Connect()
+        {
+            var needsAuth = !ValidateLogin();
+            if (needsAuth)
+            {
+                while (needsAuth)
+                {
+                    needsAuth = !PromptLogin();
+                    needsAuth = !await DoLogin();
+                }
+            }
+            else
+            {
+                needsAuth = !await DoLogin();
+                while (needsAuth)
+                {
+                    needsAuth = !PromptLogin();
+                    needsAuth = !await DoLogin();
+                }
+            }
 
+            return needsAuth;
+        }
+
+        private bool ValidateLogin()
+        {
+            bool exists = true;
+
+            var endpoint = Environment.GetEnvironmentVariable("SWIFT_URL");
+            var username = Environment.GetEnvironmentVariable("SWIFT_USER");
+            var password = Environment.GetEnvironmentVariable("SWIFT_KEY");
+
+            if (string.IsNullOrEmpty(endpoint))
+            {
+                Console.WriteLine("SWIFT_URL environment variable not set");
+                exists = false;
+            }
+            else
+            {
+                credentials.Endpoints = new List<string> { endpoint };
+            }
+
+            if (string.IsNullOrEmpty(username))
+            {
+                Console.WriteLine("SWIFT_USER environment variable not set");
+                exists = false;
+            }
+            else
+            {
+                credentials.Username = username;
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                Console.WriteLine("SWIFT_KEY environment variable not set");
+                exists = false;
+            }
+            else
+            {
+                credentials.Password = password;
+            }
+
+            return exists;
+        }
+
+        private bool PromptLogin()
+        {
+            Console.WriteLine($"Connect to swift using command: login -h http://localhost:8080 -u username -p password");
+            var loginCommand = Console.ReadLine();
+
+            var exitCode = CommandLine.Parser.Default.ParseArguments<LoginOptions>(loginCommand.ParseArguments()).MapResult(
+                options => {
+                    credentials.Endpoints = new List<string> { options.Endpoint };
+                    credentials.Username = options.User;
+                    credentials.Password = options.Password;
+                    return 0;
+                },
+                errs => 1);
+
+            return exitCode == 0;
+        }
+
+        private async Task<bool> DoLogin()
+        {
+            bool ok = false;
+
+            Console.WriteLine($"Connecting to {credentials.Endpoints.FirstOrDefault()} as {credentials.Username}");
+
+            client = new SwiftClient(new SwiftAuthManager(credentials))
+                .SetRetryCount(1)
+                .SetLogger(new SwiftLogger());
+
+            var data = await client.Authenticate();
+
+            if (data != null)
+            {
+                ok = true;
+                Console.WriteLine($"Connected to {data.StorageUrl}");
+            }
+
+            return ok;
+        }
     }
 }
