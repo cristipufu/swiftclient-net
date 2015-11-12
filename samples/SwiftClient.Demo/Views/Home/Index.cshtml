@@ -33,12 +33,12 @@
                 @foreach(var obj in Model.Objects)
                 {
                     <tr>
-                        <td> @obj.name </td>
-                        <td> @obj.bytes </td>
-                        <td> @obj.content_type </td>
-                        <td> @obj.last_modified </td>
-                        <td> @obj.hash </td>
-                        <td> <a href="home/downloadfile?fileId=@obj.name" id="downloadFile">Download</a> </td>
+                        <td> @obj.Object </td>
+                        <td> @obj.Bytes </td>
+                        <td> @obj.ContentType </td>
+                        <td> @obj.LastModified </td>
+                        <td> @obj.Hash </td>
+                        <td> <a href="home/downloadfile?fileId=@obj.Object" id="downloadFile">Download</a> </td>
                     </tr>
                 }
             </table>

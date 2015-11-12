@@ -4,7 +4,6 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.OptionsModel;
 using System.Collections.Generic;
 using Microsoft.Framework.Caching.Memory;
-using Newtonsoft.Json;
 
 namespace SwiftClient.Demo.Controllers
 {
@@ -34,10 +33,7 @@ namespace SwiftClient.Demo.Controllers
 
             if (containerData.IsSuccess)
             {
-                if (!string.IsNullOrEmpty(containerData.Info))
-                {
-                    viewModel.Objects = JsonConvert.DeserializeObject<List<ObjectViewModel>>(containerData.Info);
-                }
+                viewModel.Objects = containerData.Objects;
             }
             else
             {

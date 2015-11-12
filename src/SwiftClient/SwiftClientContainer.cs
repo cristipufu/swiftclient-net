@@ -5,6 +5,7 @@ using System.Net;
 using SwiftClient.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace SwiftClient
 {
@@ -53,6 +54,20 @@ namespace SwiftClient
         {
             return AuthorizeAndExecute(async (auth) =>
             {
+                if (queryParams == null)
+                {
+                    queryParams = new Dictionary<string, string>();
+                }
+
+                if (!queryParams.ContainsKey("format"))
+                {
+                    queryParams.Add("format", "json");
+                }
+                else
+                {
+                    queryParams["format"] = "json";
+                }
+
                 var url = SwiftUrlBuilder.GetContainerUrl(auth.StorageUrl, containerId, queryParams);
 
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -77,7 +92,12 @@ namespace SwiftClient
                             result.ObjectsCount = objectsCount;
                         }
 
-                        result.Info = await response.Content.ReadAsStringAsync();
+                        var info = await response.Content.ReadAsStringAsync();
+
+                        if (!string.IsNullOrEmpty(info))
+                        {
+                            result.Objects = JsonConvert.DeserializeObject<List<SwiftObjectModel>>(info);
+                        }
 
                         return result;
                     }

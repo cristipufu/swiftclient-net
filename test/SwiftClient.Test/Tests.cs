@@ -269,13 +269,11 @@ namespace SwiftClient.Test
 
         public async Task GetAccount(SwiftClient client)
         {
-            var resp = await client.GetAccount(new Dictionary<string, string>() { { "format", "json" } });
+            var resp = await client.GetAccount();
 
             Assert.True(resp.IsSuccess);
 
-            var containersList = JsonConvert.DeserializeObject<List<ContainerInfoModel>>(resp.Info);
-
-            Assert.True(containersList.Any(x => x.name == containerId));
+            Assert.True(resp.Containers.Any(x => x.Container == containerId));
         }
 
         [Fact]
@@ -293,13 +291,11 @@ namespace SwiftClient.Test
 
         public async Task GetContainer(SwiftClient client)
         {
-            var resp = await client.GetContainer(containerId, null, new Dictionary<string, string>() { { "format", "json" } });
+            var resp = await client.GetContainer(containerId);
 
             Assert.True(resp.IsSuccess);
 
-            var objectsList = JsonConvert.DeserializeObject<List<ObjectInfoModel>>(resp.Info);
-
-            Assert.True(objectsList.Count > 0 && objectsList[0].bytes == maxBufferSize);
+            Assert.True(resp.ObjectsCount > 0 && resp.Objects[0].Bytes == maxBufferSize);
         }
     }
 }

@@ -165,13 +165,12 @@ namespace SwiftClient.Cli
                 var accountData = client.GetAccount(new Dictionary<string, string>() { { "format", "json" } }).Result;
                 if (accountData.IsSuccess)
                 {
-                    if (!string.IsNullOrEmpty(accountData.Info))
+                    if (accountData.Containers != null)
                     {
-                        var list = JsonConvert.DeserializeObject<List<ContainerInfoModel>>(accountData.Info);
-                        var table = list.ToStringTable(
+                        var table = accountData.Containers.ToStringTable(
                             u => u.Container,
                             u => u.Objects,
-                            u => u.Size
+                            u => u.Size()
                         );
                         Console.WriteLine(table);
                     }
@@ -186,13 +185,11 @@ namespace SwiftClient.Cli
                 var containerData = client.GetContainer(options.Container, null, new Dictionary<string, string> { { "format", "json" } }).Result;
                 if (containerData.IsSuccess)
                 {
-                    if (!string.IsNullOrEmpty(containerData.Info))
+                    if (containerData.Objects != null)
                     {
-                        var viewModel = new ContainerViewModel();
-                        viewModel.Objects = JsonConvert.DeserializeObject<List<ObjectViewModel>>(containerData.Info);
-                        var table = viewModel.Objects.ToStringTable(
+                        var table = containerData.Objects.ToStringTable(
                             u => u.Object,
-                            u => u.Size,
+                            u => u.Size(),
                             u => u.LastModified
                         );
                         Console.WriteLine(table);

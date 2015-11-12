@@ -23,5 +23,8 @@
         "System.Net.Requests": "4.0.10-beta-23019"
       }
     }
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "7.0.1"
   }
 }
