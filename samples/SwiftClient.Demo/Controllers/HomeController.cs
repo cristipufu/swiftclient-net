@@ -11,6 +11,10 @@ namespace SwiftClient.Demo.Controllers
     {
         string containerTempId = "demotempcontainer";
         string containerId = "democontainer";
+
+        string metaFileName = "Filename";
+        string metaContentType = "Contenttype";
+
         SwiftClient client;
 
         public HomeController(IOptions<SwiftCredentials> credentials, IMemoryCache cache)
@@ -27,7 +31,7 @@ namespace SwiftClient.Demo.Controllers
 
             await client.PutContainer(containerTempId);
 
-            var containerData = await client.GetContainer(containerId, null, new Dictionary<string, string> { { "format", "json" } });
+            var containerData = await client.GetContainer(containerId);
 
             var viewModel = new ContainerViewModel();
 
@@ -80,8 +84,8 @@ namespace SwiftClient.Demo.Controllers
             // copy chunks to new file and set some meta data info about the file (filename, contentype)
             await client.CopyObject(containerTempId, fileName, containerId, fileName, new Dictionary<string, string>
                 {
-                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Filename"), fileName },
-                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Contenttype"), contentType }
+                    { $"X-Object-Meta-{metaFileName}", fileName },
+                    { $"X-Object-Meta-{metaContentType}", contentType }
                 });
 
             // cleanup temp chunks
@@ -110,8 +114,8 @@ namespace SwiftClient.Demo.Controllers
 
             if (headObject.IsSuccess)
             {
-                var fileName = headObject.GetMeta("Filename");
-                var contentType = headObject.GetMeta("Contenttype");
+                var fileName = headObject.GetMeta(metaFileName);
+                var contentType = headObject.GetMeta(metaContentType);
 
                 var stream = new BufferedHTTPStream((start, end) =>
                 {
@@ -137,8 +141,8 @@ namespace SwiftClient.Demo.Controllers
 
             if (headObject.IsSuccess && headObject.ContentLength > 0)
             {
-                var fileName = headObject.GetMeta("Filename");
-                var contentType = headObject.GetMeta("Contenttype");
+                var fileName = headObject.GetMeta(metaFileName);
+                var contentType = headObject.GetMeta(metaContentType);
 
                 Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
 

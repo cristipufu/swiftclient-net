@@ -162,7 +162,7 @@ namespace SwiftClient.Cli
         {
             if (string.IsNullOrEmpty(options.Container))
             {
-                var accountData = client.GetAccount(new Dictionary<string, string>() { { "format", "json" } }).Result;
+                var accountData = client.GetAccount().Result;
                 if (accountData.IsSuccess)
                 {
                     if (accountData.Containers != null)
@@ -182,7 +182,7 @@ namespace SwiftClient.Cli
             }
             else
             {
-                var containerData = client.GetContainer(options.Container, null, new Dictionary<string, string> { { "format", "json" } }).Result;
+                var containerData = client.GetContainer(options.Container).Result;
                 if (containerData.IsSuccess)
                 {
                     if (containerData.Objects != null)
