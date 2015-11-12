@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace SwiftClient.Cli
 {
-    public class SwiftLogger : ISwiftLogger
+    public class SwiftConsoleLog : ISwiftLogger
     {
         private string _authError = "Exception occured: {0} for credentials {1} : {2} on proxy node {3}";
         private string _requestError = "Exception occured: {0} with status code: {1} for request url: {2}";
         private string _unauthorizedError = "Unauthorized request with old token {0}";
 
-        public SwiftLogger()
+        public SwiftConsoleLog()
         {
             var sw = new StreamWriter(Console.OpenStandardOutput());
             sw.AutoFlush = true;

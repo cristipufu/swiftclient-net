@@ -8,16 +8,13 @@ using CommandLine.Text;
 
 namespace SwiftClient.Cli
 {
-    [Verb("get", HelpText = "download file")]
-    public class GetOptions
+    [Verb("rm", HelpText = "remove container and it's content or a single object if one is specified")]
+    public class DeleteOptions
     {
         [Option('c', "container", Required = true, HelpText = "container")]
         public string Container { get; set; }
 
-        [Option('o', "object", Required = true, HelpText = "object")]
+        [Option('o', "object", Required = false, HelpText = "object")]
         public string Object { get; set; }
-
-        [Option('f', "file", Required = true, HelpText = "destination file path")]
-        public string File { get; set; }
     }
 }

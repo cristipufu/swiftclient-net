@@ -24,12 +24,23 @@ namespace SwiftClient.Cli
 
             while (command != "exit")
             {
-                
-                var exitCode = CommandLine.Parser.Default.ParseArguments<PutOptions, GetOptions, ListOptions>(command.ParseArguments()).MapResult(
-                    (PutOptions opts) => PutCommand.Run(opts, client),
-                    (GetOptions opts) => GetCommand.Run(opts, client),
-                    (ListOptions opts) => ListCommand.Run(opts, client),
-                    errs => 1);
+                try
+                {
+                    var exitCode = CommandLine.Parser.Default.ParseArguments<
+                        PutOptions, 
+                        GetOptions, 
+                        ListOptions, 
+                        DeleteOptions>(command.ParseArguments()).MapResult(
+                        (PutOptions opts) => PutCommand.Run(opts, client),
+                        (GetOptions opts) => GetCommand.Run(opts, client),
+                        (ListOptions opts) => ListCommand.Run(opts, client),
+                        (DeleteOptions opts) => DeleteCommand.Run(opts, client),
+                        errs => 1);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.InnerException != null ? ex.InnerException.Message : ex.Message);       
+                }
 
                 command = Console.ReadLine();
             }
@@ -126,7 +137,7 @@ namespace SwiftClient.Cli
 
             client = new SwiftClient(new SwiftAuthManager(credentials))
                 .SetRetryCount(1)
-                .SetLogger(new SwiftLogger());
+                .SetLogger(new SwiftConsoleLog());
 
             var data = await client.Authenticate();
 
