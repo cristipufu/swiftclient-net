@@ -22,7 +22,7 @@ namespace SwiftClient.Cli
 
             Console.WriteLine($"Uploading {options.File} to {options.Object}");
 
-            var response = new SwiftResponse();
+            var response = new SwiftBaseResponse();
             var fileName = Path.GetFileNameWithoutExtension(options.File);
             string containerTemp = options.Container + "_tmp";
             byte[] buffer = new byte[bufferSize];
@@ -64,6 +64,8 @@ namespace SwiftClient.Cli
                     chunks++;
                 }
 
+                Console.Write(Environment.NewLine);
+
                 // use manifest to merge chunks
                 response = client.PutManifest(containerTemp, fileName).Result;
 
@@ -76,8 +78,8 @@ namespace SwiftClient.Cli
                 // copy chunks to new file and set some meta data info about the file (filename, contentype)
                 response = client.CopyObject(containerTemp, fileName, options.Container, options.Object, new Dictionary<string, string>
                 {
-                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Filename"), fileName },
-                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Contenttype"), Path.GetExtension(options.File) }
+                    { "X-Object-Meta-Filename", fileName },
+                    { "X-Object-Meta-Contenttype", Path.GetExtension(options.File) }
                 }).Result;
 
                 if (!response.IsSuccess)
@@ -86,33 +88,8 @@ namespace SwiftClient.Cli
                     return 500;
                 }
 
-                // cleanup temp chunks
-                var deleteTasks = new List<Task<SwiftResponse>>();
-
-                for (var i = 0; i < chunks; i++)
-                {
-                    deleteTasks.Add(client.DeleteObjectChunk(containerTemp, fileName, i));
-                }
-
-                // cleanup manifest
-                deleteTasks.Add(client.DeleteObject(containerTemp, fileName));
-
-                // cleanup temp container
-                Task.WhenAll(deleteTasks).ContinueWith((rsp) =>
-                {
-                    response = rsp.Result.FirstOrDefault(x => !x.IsSuccess);
-
-                    if (response != null)
-                    {
-                        Console.WriteLine($"Cleanup temp chunks error {response.Reason}");
-                    }
-
-                    if (rsp.Result.All(x => x.IsSuccess))
-                    {
-                        response = client.DeleteContainer(containerTemp).Result;
-                    }
-
-                }).Wait();
+                // cleanup temp
+                response = client.DeleteContainerWithContents(containerTemp).Result;
 
                 if (!response.IsSuccess)
                 {

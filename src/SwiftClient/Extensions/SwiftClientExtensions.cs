@@ -7,11 +7,28 @@ namespace SwiftClient
 {
     public static class SwiftClientExtensions
     {
-        public static async Task<SwiftBaseResponse> DeleteContainerWithObjects(this SwiftClient client, string containerId, int limit = 2)
+        public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this SwiftClient client, string containerId, int limit = 1000)
         {
+            // delete all container objects
+            var deleteRsp = await client.DeleteContainerContents(containerId, limit);
+
+            if (deleteRsp.IsSuccess)
+            {
+                //delete container
+                return await client.DeleteContainer(containerId);
+            }
+
+            return deleteRsp;
+        }
+
+        public static async Task<SwiftBaseResponse> DeleteContainerContents(this SwiftClient client, string containerId, int limit = 1000)
+        {
+            var limitHeaderKey = "limit";
+            var markerHeaderKey = "marker";
+
             var queryParams = new Dictionary<string, string>()
             {
-                { "limit", limit.ToString() }
+                { limitHeaderKey, limit.ToString() }
             };
 
             var marker = string.Empty;
@@ -20,13 +37,13 @@ namespace SwiftClient
             {
                 if (!string.IsNullOrEmpty(marker))
                 {
-                    if (queryParams.ContainsKey("marker"))
+                    if (queryParams.ContainsKey(markerHeaderKey))
                     {
-                        queryParams["marker"] = marker;
+                        queryParams[markerHeaderKey] = marker;
                     }
                     else
                     {
-                        queryParams.Add("marker", marker);
+                        queryParams.Add(markerHeaderKey, marker);
                     }
                 }
 
@@ -34,7 +51,7 @@ namespace SwiftClient
                 var infoRsp = await client.GetContainer(containerId, null, queryParams);
 
                 // no more objects => break
-                if (infoRsp.ObjectsCount == 0) break;
+                if (infoRsp.ObjectsCount == 0) return infoRsp;
 
                 if (infoRsp.IsSuccess && infoRsp.Objects != null)
                 {
@@ -42,16 +59,13 @@ namespace SwiftClient
 
                     var count = infoRsp.Objects.Count;
 
-                    if (count > 0)
-                    {
-                        // delete them
-                        var deleteRsp = await client.DeleteObjects(objectIds);
+                    // delete them
+                    var deleteRsp = await client.DeleteObjects(objectIds);
 
-                        if (!deleteRsp.IsSuccess) return deleteRsp;
-                    }
+                    if (!deleteRsp.IsSuccess) return deleteRsp;
 
                     // last page => break
-                    if (count < limit) break;
+                    if (count < limit) return deleteRsp;
 
                     marker = infoRsp.Objects.Select(x => x.Object).LastOrDefault();
                 }
@@ -60,9 +74,6 @@ namespace SwiftClient
                     return infoRsp;
                 }
             }
-
-            // delete container
-            return await client.DeleteContainer(containerId);
-        } 
+        }
     }
 }

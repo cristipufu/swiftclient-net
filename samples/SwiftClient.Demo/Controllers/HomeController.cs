@@ -83,24 +83,13 @@ namespace SwiftClient.Demo.Controllers
 
             // copy chunks to new file and set some meta data info about the file (filename, contentype)
             await client.CopyObject(containerTempId, fileName, containerId, fileName, new Dictionary<string, string>
-                {
-                    { $"X-Object-Meta-{metaFileName}", fileName },
-                    { $"X-Object-Meta-{metaContentType}", contentType }
-                });
-
-            // cleanup temp chunks
-            var deleteTasks = new List<Task>();
-
-            for (var i = 0; i <= segmentsCount; i++)
             {
-                deleteTasks.Add(client.DeleteObjectChunk(containerTempId, fileName, i));
-            }
+                { $"X-Object-Meta-{metaFileName}", fileName },
+                { $"X-Object-Meta-{metaContentType}", contentType }
+            });
 
-            // cleanup manifest
-            deleteTasks.Add(client.DeleteObject(containerTempId, fileName));
-
-            // cleanup temp container
-            await Task.WhenAll(deleteTasks);
+            // cleanup temp
+            await client.DeleteContainerContents(containerId);
 
             return new JsonResult(new
             {
