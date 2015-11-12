@@ -17,12 +17,12 @@ namespace SwiftClient.Demo
             Console.SetOut(sw);
         }
 
-        public void LogAuthenticationError(Exception e, string username, string password, string endpoint)
+        public void LogAuthenticationError(Exception ex, string username, string password, string endpoint)
         {
-            Console.Out.WriteLine(string.Format(_authError, e.InnerException != null ? e.InnerException.Message : e.Message, username, password, endpoint));
+            Console.Out.WriteLine(string.Format(_authError, ex.InnerException != null ? ex.InnerException.Message : ex.Message, username, password, endpoint));
         }
 
-        public void LogRequestError(WebException e, HttpStatusCode statusCode, string reason, string requestUrl)
+        public void LogRequestError(Exception ex, HttpStatusCode statusCode, string reason, string requestUrl)
         {
             Console.Out.WriteLine(string.Format(_requestError, reason, statusCode.ToString(), requestUrl));
         }

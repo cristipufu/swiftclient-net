@@ -53,26 +53,31 @@ namespace SwiftClient
             request.SetHeaders(headers);
         }
 
-        private T GetExceptionResponse<T>(WebException e, string url) where T : SwiftBaseResponse, new()
+        private T GetExceptionResponse<T>(Exception ex, string url) where T : SwiftBaseResponse, new()
         {
             var result = new T();
 
-            var rsp = ((HttpWebResponse)e.Response);
+            var webException = ex as WebException;
 
-            if (rsp != null)
+            if (webException != null)
             {
-                result.StatusCode = rsp.StatusCode;
-                result.Reason = rsp.StatusDescription;
+                var rsp = ((HttpWebResponse)webException.Response);
+
+                if (rsp != null)
+                {
+                    result.StatusCode = rsp.StatusCode;
+                    result.Reason = rsp.StatusDescription;
+                }
             }
             else
             {
                 result.StatusCode = HttpStatusCode.BadRequest;
-                result.Reason = e.Message;
+                result.Reason = ex.Message;
             }
 
             if (_logger != null)
             {
-                _logger.LogRequestError(e, result.StatusCode, result.Reason, url);
+                _logger.LogRequestError(ex, result.StatusCode, result.Reason, url);
             }
 
             return result;

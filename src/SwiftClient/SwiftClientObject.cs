@@ -27,9 +27,9 @@ namespace SwiftClient
                         return GetResponse<SwiftResponse>(response);
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
         }
@@ -57,9 +57,9 @@ namespace SwiftClient
                         return result;
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
         }
@@ -93,9 +93,9 @@ namespace SwiftClient
                         return GetResponse<SwiftResponse>(response);
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
         }
@@ -119,9 +119,9 @@ namespace SwiftClient
                         return GetResponse<SwiftResponse>(response);
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
         }
@@ -145,9 +145,9 @@ namespace SwiftClient
                         return GetResponse<SwiftResponse>(response);
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
         }
@@ -205,9 +205,9 @@ namespace SwiftClient
                         return GetResponse<SwiftResponse>(response);
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, url);
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
         } 

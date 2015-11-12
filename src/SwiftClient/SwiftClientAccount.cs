@@ -47,9 +47,9 @@ namespace SwiftClient
                         return result;
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftAccountResponse>(e, auth.StorageUrl);
+                    return GetExceptionResponse<SwiftAccountResponse>(ex, auth.StorageUrl);
                 }
             });
         }
@@ -92,9 +92,9 @@ namespace SwiftClient
                         return result;
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftAccountResponse>(e, auth.StorageUrl);
+                    return GetExceptionResponse<SwiftAccountResponse>(ex, auth.StorageUrl);
                 }
             });
         }
@@ -116,9 +116,9 @@ namespace SwiftClient
                         return GetResponse<SwiftResponse>(response);
                     }
                 }
-                catch (WebException e)
+                catch (Exception ex)
                 {
-                    return GetExceptionResponse<SwiftResponse>(e, auth.StorageUrl);
+                    return GetExceptionResponse<SwiftResponse>(ex, auth.StorageUrl);
                 }
             });
         }
