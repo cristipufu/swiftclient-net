@@ -2,16 +2,25 @@
 
 namespace SwiftClient.Cli
 {
-    public static class SwiftModelExtensions
+    public class SwiftObject : SwiftObjectModel
     {
-        public static string Size(this SwiftObjectModel model)
+        public string Size
         {
-            return model.Bytes.Bytes().Humanize("0.00");
+            get
+            {
+                return Bytes.Bytes().Humanize("0.00");
+            }
         }
+    }
 
-        public static string Size(this SwiftContainerModel model)
+    public class SwiftContainer : SwiftContainerModel
+    {
+        public string Size
         {
-            return model.Bytes.Bytes().Humanize("0.00");
+            get
+            {
+                return Bytes.Bytes().Humanize("0.00");
+            }
         }
     }
 }

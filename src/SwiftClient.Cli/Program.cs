@@ -15,7 +15,6 @@ namespace SwiftClient.Cli
     {
         SwiftClient client = null;
         SwiftCredentials credentials = new SwiftCredentials();
-        long bufferSize = Convert.ToInt64(ByteSize.FromMegabytes(2).Bytes);
 
         public async Task Main(string[] args)
         {
@@ -27,180 +26,14 @@ namespace SwiftClient.Cli
             {
                 
                 var exitCode = CommandLine.Parser.Default.ParseArguments<PutOptions, GetOptions, ListOptions>(command.ParseArguments()).MapResult(
-                    (PutOptions opts) => RunPut(opts),
-                    (GetOptions opts) => RunGet(opts),
-                    (ListOptions opts) => RunList(opts),
+                    (PutOptions opts) => PutCommand.Run(opts, client),
+                    (GetOptions opts) => GetCommand.Run(opts, client),
+                    (ListOptions opts) => ListCommand.Run(opts, client),
                     errs => 1);
 
                 command = Console.ReadLine();
             }
             
-        }
-
-        private int RunPut(PutOptions options)
-        {
-            options.File = options.File.Replace('"', ' ').Trim();
-            if (!File.Exists(options.File))
-            {
-                Console.WriteLine($"File not found {options.File}");
-                return 404;
-            }
-
-            Console.WriteLine($"Uploading {options.File} to {options.Object}");
-
-            var response = new SwiftResponse();
-            var fileName = Path.GetFileNameWithoutExtension(options.File);
-            string containerTemp = options.Container + "_tmp";
-            byte[] buffer = new byte[bufferSize];
-
-            response = client.PutContainer(containerTemp).Result;
-
-            if (!response.IsSuccess)
-            {
-                Console.WriteLine($"Put tmp container error {response.Reason}");
-                return 500;
-            }
-
-            response = client.PutContainer(options.Container).Result;
-
-            if (!response.IsSuccess)
-            {
-                Console.WriteLine($"Put container error {response.Reason}");
-                return 500;
-            }
-
-            using (var stream = File.OpenRead(options.File))
-            {
-                int chunks = 0;
-                int bytesRead;
-                while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    Console.Write('.');
-                    using (MemoryStream tmpStream = new MemoryStream())
-                    {
-                        tmpStream.Write(buffer, 0, bytesRead);
-
-                        response = client.PutChunkedObject(containerTemp, fileName, tmpStream.ToArray(), chunks).Result;
-                        if (!response.IsSuccess)
-                        {
-                            Console.WriteLine($"Uploading error {response.Reason}");
-                            return 500;
-                        }
-                    }
-                    chunks++;
-                }
-
-                // use manifest to merge chunks
-                response = client.PutManifest(containerTemp, fileName).Result;
-
-                if (!response.IsSuccess)
-                {
-                    Console.WriteLine($"Put manifest error {response.Reason}");
-                    return 500;
-                }
-
-                // copy chunks to new file and set some meta data info about the file (filename, contentype)
-                response = client.CopyObject(containerTemp, fileName, options.Container, options.Object, new Dictionary<string, string>
-                {
-                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Filename"), fileName },
-                    { string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Contenttype"), Path.GetExtension(options.File) }
-                }).Result;
-
-                if (!response.IsSuccess)
-                {
-                    Console.WriteLine($"Copy object error {response.Reason}");
-                    return 500;
-                }
-
-                // cleanup temp chunks
-                var deleteTasks = new List<Task<SwiftResponse>>();
-
-                for (var i = 0; i < chunks; i++)
-                {
-                    deleteTasks.Add(client.DeleteObjectChunk(containerTemp, fileName, i));
-                }
-
-                // cleanup manifest
-                deleteTasks.Add(client.DeleteObject(containerTemp, fileName));
-
-                // cleanup temp container
-                Task.WhenAll(deleteTasks).ContinueWith((rsp) =>
-                {
-                    response = rsp.Result.FirstOrDefault(x => !x.IsSuccess);
-
-                    if (response != null)
-                    {
-                        Console.WriteLine($"Cleanup temp chunks error {response.Reason}");
-                    }
-
-                    if (rsp.Result.All(x => x.IsSuccess))
-                    {
-                        response = client.DeleteContainer(containerTemp).Result;
-                    }
-
-                }).Wait();
-
-                if (!response.IsSuccess)
-                {
-                    Console.WriteLine($"Cleanup error {response.Reason}");
-                    return 500;
-                }
-
-                Console.WriteLine($"Upload done");
-            }
-
-            return 0;
-        }
-
-        private int RunGet(GetOptions options)
-        {
-            Console.WriteLine($"Download {options.Object} to {options.File} ");
-            return 0;
-        }
-
-        private int RunList(ListOptions options)
-        {
-            if (string.IsNullOrEmpty(options.Container))
-            {
-                var accountData = client.GetAccount().Result;
-                if (accountData.IsSuccess)
-                {
-                    if (accountData.Containers != null)
-                    {
-                        var table = accountData.Containers.ToStringTable(
-                            u => u.Container,
-                            u => u.Objects,
-                            u => u.Size()
-                        );
-                        Console.WriteLine(table);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(accountData.Reason);
-                }
-            }
-            else
-            {
-                var containerData = client.GetContainer(options.Container).Result;
-                if (containerData.IsSuccess)
-                {
-                    if (containerData.Objects != null)
-                    {
-                        var table = containerData.Objects.ToStringTable(
-                            u => u.Object,
-                            u => u.Size(),
-                            u => u.LastModified
-                        );
-                        Console.WriteLine(table);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(containerData.Reason);
-                }
-            }
-            return 0;
         }
 
         private async Task<bool> Connect()
