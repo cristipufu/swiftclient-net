@@ -262,7 +262,7 @@ namespace SwiftClient
 
                 var request = new HttpRequestMessage(HttpMethod.Delete, url);
 
-                request.Headers.Add("Accept", "application:json");
+                request.Headers.Add("Accept", "application/json");
 
                 FillRequest(request, auth);
 

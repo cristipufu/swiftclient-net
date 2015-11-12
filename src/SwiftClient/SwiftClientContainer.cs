@@ -78,6 +78,8 @@ namespace SwiftClient
                 {
                     using (var response = await _client.SendAsync(request))
                     {
+                        response.EnsureSuccessStatusCode();
+
                         var result = GetResponse<SwiftContainerResponse>(response);
 
                         long totalBytes, objectsCount;
@@ -180,6 +182,5 @@ namespace SwiftClient
                 }
             });
         }
-
     }
 }

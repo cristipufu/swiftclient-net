@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 
 using SwiftClient.Extensions;
 using System.Net.Http;
@@ -83,6 +82,8 @@ namespace SwiftClient
                 {
                     using (var response = await _client.SendAsync(request))
                     {
+                        response.EnsureSuccessStatusCode();
+
                         var result = GetResponse<SwiftAccountResponse>(response);
 
                         long totalBytes, containersCount, objectsCount;
