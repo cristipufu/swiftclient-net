@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SwiftClient.Cli": {
+      "commandName": "SwiftClient.Cli",
+      "environmentVariables": {
+        "SWIFT_KEY": "testing",
+        "SWIFT_URL": "http://192.168.3.23:8080",
+        "SWIFT_USER": "test:tester"
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-*",
+  "description": "SwiftClient Command-line interface",
+  "authors": [ "Stefan Prodan" ],
+  "tags": [ "OpenStack Swift DNX" ],
+  "projectUrl": "https://github.com/vtfuture/SwiftClient",
+  "licenseUrl": "https://github.com/vtfuture/SwiftClient/blob/master/LICENSE.md",
+
+  "dependencies": {
+    "CommandLineParser": "2.0.275-beta",
+    "Newtonsoft.Json": "7.0.1",
+    "SwiftClient": "1.2.0-b-*"
+  },
+
+  "commands": {
+    "SwiftClient.Cli": "SwiftClient.Cli"
+  },
+
+  "frameworks": {
+    "dnx451": {
+      "dependencies": {
+      }
+    }
+  }
+}
