@@ -1,7 +1,13 @@
-﻿@model ContainerViewModel
+﻿@model PageViewModel
+@using Newtonsoft.Json
 
 @{
     ViewData["Title"] = "Swift Client Demo";
+}
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="message">@Model.Message</div>
 }
 
 <div>
@@ -10,12 +16,9 @@
 
 </div>
 
-@if (!string.IsNullOrEmpty(Model.Message))
-{
-    <div class="error-message">@Model.Message</div>
-}
+<div id="tree" data-tree="@JsonConvert.SerializeObject(Model.Tree)"></div>
 
-@if (Model.Objects != null)
+@*@if (Model.Objects != null)
 {
     <div>
         @if (Model.Objects.Any())
@@ -44,7 +47,7 @@
             </table>
         }
     </div>
-}
+}*@
 
 @*<div>
     <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" preload="none" poster="~/images/cinema.png" data-error="~/images/default-video-thumb.png">
