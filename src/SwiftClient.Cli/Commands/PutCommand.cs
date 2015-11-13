@@ -95,7 +95,7 @@ namespace SwiftClient.Cli
             int done = 0;
 
             ParallelOptions parallelOptions = new ParallelOptions();
-            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            parallelOptions.MaxDegreeOfParallelism = options.Parallel;
             Parallel.ForEach(files, parallelOptions, file =>
             {
                 //put sub-directory path in object name
