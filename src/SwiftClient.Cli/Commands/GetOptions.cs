@@ -19,5 +19,8 @@ namespace SwiftClient.Cli
 
         [Option('f', "file", Required = true, HelpText = "destination file path")]
         public string File { get; set; }
+
+        [Option('b', "buffer", Required = false, Default = 2, HelpText = "buffer size in MB, default is 2MB")]
+        public int BufferSize { get; set; }
     }
 }

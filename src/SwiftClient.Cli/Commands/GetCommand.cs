@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Humanizer.Bytes;
+using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SwiftClient.Cli
 {
@@ -10,6 +8,7 @@ namespace SwiftClient.Cli
     {
         public static int Run(GetOptions options, SwiftClient client)
         {
+            int bufferSize = Convert.ToInt32(ByteSize.FromMegabytes(options.BufferSize).Bytes);
             var headObject = client.HeadObject(options.Container, options.Object).Result;
 
             if (headObject.IsSuccess)
@@ -29,7 +28,7 @@ namespace SwiftClient.Cli
 
                 using (var fs = File.OpenWrite(options.File))
                 {
-                    stream.CopyTo(fs);
+                    stream.CopyTo(fs, bufferSize);
                 }
 
                 stream.Dispose();

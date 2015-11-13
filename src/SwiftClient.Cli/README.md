@@ -115,6 +115,11 @@ Download file:
 get -c videos -o test.mp4 -f "C:\my videos\my.mp4"
 ```
 
+Download file with a 20MB buffer size:
+```bash
+get -c videos -o test.mp4 -b 20 -f "C:\my videos\my.mp4"
+```
+
 Result:
 ```
 videos/test.mp4 downloaded to C:\my videos\my.mp4
