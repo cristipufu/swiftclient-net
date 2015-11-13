@@ -16,5 +16,8 @@ namespace SwiftClient.Cli
 
         [Option('o', "object", Required = false, HelpText = "object")]
         public string Object { get; set; }
+
+        [Option('l', "limit", Required = false, Default = 1000, HelpText = "number of objects to delete from container")]
+        public int Limit { get; set; }
     }
 }

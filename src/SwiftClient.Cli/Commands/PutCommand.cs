@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Humanizer;
+using System.Threading;
 
 namespace SwiftClient.Cli
 {
@@ -42,7 +43,7 @@ namespace SwiftClient.Cli
                 return 404;
             }
 
-            Logger.Log($"Uploading {options.File} to {options.Object}");
+            if (showProgress) Logger.Log($"Uploading {options.File} to {options.Object}");
 
             var response = new SwiftBaseResponse();
             var fileName = Path.GetFileNameWithoutExtension(options.File);
@@ -90,6 +91,9 @@ namespace SwiftClient.Cli
 
             var files = Directory.GetFiles(options.File, "*", SearchOption.AllDirectories);
 
+            int total = files.Length;
+            int done = 0;
+
             ParallelOptions parallelOptions = new ParallelOptions();
             parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
             Parallel.ForEach(files, parallelOptions, file =>
@@ -110,6 +114,8 @@ namespace SwiftClient.Cli
                 };
 
                 UploadFile(meta, client, false);
+                Interlocked.Increment(ref done);
+                Console.Write($"\rUploaded {done}/{total}");
             });
 
             Logger.Log("Files uploaded");

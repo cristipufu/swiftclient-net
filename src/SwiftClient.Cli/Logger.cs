@@ -23,6 +23,8 @@ namespace SwiftClient.Cli
         public static void LogError(string value)
         {
             Console.ForegroundColor = ConsoleColor.Red;
+            //TODO: determine if the current cursor is on a new line or not
+            Console.Write(Environment.NewLine);
             Console.WriteLine(value);
             Console.ResetColor();
         }
