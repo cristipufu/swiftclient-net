@@ -11,12 +11,32 @@ namespace SwiftClient.Cli
 {
     public static class PutCommand
     {
-        static long bufferSize = Convert.ToInt64(ByteSize.FromMegabytes(2).Bytes);
-
         public static int Run(PutOptions options, SwiftClient client)
         {
+            if (!string.IsNullOrEmpty(options.File))
+            {
+                options.File = options.File.Replace('"', ' ').Trim();
+            }
+            else
+            {
+                Logger.LogError($"Not found {options.File}");
+                return 404;
+            }
+
+            if (!string.IsNullOrEmpty(options.Object) || !Directory.Exists(options.File))
+            {
+                return UploadFile(options, client);
+            }
+            else
+            {
+                return UploadDirectory(options, client);
+            }
+        }
+        public static int UploadFile(PutOptions options, SwiftClient client, bool showProgress = true)
+        {
             var stopwatch = Stopwatch.StartNew();
-            options.File = options.File.Replace('"', ' ').Trim();
+            long bufferSize = Convert.ToInt64(ByteSize.FromMegabytes(options.BufferSize).Bytes);
+            
             if (!File.Exists(options.File))
             {
                 Logger.LogError($"File not found {options.File}");
@@ -27,7 +47,7 @@ namespace SwiftClient.Cli
 
             var response = new SwiftBaseResponse();
             var fileName = Path.GetFileNameWithoutExtension(options.File);
-            string containerTemp = options.Container + "_tmp";
+            string containerTemp = "tmp_" + Guid.NewGuid().ToString("N");
             byte[] buffer = new byte[bufferSize];
 
             response = client.PutContainer(containerTemp).Result;
@@ -48,7 +68,7 @@ namespace SwiftClient.Cli
 
             using (var stream = File.OpenRead(options.File))
             {
-                Console.Write($"\rUploading...");
+                if(showProgress) Console.Write($"\rUploading...");
 
                 int chunks = 0;
                 int bytesRead;
@@ -60,7 +80,7 @@ namespace SwiftClient.Cli
                         var data = tmpStream.ToArray();
                         response = client.PutChunkedObject(containerTemp, fileName, data, chunks).Result;
 
-                        Console.Write($"\rUploaded {((chunks * 2).Megabytes() + data.LongLength.Bytes()).Humanize("MB")}");
+                        if (showProgress) Console.Write($"\rUploaded {((chunks * options.BufferSize).Megabytes() + data.LongLength.Bytes()).Humanize("MB")}");
 
                         if (!response.IsSuccess)
                         {
@@ -71,7 +91,7 @@ namespace SwiftClient.Cli
                     chunks++;
                 }
 
-                Console.Write("\rMerging chunks... ");
+                if (showProgress) Console.Write("\rMerging chunks... ");
 
                 // use manifest to merge chunks
                 response = client.PutManifest(containerTemp, fileName).Result;
@@ -86,7 +106,8 @@ namespace SwiftClient.Cli
                 response = client.CopyObject(containerTemp, fileName, options.Container, options.Object, new Dictionary<string, string>
                 {
                     { "X-Object-Meta-Filename", fileName },
-                    { "X-Object-Meta-Contenttype", Path.GetExtension(options.File) }
+                    //TODO: determine mime type 
+                    //{ "X-Object-Meta-Contenttype", Path.GetExtension(options.File) }
                 }).Result;
 
                 if (!response.IsSuccess)
@@ -104,11 +125,50 @@ namespace SwiftClient.Cli
                     return 500;
                 }
 
-                Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()}");
-                Console.Write(Environment.NewLine);
+                if (showProgress) Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()}");
+                if (showProgress) Console.Write(Environment.NewLine);
             }
 
             return 0;
         }
+
+        public static int UploadDirectory(PutOptions options, SwiftClient client)
+        {
+            if(!Directory.Exists(options.File))
+            {
+                Logger.LogError($"Directory not found {options.File}");
+                return 404;
+            }
+
+            var files = Directory.GetFiles(options.File, "*", SearchOption.AllDirectories);
+
+            ParallelOptions parallelOptions = new ParallelOptions();
+            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            Parallel.ForEach(files, parallelOptions, file =>
+            {
+                //put sub-directory path in object name
+                var objectName = file.Replace(options.File, "");
+                if (objectName.StartsWith("\\") || objectName.StartsWith("/"))
+                {
+                    objectName = objectName.Substring(1, objectName.Length - 1);
+                }
+
+                var meta = new PutOptions
+                {
+                    BufferSize = options.BufferSize,
+                    Container = options.Container,
+                    File = file,
+                    Object = objectName
+                };
+
+                UploadFile(meta, client, false);
+            });
+
+            Logger.Log("Files uploaded");
+            return 0;
+        }
+
+
+
     }
 }
