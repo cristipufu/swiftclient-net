@@ -83,7 +83,9 @@ namespace SwiftClient.Cli
 
         public static int UploadDirectory(PutOptions options, SwiftClient client)
         {
-            if(!Directory.Exists(options.File))
+            var stopwatch = Stopwatch.StartNew();
+
+            if (!Directory.Exists(options.File))
             {
                 Logger.LogError($"Directory not found {options.File}");
                 return 404;
@@ -118,7 +120,7 @@ namespace SwiftClient.Cli
                 Console.Write($"\rUploaded {done}/{total}");
             });
 
-            Logger.Log("Files uploaded");
+            Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()}");
             return 0;
         }
 
