@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text;
+using System.Net;
 
 namespace SwiftClient
 {
@@ -116,7 +117,15 @@ namespace SwiftClient
 
                     using (var response = await _client.SendAsync(request))
                     {
-                        return GetResponse<SwiftResponse>(response);
+                        var result = GetResponse<SwiftResponse>(response);
+
+                        // container not found
+                        if (result.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams));
+                        }
+
+                        return result;
                     }
                 }
                 catch (Exception ex)
@@ -142,7 +151,15 @@ namespace SwiftClient
 
                     using (var response = await _client.SendAsync(request))
                     {
-                        return GetResponse<SwiftResponse>(response);
+                        var result = GetResponse<SwiftResponse>(response);
+
+                        // container not found
+                        if (result.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams));
+                        }
+
+                        return result;
                     }
                 }
                 catch (Exception ex)
@@ -150,6 +167,20 @@ namespace SwiftClient
                     return GetExceptionResponse<SwiftResponse>(ex, url);
                 }
             });
+        }
+
+        private async Task<SwiftResponse> EnsurePutContainer(string containerId, Func<Task<SwiftResponse>> retryFunc)
+        {
+            // put container
+            var putContainerRsp = await PutContainer(containerId);
+
+            if (!putContainerRsp.IsSuccess)
+            {
+                return putContainerRsp;
+            }
+
+            // retry put object
+            return await retryFunc();
         }
 
         public Task<SwiftResponse> PutObjectChunk(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
@@ -186,7 +217,7 @@ namespace SwiftClient
 
         /// <summary>
         /// Delete object. 
-        /// If SLO ([filter:slo]) is enabled and you want to delete file including segments add {"multipart-manifest", "delete"} to queryParams
+        /// If ([filter:slo]) is configured and you want to delete SLO file including segments add {"multipart-manifest", "delete"} to queryParams
         /// </summary>
         /// <param name="containerId"></param>
         /// <param name="objectId"></param>
