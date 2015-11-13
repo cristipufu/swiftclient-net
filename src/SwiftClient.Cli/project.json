@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.2.0-b-*",
   "description": "SwiftClient Command-line interface",
   "authors": [ "Stefan Prodan" ],
   "tags": [ "OpenStack Swift DNX" ],
