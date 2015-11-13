@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,6 +8,66 @@ namespace SwiftClient
 {
     public static class SwiftClientExtensions
     {
+        public static async Task<SwiftBaseResponse> PutLargeObject(this SwiftClient client, string containerId, string objectId, Stream stream, Action<long, long> progress = null, long bufferSize = 1000000)
+        {
+            SwiftBaseResponse response = null;
+            byte[] buffer = new byte[bufferSize];
+            string containerTemp = "tmp_" + Guid.NewGuid().ToString("N");
+            int bytesRead, chunk = 0;
+
+            response = await client.PutContainer(containerTemp);
+
+            if (!response.IsSuccess)
+            {
+                return response;
+            }
+
+            while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                response = await client.PutObjectChunk(containerTemp, objectId, buffer, chunk);
+
+                if (progress != null)
+                {
+                    progress(chunk, bytesRead);
+                }
+
+                if (!response.IsSuccess)
+                {
+                    // cleanup
+                    await client.DeleteContainerWithContents(containerTemp);
+
+                    return response;
+                }
+
+                chunk++;
+            }
+
+            // use manifest to merge chunks
+            response = await client.PutManifest(containerTemp, objectId);
+
+            if (!response.IsSuccess)
+            {
+                // cleanup
+                await client.DeleteContainerWithContents(containerTemp);
+
+                return response;
+            }
+
+            // copy chunks to new file
+            response = await client.CopyObject(containerTemp, objectId, containerId, objectId);
+
+            if (!response.IsSuccess)
+            {
+                // cleanup
+                await client.DeleteContainerWithContents(containerTemp);
+
+                return response;
+            }
+
+            // cleanup temp
+            return await client.DeleteContainerWithContents(containerTemp);
+        }
+
         public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this SwiftClient client, string containerId, int limit = 1000)
         {
             // delete all container objects

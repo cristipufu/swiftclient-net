@@ -58,7 +58,7 @@ namespace SwiftClient.Demo.Controllers
 
                 await fileStream.CopyToAsync(memoryStream);
 
-                var resp = await client.PutChunkedObject(containerTempId, fileName, memoryStream.ToArray(), segment);
+                var resp = await client.PutObjectChunk(containerTempId, fileName, memoryStream.ToArray(), segment);
 
                 return new JsonResult(new
                 {

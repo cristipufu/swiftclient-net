@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 
 using SwiftClient.Extensions;
-using System.Net.Http;
 
 namespace SwiftClient
 {

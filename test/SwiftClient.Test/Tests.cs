@@ -228,7 +228,7 @@ namespace SwiftClient.Test
                 RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
                 var data = generator.GenerateBufferFromSeed(maxBufferSize);
 
-                var task = client.PutChunkedObject(containerId, chunkedObjectId, data, i);
+                var task = client.PutObjectChunk(containerId, chunkedObjectId, data, i);
 
                 tasks.Add(task);
             }

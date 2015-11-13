@@ -152,7 +152,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PutChunkedObject(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutObjectChunk(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return PutObject(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment), data, headers, queryParams);
         }
