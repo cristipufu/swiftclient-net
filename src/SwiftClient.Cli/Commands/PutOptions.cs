@@ -22,5 +22,8 @@ namespace SwiftClient.Cli
 
         [Option('b', "buffer", Required = false, Default = 2, HelpText = "buffer size in MB, default is 2MB")]
         public int BufferSize { get; set; }
+
+        [Option('p', "parallel", Required = false, Default = 4, HelpText = "max degree of parallelism, default is 4")]
+        public int Parallel { get; set; }
     }
 }

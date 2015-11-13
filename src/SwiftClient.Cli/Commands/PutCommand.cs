@@ -83,7 +83,9 @@ namespace SwiftClient.Cli
 
         public static int UploadDirectory(PutOptions options, SwiftClient client)
         {
-            if(!Directory.Exists(options.File))
+            var stopwatch = Stopwatch.StartNew();
+
+            if (!Directory.Exists(options.File))
             {
                 Logger.LogError($"Directory not found {options.File}");
                 return 404;
@@ -95,7 +97,7 @@ namespace SwiftClient.Cli
             int done = 0;
 
             ParallelOptions parallelOptions = new ParallelOptions();
-            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            parallelOptions.MaxDegreeOfParallelism = options.Parallel;
             Parallel.ForEach(files, parallelOptions, file =>
             {
                 //put sub-directory path in object name
@@ -118,7 +120,7 @@ namespace SwiftClient.Cli
                 Console.Write($"\rUploaded {done}/{total}");
             });
 
-            Logger.Log("Files uploaded");
+            Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()}");
             return 0;
         }
 
