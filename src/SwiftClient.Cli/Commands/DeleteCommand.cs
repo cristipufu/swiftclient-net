@@ -12,7 +12,7 @@ namespace SwiftClient.Cli
         {
             if (string.IsNullOrEmpty(options.Object))
             {
-                var response = client.DeleteContainer(options.Container).Result;
+                var response = client.DeleteContainerWithContents(options.Container, options.Limit).Result;
                 if (response.IsSuccess)
                 {
                     Console.WriteLine($"{options.Container} deleted");
