@@ -2,22 +2,26 @@
 
 SwiftClient.Cli is a cross-platform console application compatible with DNX 4.5.1, it's main purpose is to transfer large objects into and out of OpenStack Swift. 
 Large files are split into chunks of configurable size and uploaded to a temporary container, when all chunks are uploaded a merge operation is triggered on the server using Swift object manifest. 
-The CLI also supports bulk upload of an entire directory tree, files and uploaded in parallel, the degree of parallelism is also configurable.
+The CLI also supports bulk upload of an entire directory tree, files are uploaded in parallel, the degree of parallelism is also configurable.
 
 # Commands
 
 SwiftClient.Cli will prompt for authentication if these environment variables are not present:
 
 ```
-$ export SWIFT_URL=http://localhost:8080
-$ export SWIFT_USER=test:tester
-$ export SWIFT_KEY=testing
+SWIFT_URL=http://localhost:8080
+SWIFT_USER=test:tester
+SWIFT_KEY=testing
 ```
 
 ### Login
 
+```
+login -h <host> -u <user> -p <password>
+```
+
 Usage:
-```bash
+```
 login -h http://localhost:8080 -u test:tester -p testing
 ```
 
@@ -30,7 +34,7 @@ Authentication token received from http://localhost:8080/v1/AUTH_test
 ### Stats
 
 List account statistics:
-```bash
+```
 stats
 ```
 
@@ -43,8 +47,12 @@ Result:
 
 ### List
 
+```
+ls -c <container>
+```
+
 List containers:
-```bash
+```
 ls
 ```
 
@@ -59,7 +67,7 @@ Result:
 ```
 
 List objects in a container:
-```bash
+```
 ls -c docs
 ```
 
@@ -74,29 +82,33 @@ Result:
 
 ### Put
 
-Upload a single file to a container:
-```bash
+```
+put -c <container> -o <object> -b <buffer> -p <parallel> -f <file>
+```
+
+Upload file to a container:
+```
 put -c videos -o test.mp4 -f "C:\vid12GB.mp4"
 ```
 
-Upload a single file to a container with a 20MB chunk size:
-```bash
-put -c videos -o test.mp4 -b 20 -f "C:\vid12GB.mp4"
+Upload file to a container with a 20MB chunk size:
+```
+put -c videos -o test.mp4 -b 20 -f "C:\vid2GB.mp4"
 ```
 
 Result:
 ```
-Uploaded 12 GB
+Uploaded 2 GB
 Upload done in 55 seconds
 ```
 
 Upload a directory tree to a container: 
-```bash
+```
 put -c videos  -f "C:\videos"
 ```
 
-Upload a directory tree to a container with 10 parallel calls: 
-```bash
+Upload a directory tree to a container using 10 parallel HTTP calls:
+```
 put -c videos -p 10 -f "C:\videos"
 ```
 
@@ -110,13 +122,17 @@ Upload done in 2 minutes
 
 ### Get
 
+```
+get -c <container> -o <object> -b <buffer> -f <file>
+```
+
 Download file:
-```bash
+```
 get -c videos -o test.mp4 -f "C:\my videos\my.mp4"
 ```
 
 Download file with a 20MB buffer size:
-```bash
+```
 get -c videos -o test.mp4 -b 20 -f "C:\my videos\my.mp4"
 ```
 
@@ -127,8 +143,12 @@ videos/test.mp4 downloaded to C:\my videos\my.mp4
 
 ### Remove
 
+```
+get -c <container> -o <object>
+```
+
 Delete file from container:
-```bash
+```
 rm -c videos -o test.mp4
 ```
 
@@ -138,7 +158,7 @@ videos/test.mp4 deleted
 ```
 
 Delete container and objects:
-```bash
+```
 rm -c videos
 ```
 

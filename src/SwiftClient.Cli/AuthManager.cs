@@ -87,7 +87,8 @@ namespace SwiftClient.Cli
 
         private bool PromptLogin()
         {
-            Console.WriteLine($"Connect to swift using command: login -h http://localhost:8080 -u username -p password");
+            Console.WriteLine($"Connect to swift using command:");
+            Console.WriteLine("login -h <host> -u <user> -p <password>");
             var loginCommand = Console.ReadLine();
 
             var exitCode = ParseLoginCommand(loginCommand.ParseArguments());
