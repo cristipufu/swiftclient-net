@@ -59,7 +59,7 @@ ctrl.prototype.initFileUpload = function () {
 
     $('#fileupload').fileupload({
         dataType: 'json',
-        maxChunkSize: 1000000,
+        maxChunkSize: 2000000,
         add: this.onFileAdd.bind(this),
         formData: this.getFormData.bind(this),
         done: this.fileUploadDone.bind(this)

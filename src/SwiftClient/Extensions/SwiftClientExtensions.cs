@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace SwiftClient
 {
@@ -42,8 +44,19 @@ namespace SwiftClient
                 chunk++;
             }
 
+            Dictionary<string, string> integrityHeaders = null;
+
+#if !DNXCORE50
+            using (var md5 = MD5.Create())
+            {
+                var eTag = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLower();
+
+                integrityHeaders = new Dictionary<string, string>() { { "ETag", eTag } };
+            }
+#endif
+
             // use manifest to merge chunks
-            response = await client.PutManifest(containerTemp, objectId);
+            response = await client.PutManifest(containerTemp, objectId, integrityHeaders);
 
             if (!response.IsSuccess)
             {
