@@ -5,16 +5,19 @@
     ViewData["Title"] = "Swift Client Demo";
 }
 
+
 @if (!string.IsNullOrEmpty(Model.Message))
 {
-    <div class="message">@Model.Message</div>
+    <div class="alert alert-info"><em>@Model.Message</em></div>
 }
 
-<div>
-
+<div class="upload-file form-group">
+    <label for="fileupload">Upload file</label>
     <input id="fileupload" type="file" name="file" data-url="home/uploadchunk/" multiple>
 
 </div>
+
+<h2>Your files</h2>
 
 <div id="tree" data-tree="@JsonConvert.SerializeObject(Model.Tree)"></div>
 
