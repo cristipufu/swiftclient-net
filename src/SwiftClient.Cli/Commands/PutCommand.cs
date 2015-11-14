@@ -44,10 +44,19 @@ namespace SwiftClient.Cli
                 return 404;
             }
 
+            if (options.ToLower)
+            {
+                options.Container = options.Container.ToLowerInvariant();
+                if (!string.IsNullOrEmpty(options.Object))
+                {
+                    options.Object = options.Object.ToLowerInvariant();
+                }
+            }
+
             if (showProgress) Logger.Log($"Uploading {options.File} to {options.Object}");
 
             var response = new SwiftBaseResponse();
-            var fileName = Path.GetFileNameWithoutExtension(options.File);
+            var fileName = Path.GetFileName(options.File);
 
             response = client.PutContainer(options.Container).Result;
 
@@ -98,13 +107,18 @@ namespace SwiftClient.Cli
                 return 404;
             }
 
+            if (options.ToLower)
+            {
+                options.Container = options.Container.ToLowerInvariant();
+            }
+
             var files = Directory.GetFiles(options.File, "*", SearchOption.AllDirectories);
 
             int total = files.Length;
             int done = 0;
 
             ParallelOptions parallelOptions = new ParallelOptions();
-            parallelOptions.MaxDegreeOfParallelism = options.Parallel;
+            parallelOptions.MaxDegreeOfParallelism = options.Parallel > 0 ? options.Parallel : 4;
             Parallel.ForEach(files, parallelOptions, file =>
             {
                 //put sub-directory path in object name
@@ -112,6 +126,13 @@ namespace SwiftClient.Cli
                 if (objectName.StartsWith("\\") || objectName.StartsWith("/"))
                 {
                     objectName = objectName.Substring(1, objectName.Length - 1);
+                }
+
+                objectName = objectName.Replace("\\", "/");
+
+                if (options.ToLower)
+                {
+                    objectName = objectName.ToLowerInvariant();
                 }
 
                 var meta = new PutOptions
