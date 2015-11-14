@@ -67,7 +67,8 @@ namespace SwiftClient.Cli
                         var table = list.ToStringTable(
                             u => u.Object,
                             u => u.Size,
-                            u => u.LastModified
+                            u => u.LastModified,
+                            u => u.ContentType
                         );
                         Console.WriteLine(table);
                     }

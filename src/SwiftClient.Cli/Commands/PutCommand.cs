@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Humanizer;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace SwiftClient.Cli
 {
@@ -61,7 +62,13 @@ namespace SwiftClient.Cli
                 if (showProgress)
                     Console.Write($"\rUploading...");
 
-                response = client.PutLargeObject(options.Container, options.Object, stream, (chunk, bytesRead) =>
+                var headers = new Dictionary<string, string>
+                {
+                    { $"X-Object-Meta-Filename", fileName },
+                    { $"X-Object-Meta-Contenttype", MimeTypeMap.GetMimeType(Path.GetExtension(options.File)) }
+                };
+
+                response = client.PutLargeObject(options.Container, options.Object, stream, headers, (chunk, bytesRead) =>
                 {
                     if (showProgress)
                         Console.Write($"\rUploaded {((chunk * options.BufferSize).Megabytes() + bytesRead.Bytes()).Humanize("MB")}");
@@ -120,7 +127,7 @@ namespace SwiftClient.Cli
                 Console.Write($"\rUploaded {done}/{total}");
             });
 
-            Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()}");
+            Console.Write($"\rUpload done in {stopwatch.ElapsedMilliseconds.Milliseconds().Humanize()} {Environment.NewLine}");
             return 0;
         }
 

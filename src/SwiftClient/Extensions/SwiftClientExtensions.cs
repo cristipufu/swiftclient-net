@@ -10,7 +10,7 @@ namespace SwiftClient
 {
     public static class ClientExtensions
     {
-        public static async Task<SwiftBaseResponse> PutLargeObject(this Client client, string containerId, string objectId, Stream stream, Action<long, long> progress = null, long bufferSize = 1000000)
+        public static async Task<SwiftBaseResponse> PutLargeObject(this Client client, string containerId, string objectId, Stream stream, Dictionary<string, string> headers = null, Action<long, long> progress = null, long bufferSize = 1000000)
         {
             SwiftBaseResponse response = null;
             byte[] buffer = new byte[bufferSize];
@@ -67,7 +67,7 @@ namespace SwiftClient
             }
 
             // copy chunks to new file
-            response = await client.CopyObject(containerTemp, objectId, containerId, objectId);
+            response = await client.CopyObject(containerTemp, objectId, containerId, objectId, headers);
 
             if (!response.IsSuccess)
             {
