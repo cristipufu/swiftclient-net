@@ -26,7 +26,11 @@ namespace SwiftClient
 
             while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                response = await client.PutObjectChunk(containerTemp, objectId, buffer, chunk);
+                using (MemoryStream tmpStream = new MemoryStream())
+                {
+                    tmpStream.Write(buffer, 0, bytesRead);
+                    response = await client.PutObjectChunk(containerTemp, objectId, tmpStream.ToArray(), chunk);
+                }
 
                 if (progress != null)
                 {
