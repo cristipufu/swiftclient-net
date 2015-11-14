@@ -9,7 +9,7 @@ namespace SwiftClient.Cli
     public class AuthManager
     {
         bool validLoginData = false;
-        SwiftClient client = null;
+        Client client = null;
         SwiftCredentials credentials = new SwiftCredentials();
 
         public AuthManager(string[] args)
@@ -20,7 +20,7 @@ namespace SwiftClient.Cli
             }
         }
 
-        public async Task<SwiftClient> Connect()
+        public async Task<Client> Connect()
         {
             var needsAuth = validLoginData ? false : !ValidateLogin();
             if (needsAuth)
@@ -114,7 +114,7 @@ namespace SwiftClient.Cli
 
             Console.WriteLine($"Connecting to {credentials.Endpoints.FirstOrDefault()} as {credentials.Username}");
 
-            client = new SwiftClient(new SwiftAuthManager(credentials))
+            client = new Client(new SwiftAuthManager(credentials))
                 .SetRetryCount(1)
                 .SetLogger(new SwiftConsoleLog());
 

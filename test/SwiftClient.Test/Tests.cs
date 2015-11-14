@@ -27,7 +27,7 @@ namespace SwiftClient.Test
 
         public void Dispose()
         {
-            using (var client = new SwiftClient(Credentials))
+            using (var client = new Client(Credentials))
             {
                 var deleteFilesTasks = new List<Task>();
 
@@ -124,9 +124,9 @@ namespace SwiftClient.Test
 
         #endregion
 
-        public SwiftClient GetClient()
+        public Client GetClient()
         {
-            var client = new SwiftClient(credentials);
+            var client = new Client(credentials);
 
             client.SetLogger(new SwiftLogger(output));
             client.SetRetryCount(2);
@@ -143,7 +143,7 @@ namespace SwiftClient.Test
             }
         }
 
-        public async Task Authenticate(SwiftClient client)
+        public async Task Authenticate(Client client)
         {
             // auth
             var rsp = await client.Authenticate();
@@ -160,7 +160,7 @@ namespace SwiftClient.Test
             }
         }
 
-        public async Task PutContainer(SwiftClient client)
+        public async Task PutContainer(Client client)
         {
             // create
             var createRsp = await client.PutContainer(containerId);
@@ -184,7 +184,7 @@ namespace SwiftClient.Test
             }
         }
 
-        public async Task PutObject(SwiftClient client)
+        public async Task PutObject(Client client)
         {
             // generate random byte array
             RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
@@ -217,7 +217,7 @@ namespace SwiftClient.Test
             }
         }
 
-        public async Task PutChunkedObject(SwiftClient client)
+        public async Task PutChunkedObject(Client client)
         {
             var tasks = new List<Task>();
 
@@ -267,7 +267,7 @@ namespace SwiftClient.Test
             }
         }
 
-        public async Task GetAccount(SwiftClient client)
+        public async Task GetAccount(Client client)
         {
             var resp = await client.GetAccount();
 
@@ -289,7 +289,7 @@ namespace SwiftClient.Test
             }
         }
 
-        public async Task GetContainer(SwiftClient client)
+        public async Task GetContainer(Client client)
         {
             var resp = await client.GetContainer(containerId);
 

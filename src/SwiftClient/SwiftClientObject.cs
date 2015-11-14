@@ -9,7 +9,7 @@ using System.Net;
 
 namespace SwiftClient
 {
-    public partial class SwiftClient : ISwiftClient, IDisposable
+    public partial class Client : ISwiftClient, IDisposable
     {
         public Task<SwiftResponse> HeadObject(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {

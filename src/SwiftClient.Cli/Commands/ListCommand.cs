@@ -7,7 +7,7 @@ namespace SwiftClient.Cli
 {
     public static class ListCommand
     {
-        public static int Run(ListOptions options, SwiftClient client)
+        public static int Run(ListOptions options, Client client)
         {
             if (string.IsNullOrEmpty(options.Container))
             {

@@ -2,7 +2,7 @@
 
 namespace SwiftClient
 {
-    public partial class SwiftClient : ISwiftClient, IDisposable
+    public partial class Client : ISwiftClient, IDisposable
     {
 
         /// <summary>
@@ -10,7 +10,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="credentials"></param>
         /// <returns></returns>
-        public SwiftClient WithCredentials(SwiftCredentials credentials)
+        public Client WithCredentials(SwiftCredentials credentials)
         {
             if (_manager == null)
             {
@@ -31,7 +31,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public SwiftClient SetLogger(ISwiftLogger logger)
+        public Client SetLogger(ISwiftLogger logger)
         {
             _logger = logger;
             _manager.SetLogger(logger);
@@ -44,7 +44,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="retryCount">Default value 1</param>
         /// <returns></returns>
-        public SwiftClient SetRetryCount(int retryCount)
+        public Client SetRetryCount(int retryCount)
         {
             _manager.SetRetryCount(retryCount);
 
@@ -56,7 +56,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="retryPerEndpointCount">Default value 1</param>
         /// <returns></returns>
-        public SwiftClient SetRetryPerEndpointCount(int retryPerEndpointCount)
+        public Client SetRetryPerEndpointCount(int retryPerEndpointCount)
         {
             _manager.SetRetryPerEndpointCount(retryPerEndpointCount);
 

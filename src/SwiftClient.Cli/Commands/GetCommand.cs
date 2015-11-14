@@ -6,7 +6,7 @@ namespace SwiftClient.Cli
 {
     public static class GetCommand
     {
-        public static int Run(GetOptions options, SwiftClient client)
+        public static int Run(GetOptions options, Client client)
         {
             int bufferSize = Convert.ToInt32(ByteSize.FromMegabytes(options.BufferSize).Bytes);
             var headObject = client.HeadObject(options.Container, options.Object).Result;

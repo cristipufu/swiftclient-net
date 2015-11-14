@@ -10,7 +10,7 @@
     "CommandLineParser": "2.0.275-beta",
     "Humanizer": "1.37.7",
     "Newtonsoft.Json": "7.0.1",
-    "SwiftClient": "1.2.0-b-*"
+    "SwiftClient": "1.2.0-rc-*"
   },
 
   "commands": {

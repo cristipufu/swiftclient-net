@@ -8,9 +8,9 @@ using System.Text;
 
 namespace SwiftClient
 {
-    public static class SwiftClientExtensions
+    public static class ClientExtensions
     {
-        public static async Task<SwiftBaseResponse> PutLargeObject(this SwiftClient client, string containerId, string objectId, Stream stream, Action<long, long> progress = null, long bufferSize = 1000000)
+        public static async Task<SwiftBaseResponse> PutLargeObject(this Client client, string containerId, string objectId, Stream stream, Action<long, long> progress = null, long bufferSize = 1000000)
         {
             SwiftBaseResponse response = null;
             byte[] buffer = new byte[bufferSize];
@@ -81,7 +81,7 @@ namespace SwiftClient
             return await client.DeleteContainerWithContents(containerTemp);
         }
 
-        public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this SwiftClient client, string containerId, int limit = 1000)
+        public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this Client client, string containerId, int limit = 1000)
         {
             // delete all container objects
             var deleteRsp = await client.DeleteContainerContents(containerId, limit);
@@ -95,7 +95,7 @@ namespace SwiftClient
             return deleteRsp;
         }
 
-        public static async Task<SwiftBaseResponse> DeleteContainerContents(this SwiftClient client, string containerId, int limit = 1000)
+        public static async Task<SwiftBaseResponse> DeleteContainerContents(this Client client, string containerId, int limit = 1000)
         {
             var limitHeaderKey = "limit";
             var markerHeaderKey = "marker";

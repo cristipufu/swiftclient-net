@@ -13,7 +13,7 @@ namespace SwiftClient.Cli
 {
     public class Program
     {
-        SwiftClient client = null;
+        Client client = null;
 
         public async Task Main(string[] args)
         {

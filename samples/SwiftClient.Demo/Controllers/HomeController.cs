@@ -17,13 +17,13 @@ namespace SwiftClient.Demo.Controllers
         string metaContentType = "Contenttype";
 
         SwiftCredentials Credentials;
-        SwiftClient Client;
+        Client Client;
 
         public HomeController(IOptions<SwiftCredentials> credentials, IMemoryCache cache)
         {
             Credentials = credentials.Value;
 
-            Client = new SwiftClient(new SwiftAuthManagerWithCache(Credentials, cache));
+            Client = new Client(new SwiftAuthManagerWithCache(Credentials, cache));
 
             Client.SetRetryCount(2)
                   .SetLogger(new SwiftLogger());

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace SwiftClient
 {
-    public partial class SwiftClient : ISwiftClient, IDisposable
+    public partial class Client : ISwiftClient, IDisposable
     {
 
         public Task<SwiftAccountResponse> HeadAccount()

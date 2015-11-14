@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace SwiftClient
 {
-    public partial class SwiftClient : ISwiftClient, IDisposable
+    public partial class Client : ISwiftClient, IDisposable
     {
 
         public Task<SwiftContainerResponse> HeadContainer(string containerId, Dictionary<string, string> headers = null)

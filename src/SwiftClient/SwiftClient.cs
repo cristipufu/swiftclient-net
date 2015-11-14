@@ -7,22 +7,22 @@ using SwiftClient.Extensions;
 
 namespace SwiftClient
 {
-    public partial class SwiftClient : ISwiftClient, IDisposable
+    public partial class Client : ISwiftClient, IDisposable
     {
         protected ISwiftLogger _logger;
         protected SwiftRetryManager _manager;
         protected HttpClient _client = new HttpClient();
 
-        public SwiftClient() { }
+        public Client() { }
 
-        public SwiftClient(SwiftCredentials credentials) : this(new SwiftAuthManager(credentials)) { }
+        public Client(SwiftCredentials credentials) : this(new SwiftAuthManager(credentials)) { }
 
-        public SwiftClient(SwiftCredentials credentials, ISwiftLogger logger) : this(credentials)
+        public Client(SwiftCredentials credentials, ISwiftLogger logger) : this(credentials)
         {
             SetLogger(logger);
         }
 
-        public SwiftClient(ISwiftAuthManager authManager)
+        public Client(ISwiftAuthManager authManager)
         {
             if (authManager.Authenticate == null)
             {
@@ -32,7 +32,7 @@ namespace SwiftClient
             _manager = new SwiftRetryManager(authManager);
         }
 
-        public SwiftClient(ISwiftAuthManager authManager, ISwiftLogger logger) : this(authManager)
+        public Client(ISwiftAuthManager authManager, ISwiftLogger logger) : this(authManager)
         {
             SetLogger(logger);
         }

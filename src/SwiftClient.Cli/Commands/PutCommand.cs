@@ -10,7 +10,7 @@ namespace SwiftClient.Cli
 {
     public static class PutCommand
     {
-        public static int Run(PutOptions options, SwiftClient client)
+        public static int Run(PutOptions options, Client client)
         {
             if (!string.IsNullOrEmpty(options.File))
             {
@@ -32,7 +32,7 @@ namespace SwiftClient.Cli
             }
         }
 
-        public static int UploadFile(PutOptions options, SwiftClient client, bool showProgress = true)
+        public static int UploadFile(PutOptions options, Client client, bool showProgress = true)
         {
             var stopwatch = Stopwatch.StartNew();
             long bufferSize = Convert.ToInt64(ByteSize.FromMegabytes(options.BufferSize).Bytes);
@@ -81,7 +81,7 @@ namespace SwiftClient.Cli
             return 0;
         }
 
-        public static int UploadDirectory(PutOptions options, SwiftClient client)
+        public static int UploadDirectory(PutOptions options, Client client)
         {
             var stopwatch = Stopwatch.StartNew();
 

@@ -7,7 +7,7 @@ namespace SwiftClient.Cli
 {
     public static class StatsCommand
     {
-        public static int Run(StatsOptions options, SwiftClient client)
+        public static int Run(StatsOptions options, Client client)
         {
                 var accountData = client.GetAccount().Result;
                 if (accountData.IsSuccess)

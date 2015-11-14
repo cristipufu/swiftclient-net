@@ -8,7 +8,7 @@ namespace SwiftClient.Cli
 {
     public static class DeleteCommand
     {
-        public static int Run(DeleteOptions options, SwiftClient client)
+        public static int Run(DeleteOptions options, Client client)
         {
             if (string.IsNullOrEmpty(options.Object))
             {
