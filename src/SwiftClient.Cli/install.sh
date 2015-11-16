@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+if hash unzip 2>/dev/null; then
+echo "unzip detected"
+else
+	sudo apt-get install unzip curl
+fi
+
 if hash dnx 2>/dev/null; then
-echo "DNX detected, skyping prerequisites"
+echo "DNX detected, skipping prerequisites"
 else
 	#install Mono
 	sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
@@ -9,7 +15,6 @@ else
 	sudo apt-get update
 
 	# install DNVM
-	sudo apt-get install unzip curl
 	curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | DNX_BRANCH=dev sh && source ~/.dnx/dnvm/dnvm.sh
 
 	# install DNX for Mono
@@ -30,7 +35,7 @@ else
 fi
 
 curl -sS $CLI_SOURCE > package.zip || {
-    echo >&2 "Failed to download '$DNVM_SOURCE'.."
+    echo >&2 "Failed to download '$CLI_SOURCE'.."
     return 1
 }
 

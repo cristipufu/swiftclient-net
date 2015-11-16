@@ -25,5 +25,8 @@ namespace SwiftClient.Cli
 
         [Option('p', "parallel", Required = false, Default = 4, HelpText = "max degree of parallelism, default is 4")]
         public int Parallel { get; set; }
+
+        [Option('l', "lower", Required = false, Default = false, HelpText = "apply ToLowerInvariant on container and object names")]
+        public bool ToLower { get; set; }
     }
 }
