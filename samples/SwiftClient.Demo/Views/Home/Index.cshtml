@@ -21,40 +21,52 @@
 
 <div id="tree" data-tree="@JsonConvert.SerializeObject(Model.Tree)"></div>
 
-@*@if (Model.Objects != null)
-{
-    <div>
-        @if (Model.Objects.Any())
-        {
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Bytes</th>
-                        <th>Content Type</th>
-                        <th>Last Modified</th>
-                        <th>Hash</th>
-                    </tr>
-                </thead>
-                @foreach(var obj in Model.Objects)
-                {
-                    <tr>
-                        <td> @obj.Object </td>
-                        <td> @obj.Bytes </td>
-                        <td> @obj.ContentType </td>
-                        <td> @obj.LastModified </td>
-                        <td> @obj.Hash </td>
-                        <td> <a href="home/downloadfile?fileId=@obj.Object" id="downloadFile">Download</a> </td>
-                    </tr>
-                }
-            </table>
-        }
-    </div>
-}*@
-
 @*<div>
-    <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" preload="none" poster="~/images/cinema.png" data-error="~/images/default-video-thumb.png">
-        <source src="/home/playvideo" type='video/mp4'>
-        <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
-    </video>
-</div>*@
+        <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" preload="none" poster="~/images/cinema.png" data-error="~/images/default-video-thumb.png">
+            <source src="/home/playvideo" type='video/mp4'>
+            <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+        </video>
+    </div>*@
+
+<script type="text/html" id="tree-branch-template">
+    {{#Nodes}}
+    <li class="list-group-item">
+        {{#IsFile}}
+        <span class="glyphicon glyphicon-file"></span>
+        {{/IsFile}}
+        {{^IsFile}}
+        <span class="glyphicon glyphicon-plus pull-right tree-toogle js-treeToggle"></span>
+        <span class="glyphicon glyphicon-folder-open"></span>
+        {{/IsFile}}
+        <span>{{Text}}</span>
+        <ul class="list-group" style="display: none;">
+            {{>tree-branch-template}}
+        </ul>
+        {{#IsFile}}
+        <div class="btn-group btn-group-sm pull-right" role="group">
+            <a href="home/downloadfile?objectId={{ObjectId}}&containerId={{ContainerId}}" class="btn btn-primary js-downloadBtn">
+                <span class="glyphicon glyphicon-download"></span> Download
+            </a>
+        </div>
+        <div class="clearfix"></div>
+        {{/IsFile}}
+    </li>
+    {{/Nodes}}
+</script>
+
+<script type="text/html" id="tree-template">
+    <ul class="list-group">
+        {{#Nodes}}
+        <li class="list-group-item">
+            {{#Nodes}}
+            <span class="glyphicon glyphicon-plus pull-right tree-toogle js-treeToggle"></span>
+            {{/Nodes}}
+            <span class="glyphicon glyphicon-folder-open"></span>
+            <span>{{Text}}</span>
+            <ul class="list-group" style="display: none;">
+                {{>tree-branch-template}}
+            </ul>
+        </li>
+        {{/Nodes}}
+    </ul>
+</script>

@@ -43,7 +43,7 @@ namespace SwiftClient.Demo.Controllers
 
                 await Client.PutContainer(containerTempId);
 
-                viewModel.Tree = new List<TreeViewModel> { await GetTree() };
+                viewModel.Tree = await GetTree();
             }
             else
             {
@@ -163,45 +163,51 @@ namespace SwiftClient.Demo.Controllers
 
             if (accountData.IsSuccess)
             {
-                tree.text = Credentials.Username;
+                tree.Text = Credentials.Username;
 
                 if (accountData.Containers != null)
                 {
-                    tree.nodes = new List<TreeViewModel>();
+                    tree.Nodes = new List<TreeViewModel>();
+
+                    var tasks = new List<Task<TreeViewModel>>();
 
                     foreach (var container in accountData.Containers)
                     {
-                        tree.nodes.Add(new TreeViewModel
-                        {
-                            text = container.Container,
-                            nodes = await GetContainerObjects(container.Container)
-                        });
+                        tasks.Add(GetContainerBranch(container.Container));
                     }
 
+                    await Task.WhenAll(tasks).ContinueWith((rsp) =>
+                    {
+                        tree.Nodes.AddRange(rsp.Result);
+                    });
                 }
             }
 
             return tree;
         }
 
-        private async Task<List<TreeViewModel>> GetContainerObjects(string containerId)
+        private async Task<TreeViewModel> GetContainerBranch(string containerId)
         {
             var containerData = await Client.GetContainer(containerId);
 
-            List<TreeViewModel> result = null;
+            TreeViewModel result = new TreeViewModel
+            {
+                Text = containerId,
+                ContainerId = containerId
+            };
 
             if (containerData.IsSuccess)
             {
                 if (containerData.Objects != null && containerData.ObjectsCount > 0)
                 {
-                    result = GetObjectNodes(containerId, "", containerData.Objects.Select(x => x.Object).ToList()).ToList();
+                    result.Nodes = GetObjectBranch(containerId, "", containerData.Objects.Select(x => x.Object).ToList()).ToList();
                 }
             }
 
             return result;
         }
 
-        private List<TreeViewModel> GetObjectNodes(string containerId, string prefixObj, List<string> objectIds)
+        private List<TreeViewModel> GetObjectBranch(string containerId, string prefixObj, List<string> objectIds)
         {
             var prefixes = objectIds.Select(x => x.Split('\\')[0]).Distinct().ToList();
 
@@ -217,14 +223,16 @@ namespace SwiftClient.Demo.Controllers
 
                     var tree = new TreeViewModel
                     {
-                        objectId = newPrefix,
-                        containerId = containerId,
-                        text = prefix
+                        ObjectId = newPrefix,
+                        ContainerId = containerId,
+                        Text = prefix
                     };
 
-                    var prefixedObjs = objectIds.Where(x => x.StartsWith(prefix + "\\")).Select(x => x.Split('\\')[1]).ToList();
+                    var prefixedObjs = objectIds.Where(x => x.StartsWith(prefix + "\\")).Select(x => x.Split(new[] { '\\' }, 2)[1]).ToList();
 
-                    tree.nodes = GetObjectNodes(containerId, newPrefix, prefixedObjs);
+                    tree.Nodes = GetObjectBranch(containerId, newPrefix, prefixedObjs);
+
+                    if (tree.Nodes == null) { tree.IsFile = true; }
 
                     result.Add(tree);
                 }

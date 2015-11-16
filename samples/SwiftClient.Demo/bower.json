@@ -3,6 +3,8 @@
   "private": true,
   "dependencies": {
     "video-js": "5.1.0",
+    "jquery-Mustache": "0.2.7",
+    "mustache.js": "2.2.0",
     "bootstrap": "3.3.5",
     "hammer.js": "2.0.4",
     "jquery": "2.1.4",

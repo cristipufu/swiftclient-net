@@ -1,5 +1,4 @@
 ﻿
-
 var ctrl = function () {
     this.initFileUpload();
     this.initTree();
@@ -7,7 +6,13 @@ var ctrl = function () {
 };
 
 ctrl.prototype.initTree = function () {
-    $('#tree').append(this.buildTree(this.getTreeData(), 0));
+    $.Mustache.addFromDom();
+
+    var treeData = this.getTreeData();
+    var $html = $.Mustache.render('tree-template', treeData);
+
+    $('#tree').append($html);
+
     $('#tree').on('click', '.js-treeToggle', function (e) {
         e.preventDefault();
         var $target = $(e.currentTarget),
@@ -21,35 +26,6 @@ ctrl.prototype.initTree = function () {
             $target.addClass('glyphicon-minus').removeClass('glyphicon-plus');
         }
     });
-};
-
-ctrl.prototype.buildTree = function (nodes, depth) {
-    var $list = $('<ul class="list-group"></ul>');
-    depth++;
-    for (var i = 0; i < nodes.length; i++) {
-        var $li = $('<li class="list-group-item"></li>');
-        $li.append('<span>' + nodes[i].text + '</span>');
-        if (nodes[i].nodes && nodes[i].nodes.length > 0) {
-            var newDepth = depth;
-            var $node = this.buildTree(nodes[i].nodes, newDepth);
-            if (depth < 2){
-                $li.prepend($('<span class="glyphicon glyphicon-minus pull-right tree-toogle js-treeToggle"></span>'))
-            } else {
-                $node.hide();
-                $li.prepend($('<span class="glyphicon glyphicon-plus pull-right tree-toogle js-treeToggle"></span>'))
-            }
-            $li.append($node);
-            $li.prepend('<span class="glyphicon glyphicon-folder-open"></span>');
-        } else if (depth > 2) { // leaf
-            $li.prepend('<span class="glyphicon glyphicon-file"></span>');
-            $li.append('<div class="btn-group btn-group-sm pull-right" role="group"><a href="home/downloadfile?objectId=' + nodes[i].objectId + '&containerId=' + nodes[i].containerId + '" class="btn btn-primary js-downloadBtn"><span class="glyphicon glyphicon-download"></span> Download</a></div><div class="clearfix"></div>');
-        } else {
-            $li.prepend('<span class="glyphicon glyphicon-folder-open"></span>');
-        }
-        $list.append($li);
-    }
-
-    return $list;
 };
 
 ctrl.prototype.getTreeData = function () {
@@ -86,7 +62,6 @@ ctrl.prototype.getFormData = function () {
 
 ctrl.prototype.fileUploadDone = function (e, data) {
     if (data.result.Success) {
-
         $.ajax({
             url: 'home/uploaddone',
             data: {
@@ -99,7 +74,6 @@ ctrl.prototype.fileUploadDone = function (e, data) {
                 console.log(response);
             }
         })
-
     }
 
     this.resetIndex();

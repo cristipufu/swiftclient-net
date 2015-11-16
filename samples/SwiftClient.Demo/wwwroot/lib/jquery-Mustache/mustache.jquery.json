@@ -1,0 +1,34 @@
+{
+    "name": "mustache",
+    "version": "0.2.7",
+    "title": "jQuery Mustache",
+    "author": {
+        "name": "Jonny Reeves",
+        "url": "http://jonnyreeves.co.uk/"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/jonnyreeves/jquery-Mustache/blob/master/MIT-LICENSE.txt"
+        }
+    ],
+    "dependencies": {
+        "jquery": ">=1.5",
+        "mustache": ">=0.4"
+    },
+    "description": "Mustache templating for jQuery",
+    "keywords": [
+        "mustache",
+        "template",
+        "templating"
+    ],
+	"docs": "https://github.com/jonnyreeves/jquery-Mustache/wiki",
+	"bugs": "https://github.com/jonnyreeves/jquery-Mustache/issues",
+    "homepage": "https://github.com/jonnyreeves/jquery-Mustache",
+    "maintainers": [
+        {
+            "name": "Jonny Reeves",
+            "url": "https://github.com/jonnyreeves"
+        }
+    ]
+}

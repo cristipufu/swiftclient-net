@@ -60,6 +60,8 @@
             <script src="~/lib/iframe-transport/jquery.iframe-transport.js" asp-append-version="true"></script>
             <script src="~/lib/jquery-file-upload/jquery.fileupload.js" asp-append-version="true"></script>
             <script src="~/lib/video-js/dist/video.js" asp-append-version="true"></script>
+            <script src="~/lib/mustache.js/mustache.min.js" asp-append-version="true"></script>
+            <script src="~/lib/jquery-Mustache/jquery.mustache.js" asp-append-version="true"></script>
             <script src="~/js/site.js" asp-append-version="true"></script>
         </environment>
         <environment names="Staging,Production">
@@ -82,6 +84,8 @@
                     asp-fallback-src="~/lib/video-js/dist/video.js"
                     asp-fallback-test="window.videojs">
             </script>
+            <script src="~/lib/mustache.js/mustache.min.js" asp-append-version="true"></script>
+            <script src="~/lib/jquery-Mustache/jquery.mustache.js" asp-append-version="true"></script>
             <script src="~/js/site.js" asp-append-version="true"></script>
         </environment>
         @RenderSection("scripts", required: false)

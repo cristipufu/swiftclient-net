@@ -5,20 +5,22 @@ namespace SwiftClient.Demo
 {
     public class PageViewModel
     {
-        public List<TreeViewModel> Tree { get; set; }
+        public TreeViewModel Tree { get; set; }
 
         public string Message { get; set; }
     }
 
     public class TreeViewModel
     {
-        public string text { get; set; }
+        public string Text { get; set; }
 
-        public string containerId { get; set; }
+        public string ContainerId { get; set; }
 
-        public string objectId { get; set; }
+        public string ObjectId { get; set; }
 
-        public List<TreeViewModel> nodes { get; set; }
+        public bool IsFile { get; set; }
+
+        public List<TreeViewModel> Nodes { get; set; }
     }
 
 }

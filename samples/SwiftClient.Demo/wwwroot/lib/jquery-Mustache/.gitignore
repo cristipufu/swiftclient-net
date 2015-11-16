@@ -1,0 +1,10 @@
+# IDE junk
+.settings
+.project
+.idea
+
+# OS Junk
+.DS_Store
+
+# Build artifactos
+dist/
