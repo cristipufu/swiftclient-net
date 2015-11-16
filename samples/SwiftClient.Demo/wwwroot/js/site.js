@@ -28,22 +28,23 @@ ctrl.prototype.buildTree = function (nodes, depth) {
     depth++;
     for (var i = 0; i < nodes.length; i++) {
         var $li = $('<li class="list-group-item"></li>');
-        $li.append('<span class="glyphicon glyphicon-file"></span><span class="glyphicon glyphicon-folder-open"></span> <span>' + nodes[i].text + '</span>');
+        $li.append('<span>' + nodes[i].text + '</span>');
         if (nodes[i].nodes && nodes[i].nodes.length > 0) {
-            var $node = this.buildTree(nodes[i].nodes, depth);
+            var newDepth = depth;
+            var $node = this.buildTree(nodes[i].nodes, newDepth);
             if (depth < 2){
                 $li.prepend($('<span class="glyphicon glyphicon-minus pull-right tree-toogle js-treeToggle"></span>'))
             } else {
                 $node.hide();
                 $li.prepend($('<span class="glyphicon glyphicon-plus pull-right tree-toogle js-treeToggle"></span>'))
             }
-            $li.append($node)
-        } else if (depth > 2) {
-            
-            $li.append('<div class="btn-group btn-group-sm pull-right" role="group"><a href="#" class="btn btn-info js-playVideoBtn"><span class="glyphicon glyphicon-play"></span> Play</a> <a href="#" class="btn btn-primary js-downloadBtn"><span class="glyphicon glyphicon-download"></span> Download</a> <a href="#" class="btn btn-danger js-deleteBtn"><span class="glyphicon glyphicon-trash"></span> Delete</a></div><div class="clearfix"></div>');
-            
-            
-
+            $li.append($node);
+            $li.prepend('<span class="glyphicon glyphicon-folder-open"></span>');
+        } else if (depth > 2) { // leaf
+            $li.prepend('<span class="glyphicon glyphicon-file"></span>');
+            $li.append('<div class="btn-group btn-group-sm pull-right" role="group"><a href="home/downloadfile?objectId=' + nodes[i].objectId + '&containerId=' + nodes[i].containerId + '" class="btn btn-primary js-downloadBtn"><span class="glyphicon glyphicon-download"></span> Download</a></div><div class="clearfix"></div>');
+        } else {
+            $li.prepend('<span class="glyphicon glyphicon-folder-open"></span>');
         }
         $list.append($li);
     }

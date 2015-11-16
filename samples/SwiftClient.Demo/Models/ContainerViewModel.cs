@@ -14,6 +14,10 @@ namespace SwiftClient.Demo
     {
         public string text { get; set; }
 
+        public string containerId { get; set; }
+
+        public string objectId { get; set; }
+
         public List<TreeViewModel> nodes { get; set; }
     }
 

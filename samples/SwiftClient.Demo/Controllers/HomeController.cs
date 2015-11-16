@@ -11,7 +11,7 @@ namespace SwiftClient.Demo.Controllers
     public class HomeController : Controller
     {
         string containerTempId = "demotempcontainer";
-        string containerId = "democontainer";
+        string containerDemoId = "democontainer";
 
         string metaFileName = "Filename";
         string metaContentType = "Contenttype";
@@ -39,7 +39,7 @@ namespace SwiftClient.Demo.Controllers
             {
                 viewModel.Message = $"Connected on proxy node: {authData.StorageUrl} with authentication token: {authData.AuthToken}";
 
-                await Client.PutContainer(containerId);
+                await Client.PutContainer(containerDemoId);
 
                 await Client.PutContainer(containerTempId);
 
@@ -88,14 +88,14 @@ namespace SwiftClient.Demo.Controllers
             await Client.PutManifest(containerTempId, fileName);
 
             // copy chunks to new file and set some meta data info about the file (filename, contentype)
-            await Client.CopyObject(containerTempId, fileName, containerId, fileName, new Dictionary<string, string>
+            await Client.CopyObject(containerTempId, fileName, containerDemoId, fileName, new Dictionary<string, string>
             {
                 { $"X-Object-Meta-{metaFileName}", fileName },
                 { $"X-Object-Meta-{metaContentType}", contentType }
             });
 
             // cleanup temp
-            await Client.DeleteContainerContents(containerId);
+            await Client.DeleteContainerContents(containerTempId);
 
             return new JsonResult(new
             {
@@ -103,9 +103,9 @@ namespace SwiftClient.Demo.Controllers
             });
         }
 
-        public async Task<IActionResult> PlayVideo(string fileId)
+        public async Task<IActionResult> PlayVideo(string containerId, string objectId)
         {
-            var headObject = await Client.HeadObject(containerId, fileId);
+            var headObject = await Client.HeadObject(containerId, objectId);
 
             if (headObject.IsSuccess)
             {
@@ -114,7 +114,7 @@ namespace SwiftClient.Demo.Controllers
 
                 var stream = new BufferedHTTPStream((start, end) =>
                 {
-                    var response = Client.GetObjectRange(containerId, fileId, start, end).Result;
+                    var response = Client.GetObjectRange(containerId, objectId, start, end).Result;
 
                     return response.Stream;
 
@@ -130,9 +130,9 @@ namespace SwiftClient.Demo.Controllers
             return new HttpNotFoundResult();
         }
 
-        public async Task<IActionResult> DownloadFile(string fileId)
+        public async Task<IActionResult> DownloadFile(string containerId, string objectId)
         {
-            var headObject = await Client.HeadObject(containerId, fileId);
+            var headObject = await Client.HeadObject(containerId, objectId);
 
             if (headObject.IsSuccess && headObject.ContentLength > 0)
             {
@@ -143,13 +143,13 @@ namespace SwiftClient.Demo.Controllers
 
                 var stream = new BufferedHTTPStream((start, end) =>
                 {
-                    var response = Client.GetObjectRange(containerId, fileId, start, end).Result;
+                    var response = Client.GetObjectRange(containerId, objectId, start, end).Result;
 
                     return response.Stream;
 
                 }, () => headObject.ContentLength);
 
-                return new FileStreamResult(stream, contentType);
+                return new FileStreamResult(stream, contentType ?? "application/octet-stream");
             }
 
             return new HttpNotFoundResult();
@@ -194,16 +194,16 @@ namespace SwiftClient.Demo.Controllers
             {
                 if (containerData.Objects != null && containerData.ObjectsCount > 0)
                 {
-                    result = GetObjectNodes(containerData.Objects.Select(x => x.Object).ToList()).ToList();
+                    result = GetObjectNodes(containerId, "", containerData.Objects.Select(x => x.Object).ToList()).ToList();
                 }
             }
 
             return result;
         }
 
-        private List<TreeViewModel> GetObjectNodes(List<string> objectIds)
+        private List<TreeViewModel> GetObjectNodes(string containerId, string prefixObj, List<string> objectIds)
         {
-            var prefixes = objectIds.Select(x => x.Split('/')[0]).Distinct().ToList();
+            var prefixes = objectIds.Select(x => x.Split('\\')[0]).Distinct().ToList();
 
             List<TreeViewModel> result = null;
 
@@ -213,14 +213,18 @@ namespace SwiftClient.Demo.Controllers
 
                 foreach (var prefix in prefixes)
                 {
+                    var newPrefix = !string.IsNullOrEmpty(prefixObj) ? prefixObj + "\\" + prefix : prefix;
+
                     var tree = new TreeViewModel
                     {
+                        objectId = newPrefix,
+                        containerId = containerId,
                         text = prefix
                     };
 
-                    var prefixedObjs = objectIds.Where(x => x.StartsWith(prefix + "/")).Select(x => x.Split('/')[1]).ToList();
+                    var prefixedObjs = objectIds.Where(x => x.StartsWith(prefix + "\\")).Select(x => x.Split('\\')[1]).ToList();
 
-                    tree.nodes = GetObjectNodes(prefixedObjs);
+                    tree.nodes = GetObjectNodes(containerId, newPrefix, prefixedObjs);
 
                     result.Add(tree);
                 }

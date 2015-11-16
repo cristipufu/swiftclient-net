@@ -36,9 +36,7 @@ h2 {
     margin-right: 5px;
  }
 
-
 .glyphicon-folder-open {
-    display: none;
     background: #337ab7;
     color: #fff;
     padding: 10px;
@@ -51,13 +49,6 @@ h2 {
     padding: 10px;
     border-radius: 50%;
 }
-
-.tree-toogle ~ .glyphicon-file {
-    display: none;    
-} 
-.tree-toogle ~ .glyphicon-folder-open {
-    display: inline-block;    
-} 
 
 .list-group .list-group-item > .tree-toogle {
    color: #999;
