@@ -54,9 +54,10 @@ namespace SwiftClient.Demo
             }
             else
             {
+                app.UseStatusCodePagesWithReExecute("/Error/Http{0}");
                 // Add Error handling middleware which catches all application specific errors and
                 // send the request to the following path or controller action.
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error/Http500");
             }
 
             // Add the platform handler to the request pipeline.

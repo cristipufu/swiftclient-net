@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SwiftClient.Demo
 {
@@ -28,7 +29,10 @@ namespace SwiftClient.Demo
 
         public void SetAuthData(SwiftAuthData authData)
         {
-            cache.Set(authCacheKey, authData);
+            if (authData != null)
+            {
+                cache.Set(authCacheKey, authData);
+            }
         }
 
         public List<string> GetEndpoints()
@@ -38,7 +42,10 @@ namespace SwiftClient.Demo
 
         public void SetEndpoints(List<string> endpoints)
         {
-            cache.Set(endpointsKey, endpoints);
+            if (endpoints != null && endpoints.Any())
+            {
+                cache.Set(endpointsKey, endpoints);
+            }
         }
     }
 }
