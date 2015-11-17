@@ -105,22 +105,19 @@ public async Task<IActionResult> UploadChunk(int segment)
 	if (Request.Form.Files != null && Request.Form.Files.Count > 0)
 	{
 		var file = Request.Form.Files[0];
-		var fileStream = file.OpenReadStream();
-		var memoryStream = new MemoryStream();
-		var fileName = file.GetFileName();
-
-		await fileStream.CopyToAsync(memoryStream);
-
-		var resp = await client.PutChunkedObject(containerTempId, fileName, memoryStream.ToArray(), segment);
-
-		return new JsonResult(new
+		
+		using (var fileStream = file.OpenReadStream())
 		{
-			ContentType = file.ContentType,
-			FileName = fileName ?? "demofile",
-			Status = resp.StatusCode,
-			Message = resp.Reason,
-			Success = resp.IsSuccess
-		});
+			using (var memoryStream = new MemoryStream())
+			{
+				var fileName = file.GetFileName();
+
+				await fileStream.CopyToAsync(memoryStream);
+
+				// upload file chunk
+				await client.PutChunkedObject(containerTempId, fileName, memoryStream.ToArray(), segment);
+			}
+		}
 	}
 
 	return new JsonResult(new
@@ -132,37 +129,21 @@ public async Task<IActionResult> UploadChunk(int segment)
 public async Task<IActionResult> UploadDone(int segmentsCount, string fileName, string contentType)
 {
 	// use manifest to merge chunks
-	await client.PutManifest(containerTempId, fileName);
+        await Client.PutManifest(containerTempId, fileName);
 
-	// copy chunks to new file and set some meta data info about the file (filename, contentype)
-	await client.CopyObject(containerTempId, fileName, containerId, fileName, new Dictionary<string, string>
-		{
-			{ string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Filename"), fileName },
-			{ string.Format(SwiftHeaderKeys.ObjectMetaFormat, "Contenttype"), contentType }
-		});
+        // copy chunks to new file and set some meta data info about the file (filename, contentype)
+        await Client.CopyObject(containerTempId, fileName, containerDemoId, fileName, new Dictionary<string, string>
+        {
+            { $"X-Object-Meta-{metaFileName}", fileName },
+            { $"X-Object-Meta-{metaContentType}", contentType }
+        });
 
-	// cleanup temp chunks
-	var deleteTasks = new List<Task>();
-
-	for (var i = 0; i <= segmentsCount; i++)
-	{
-		deleteTasks.Add(client.DeleteObjectChunk(containerTempId, fileName, i));
-	}
-
-	// cleanup manifest
-	deleteTasks.Add(client.DeleteObject(containerTempId, fileName));
-
-	// cleanup temp container
-	await Task.WhenAll(deleteTasks);
-
-	return new JsonResult(new
-	{
-		Success = true
-	});
+        // cleanup temp
+        await Client.DeleteContainerContents(containerTempId);
 }
 ```
 
-Download example
+Download example using `BufferedHTTPStream`
 
 ```cs
 public async Task<IActionResult> DownloadFile(string fileId)
