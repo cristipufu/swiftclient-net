@@ -155,6 +155,14 @@ namespace SwiftClient.Demo.Controllers
             return new HttpNotFoundResult();
         }
 
+        public async Task<IActionResult> RefreshTree()
+        {
+            return new JsonResult(new
+            {
+                Data = await GetTree()
+            });
+        }
+
         private async Task<TreeViewModel> GetTree()
         {
             var tree = new TreeViewModel();

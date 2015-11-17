@@ -8,10 +8,7 @@ var ctrl = function () {
 ctrl.prototype.initTree = function () {
     $.Mustache.addFromDom();
 
-    var treeData = this.getTreeData();
-    var $html = $.Mustache.render('tree-template', treeData);
-
-    $('#tree').append($html);
+    this.renderTree($('#tree').data('tree'));
 
     $('#tree').on('click', '.js-treeToggle', function (e) {
         e.preventDefault();
@@ -28,8 +25,24 @@ ctrl.prototype.initTree = function () {
     });
 };
 
-ctrl.prototype.getTreeData = function () {
-    return $('#tree').data('tree');
+ctrl.prototype.renderTree = function (data) {
+    var $html = $.Mustache.render('tree-template', data);
+    $('#tree').html($html);
+};
+
+ctrl.prototype.refreshTree = function () {
+    $.ajax({
+        url: 'home/refreshtree',
+        data: {
+        },
+        dataType: 'json',
+        success: (function (response) {
+            if (response.Data) {
+                this.renderTree(response.Data);
+                $('.js-uploadStatus').html('');
+            }
+        }).bind(this)
+    });
 };
 
 ctrl.prototype.initFileUpload = function () {
@@ -40,6 +53,7 @@ ctrl.prototype.initFileUpload = function () {
         dataType: 'json',
         maxChunkSize: 2000000,
         add: this.onFileAdd.bind(this),
+        progress: this.uploadProgress.bind(this),
         formData: this.getFormData.bind(this),
         done: this.fileUploadDone.bind(this)
     });
@@ -60,6 +74,24 @@ ctrl.prototype.getFormData = function () {
     }]
 };
 
+ctrl.prototype.uploadProgress = function (e, data) {
+    var progress = (data.loaded / data.total * 100).toFixed(2) + '%';
+    $('.js-uploadStatus').html('Uploaded ' + progress + ' (' + this.formatSize(data.loaded) + ' of ' + this.formatSize(data.total) + ')');
+};
+
+ctrl.prototype.formatSize = function (bytes) {
+    if (typeof bytes !== 'number') {
+        return '';
+    }
+    if (bytes >= 1000000000) {
+        return (bytes / 1000000000).toFixed(2) + ' GB';
+    }
+    if (bytes >= 1000000) {
+        return (bytes / 1000000).toFixed(2) + ' MB';
+    }
+    return (bytes / 1000).toFixed(2) + ' KB';
+};
+
 ctrl.prototype.fileUploadDone = function (e, data) {
     if (data.result.Success) {
         $.ajax({
@@ -70,10 +102,11 @@ ctrl.prototype.fileUploadDone = function (e, data) {
                 contentType: data.result.ContentType
             },
             dataType: 'json',
-            success: function (response) {
-                console.log(response);
-            }
-        })
+            success: (function (response) {
+                $('.js-uploadStatus').html('Upload done');
+                this.refreshTree();
+            }).bind(this)
+        });
     }
 
     this.resetIndex();
