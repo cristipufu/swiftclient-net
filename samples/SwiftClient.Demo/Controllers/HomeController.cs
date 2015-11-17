@@ -201,6 +201,11 @@ namespace SwiftClient.Demo.Controllers
                 if (containerData.Objects != null && containerData.ObjectsCount > 0)
                 {
                     result.Nodes = GetObjectBranch(containerId, "", containerData.Objects.Select(x => x.Object).ToList()).ToList();
+
+                    if (result.Nodes != null && result.Nodes.Any())
+                    {
+                        result.HasNodes = true;
+                    }
                 }
             }
 

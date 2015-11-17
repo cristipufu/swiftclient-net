@@ -20,6 +20,8 @@ namespace SwiftClient.Demo
 
         public bool IsFile { get; set; }
 
+        public bool HasNodes { get; set; }
+
         public List<TreeViewModel> Nodes { get; set; }
     }
 
