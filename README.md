@@ -31,53 +31,19 @@ var swiftClient = new SwiftClient()
 .SetLogger(new SwiftLogger());
 ```
 
-You have to supply your own implementation of `SwiftAuthManager` class and provide a caching mechanism for the ***authentication token*** so that each Swift request is not being preceded by an authentication request. It is recommended to use a dedicated cache storage like Redis so multiple instances of your app can reuse the authentication token. In the demo project there is a `SwiftAuthManager` [implementation](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/SwiftAuthManagerWithCache.cs) that uses aspnet5 in memory cache.
+You have to supply your own implementation of `ISwiftAuthManager` class and provide a caching mechanism for the ***authentication token*** so that each Swift request is not being preceded by an authentication request. It is recommended to use a dedicated cache storage like Redis so multiple instances of your app can reuse the authentication token. In the demo project there is a `ISwiftAuthManager` [implementation](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/SwiftAuthManagerWithCache.cs) that uses aspnet5 in memory cache.
 
 ### Running the ASP.NET 5 MVC demo
 
-The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against Swift, do chunked upload for a mp4 file and playing it using the HTML5 `video` tag. 
+The [SwiftClient.Demo](https://github.com/vtfuture/SwiftClient/tree/master/src/SwiftClient.Demo) project is an example of how to authenticate against Swift, do chunked upload for a large file and download it. 
 
-You will need at least one Ubuntu 14.04 box to host OpenStack Swfit proxy and storage. For dev/test environments we provide a docker image with a single Swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/docker-swift) to build and run the Swift container. After you've started the Swift all-in-one container, put your Ubuntu box IP in the `appsettings.json` from the demo project and your good to go.
+You will need at least one Ubuntu 14.04 box to host OpenStack Swift proxy and storage. For dev/test environments we provide a docker image with a single Swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/docker-swift) to build and run the Swift container. After you've started the Swift all-in-one container, put your Ubuntu box IP in the `appsettings.json` from the demo project and your good to go.
 
 If you want to setup Swift for production on a Ubuntu cluster check out the [documentation](https://github.com/vtfuture/SwiftClient/wiki) from our wiki.
 
 ### ASP.NET 5 usage
 
-You can load Swift credentials from an json file in aspnet5 project. Add an `appsettings.json` file in the root your project:
-
-```json
-{
-  "Credentials": {
-    "Username": "test:tester",
-    "Password": "testing",
-    "Endpoints": [
-      "https://192.168.3.31:8080",
-      "https://192.168.3.32:8080"
-    ]
-  }
-}
-```
-Load the settings in `Startup.cs`:
-
-```cs
-public Startup(IHostingEnvironment env, IApplicationEnvironment appEnv)
-{
-	var builder = new ConfigurationBuilder()
-		.SetBasePath(appEnv.ApplicationBasePath)
-		.AddJsonFile("appsettings.json")
-		.AddEnvironmentVariables();
-	Configuration = builder.Build();
-}
-
-public IConfigurationRoot Configuration { get; set; }
-
-public void ConfigureServices(IServiceCollection services)
-{
-	services.AddMvc();
-
-	services.Configure<SwiftCredentials>(Configuration.GetSection("Credentials"));
-}
-```
+You can load Swift credentials from an json file in aspnet5 project. Add an [`appsettings.json`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/appsettings.json) file in the root your project and load the settings in [`Startup.cs`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/Startup.cs):
 
 Using Swift credentials in a controller:
 
@@ -97,7 +63,40 @@ public class HomeController : Controller
 }
 ```
 
-Chunked upload example
+Simple upload/download example for small files
+```cs
+public async Task<IActionResult> UploadFile(IFormFile file)
+{ 
+    using (var fileStream = file.OpenReadStream())
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            await fileStream.CopyToAsync(memoryStream);
+
+            var resp = await Client.PutObject(containerId, fileId, memoryStream);
+
+            return new JsonResult(new
+            {
+                Success = resp.IsSuccess
+            });
+        }
+    }
+}
+
+public async Task<IActionResult> DownloadFile(string fileId)
+{
+    var rsp = await Client.GetObject("containerId", fileId);
+
+    if (rsp.IsSuccess)
+    {
+        return new FileStreamResult(rsp.Stream, "application/octet-stream");
+    }
+
+    return new HttpNotFoundResult();
+}
+```
+
+Chunked upload example for large files
 
 ```cs
 public async Task<IActionResult> UploadChunk(int segment)
@@ -126,7 +125,7 @@ public async Task<IActionResult> UploadChunk(int segment)
 	});
 }
 
-public async Task<IActionResult> UploadDone(int segmentsCount, string fileName, string contentType)
+public async Task<IActionResult> UploadDone(string fileName, string contentType)
 {
 	// use manifest to merge chunks
         await Client.PutManifest(containerTempId, fileName);
@@ -143,7 +142,7 @@ public async Task<IActionResult> UploadDone(int segmentsCount, string fileName, 
 }
 ```
 
-Download example using `BufferedHTTPStream`
+Buffered download example using `BufferedHTTPStream`
 
 ```cs
 public async Task<IActionResult> DownloadFile(string fileId)
