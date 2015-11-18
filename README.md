@@ -43,18 +43,18 @@ If you want to setup Swift for production on a Ubuntu cluster check out the [doc
 
 ### ASP.NET 5 usage
 
-You can load Swift credentials from an json file in aspnet5 project. Add an [`appsettings.json`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/appsettings.json) file in the root your project and load the settings in [`Startup.cs`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/Startup.cs):
+You can load Swift credentials from an json file in aspnet5 project. Add an [`appsettings.json`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/appsettings.json) file in the root your project and load the settings in [`Startup.cs`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/Startup.cs).
 
-Using Swift credentials in a controller:
+Create a new instance of `SwiftClient.Client` using the specified `SwiftCredentials` in your controller:
 
 ```cs
 public class HomeController : Controller
 {
-        SwiftClient client;
+        SwiftClient.Client client;
 
         public HomeController(IOptions<SwiftCredentials> credentials)
         {
-            client = new SwiftClient(credentials.Value);
+            client = new SwiftClient.Client(credentials.Value);
 
             client.SetRetryCount(2)
                   .SetLogger(new SwiftLogger());
@@ -73,7 +73,7 @@ public async Task<IActionResult> UploadFile(IFormFile file)
         {
             await fileStream.CopyToAsync(memoryStream);
 
-            var resp = await Client.PutObject(containerId, fileId, memoryStream);
+            var resp = await client.PutObject(containerId, fileId, memoryStream);
 
             return new JsonResult(new
             {
@@ -85,7 +85,7 @@ public async Task<IActionResult> UploadFile(IFormFile file)
 
 public async Task<IActionResult> DownloadFile(string fileId)
 {
-    var rsp = await Client.GetObject("containerId", fileId);
+    var rsp = await client.GetObject("containerId", fileId);
 
     if (rsp.IsSuccess)
     {
@@ -128,17 +128,17 @@ public async Task<IActionResult> UploadChunk(int segment)
 public async Task<IActionResult> UploadDone(string fileName, string contentType)
 {
 	// use manifest to merge chunks
-        await Client.PutManifest(containerTempId, fileName);
+        await client.PutManifest(containerTempId, fileName);
 
         // copy chunks to new file and set some meta data info about the file (filename, contentype)
-        await Client.CopyObject(containerTempId, fileName, containerDemoId, fileName, new Dictionary<string, string>
+        await client.CopyObject(containerTempId, fileName, containerDemoId, fileName, new Dictionary<string, string>
         {
             { $"X-Object-Meta-{metaFileName}", fileName },
             { $"X-Object-Meta-{metaContentType}", contentType }
         });
 
         // cleanup temp
-        await Client.DeleteContainerContents(containerTempId);
+        await client.DeleteContainerContents(containerTempId);
 }
 ```
 
