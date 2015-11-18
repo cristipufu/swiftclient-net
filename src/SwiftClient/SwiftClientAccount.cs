@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using SwiftClient.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SwiftClient.Extensions;
 
 namespace SwiftClient
 {
@@ -27,21 +26,24 @@ namespace SwiftClient
                     {
                         var result = GetResponse<SwiftAccountResponse>(response);
 
-                        long totalBytes, containersCount, objectsCount;
-
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountBytesUsed), out totalBytes))
+                        if (response.IsSuccessStatusCode)
                         {
-                            result.TotalBytes = totalBytes;
-                        }
+                            long totalBytes, containersCount, objectsCount;
 
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountContainerCount), out containersCount))
-                        {
-                            result.ContainersCount = containersCount;
-                        }
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountBytesUsed), out totalBytes))
+                            {
+                                result.TotalBytes = totalBytes;
+                            }
 
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountObjectCount), out objectsCount))
-                        {
-                            result.ObjectsCount = objectsCount;
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountContainerCount), out containersCount))
+                            {
+                                result.ContainersCount = containersCount;
+                            }
+
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountObjectCount), out objectsCount))
+                            {
+                                result.ObjectsCount = objectsCount;
+                            }
                         }
 
                         return result;
@@ -63,14 +65,7 @@ namespace SwiftClient
                     queryParams = new Dictionary<string, string>();
                 }
 
-                if (!queryParams.ContainsKey("format"))
-                {
-                    queryParams.Add("format", "json");
-                }
-                else
-                {
-                    queryParams["format"] = "json";
-                }
+                queryParams["format"] = "json";
 
                 var url = SwiftUrlBuilder.GetAccountUrl(auth.StorageUrl, queryParams);
 
@@ -82,32 +77,33 @@ namespace SwiftClient
                 {
                     using (var response = await _client.SendAsync(request))
                     {
-                        response.EnsureSuccessStatusCode();
-
                         var result = GetResponse<SwiftAccountResponse>(response);
 
-                        long totalBytes, containersCount, objectsCount;
-
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountBytesUsed), out totalBytes))
+                        if (response.IsSuccessStatusCode)
                         {
-                            result.TotalBytes = totalBytes;
-                        }
+                            long totalBytes, containersCount, objectsCount;
 
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountContainerCount), out containersCount))
-                        {
-                            result.ContainersCount = containersCount;
-                        }
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountBytesUsed), out totalBytes))
+                            {
+                                result.TotalBytes = totalBytes;
+                            }
 
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountObjectCount), out objectsCount))
-                        {
-                            result.ObjectsCount = objectsCount;
-                        }
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountContainerCount), out containersCount))
+                            {
+                                result.ContainersCount = containersCount;
+                            }
 
-                        var info = await response.Content.ReadAsStringAsync();
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.AccountObjectCount), out objectsCount))
+                            {
+                                result.ObjectsCount = objectsCount;
+                            }
 
-                        if (!string.IsNullOrEmpty(info))
-                        {
-                            result.Containers = JsonConvert.DeserializeObject<List<SwiftContainerModel>>(info);
+                            var info = await response.Content.ReadAsStringAsync();
+
+                            if (!string.IsNullOrEmpty(info))
+                            {
+                                result.Containers = JsonConvert.DeserializeObject<List<SwiftContainerModel>>(info);
+                            }
                         }
 
                         return result;

@@ -39,10 +39,6 @@ namespace SwiftClient.Demo.Controllers
             {
                 viewModel.Message = $"Connected on proxy node: {authData.StorageUrl} with authentication token: {authData.AuthToken}";
 
-                await Client.PutContainer(containerDemoId);
-
-                await Client.PutContainer(containerTempId);
-
                 viewModel.Tree = await GetTree();
             }
             else
@@ -58,22 +54,26 @@ namespace SwiftClient.Demo.Controllers
             if (Request.Form.Files != null && Request.Form.Files.Count > 0)
             {
                 var file = Request.Form.Files[0];
-                var fileStream = file.OpenReadStream();
-                var memoryStream = new MemoryStream();
                 var fileName = file.GetFileName();
 
-                await fileStream.CopyToAsync(memoryStream);
-
-                var resp = await Client.PutObjectChunk(containerTempId, fileName, memoryStream.ToArray(), segment);
-
-                return new JsonResult(new
+                using (var fileStream = file.OpenReadStream())
                 {
-                    ContentType = file.ContentType,
-                    FileName = fileName ?? "demofile",
-                    Status = resp.StatusCode,
-                    Message = resp.Reason,
-                    Success = resp.IsSuccess
-                });
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await fileStream.CopyToAsync(memoryStream);
+
+                        var resp = await Client.PutObjectChunk(containerTempId, fileName, memoryStream.ToArray(), segment);
+
+                        return new JsonResult(new
+                        {
+                            ContentType = file.ContentType,
+                            FileName = fileName ?? "demofile",
+                            Status = resp.StatusCode,
+                            Message = resp.Reason,
+                            Success = resp.IsSuccess
+                        });
+                    }
+                }
             }
 
             return new JsonResult(new

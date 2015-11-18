@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using SwiftClient.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
+using SwiftClient.Extensions;
 
 namespace SwiftClient
 {

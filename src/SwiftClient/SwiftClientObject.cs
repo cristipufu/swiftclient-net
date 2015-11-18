@@ -51,9 +51,12 @@ namespace SwiftClient
                     {
                         var result = GetResponse<SwiftResponse>(response);
 
-                        result.Stream = new MemoryStream();
-                        await response.Content.CopyToAsync(result.Stream);
-                        result.Stream.Position = 0;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            result.Stream = new MemoryStream();
+                            await response.Content.CopyToAsync(result.Stream);
+                            result.Stream.Position = 0;
+                        }
 
                         return result;
                     }
@@ -307,9 +310,12 @@ namespace SwiftClient
                     {
                         var result = GetResponse<SwiftResponse>(response);
 
-                        result.Stream = new MemoryStream();
-                        await response.Content.CopyToAsync(result.Stream);
-                        result.Stream.Position = 0;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            result.Stream = new MemoryStream();
+                            await response.Content.CopyToAsync(result.Stream);
+                            result.Stream.Position = 0;
+                        }
 
                         return result;
                     }

@@ -62,6 +62,5 @@ namespace SwiftClient
 
             return this;
         }
-
     }
 }

@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-
-using SwiftClient.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SwiftClient.Extensions;
 
 namespace SwiftClient
 {
     public partial class Client : ISwiftClient, IDisposable
     {
-
         public Task<SwiftContainerResponse> HeadContainer(string containerId, Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
@@ -28,16 +25,19 @@ namespace SwiftClient
                     {
                         var result = GetResponse<SwiftContainerResponse>(response);
 
-                        long totalBytes, objectsCount;
-
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerBytesUsed), out totalBytes))
+                        if (response.IsSuccessStatusCode)
                         {
-                            result.TotalBytes = totalBytes;
-                        }
+                            long totalBytes, objectsCount;
 
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerObjectCount), out objectsCount))
-                        {
-                            result.ObjectsCount = objectsCount;
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerBytesUsed), out totalBytes))
+                            {
+                                result.TotalBytes = totalBytes;
+                            }
+
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerObjectCount), out objectsCount))
+                            {
+                                result.ObjectsCount = objectsCount;
+                            }
                         }
 
                         return result;
@@ -59,14 +59,7 @@ namespace SwiftClient
                     queryParams = new Dictionary<string, string>();
                 }
 
-                if (!queryParams.ContainsKey("format"))
-                {
-                    queryParams.Add("format", "json");
-                }
-                else
-                {
-                    queryParams["format"] = "json";
-                }
+                queryParams["format"] = "json";
 
                 var url = SwiftUrlBuilder.GetContainerUrl(auth.StorageUrl, containerId, queryParams);
 
@@ -78,27 +71,28 @@ namespace SwiftClient
                 {
                     using (var response = await _client.SendAsync(request))
                     {
-                        response.EnsureSuccessStatusCode();
-
                         var result = GetResponse<SwiftContainerResponse>(response);
 
-                        long totalBytes, objectsCount;
-
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerBytesUsed), out totalBytes))
+                        if (response.IsSuccessStatusCode)
                         {
-                            result.TotalBytes = totalBytes;
-                        }
+                            long totalBytes, objectsCount;
 
-                        if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerObjectCount), out objectsCount))
-                        {
-                            result.ObjectsCount = objectsCount;
-                        }
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerBytesUsed), out totalBytes))
+                            {
+                                result.TotalBytes = totalBytes;
+                            }
 
-                        var info = await response.Content.ReadAsStringAsync();
+                            if (long.TryParse(response.GetHeader(SwiftHeaderKeys.ContainerObjectCount), out objectsCount))
+                            {
+                                result.ObjectsCount = objectsCount;
+                            }
 
-                        if (!string.IsNullOrEmpty(info))
-                        {
-                            result.Objects = JsonConvert.DeserializeObject<List<SwiftObjectModel>>(info);
+                            var info = await response.Content.ReadAsStringAsync();
+
+                            if (!string.IsNullOrEmpty(info))
+                            {
+                                result.Objects = JsonConvert.DeserializeObject<List<SwiftObjectModel>>(info);
+                            }
                         }
 
                         return result;
