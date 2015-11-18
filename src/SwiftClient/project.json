@@ -19,7 +19,7 @@
     "dnxcore50": {
       "dependencies": {
         "System.Linq": "4.0.1-beta-23409",
-        "System.Runtime": "4.0.20",
+        "System.Runtime": "4.0.21-beta-23409",
         "System.Net.Requests": "4.0.10-beta-23019"
       }
     }
