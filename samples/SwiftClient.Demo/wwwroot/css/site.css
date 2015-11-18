@@ -67,6 +67,21 @@ h2 {
     cursor: pointer;
 }
 
+.error_page {
+    background: #337ab7;
+    color: #fff;
+    padding: 20px;
+    border-radius: 3px;
+}
+.error_page h1 {
+    margin: 0 0 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #6A9FCC;
+}
+.error_page p {
+    font-size: 17px;
+}
+
 @media (max-width: 991px) {
     .btn-group {
         margin-top: 15px;
