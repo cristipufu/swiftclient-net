@@ -33,10 +33,10 @@ namespace SwiftClient
 
             var success = await retrier.DoAsync(async (endpoint) =>
             {
-                data = await _authManager.Authenticate(credentials.Username, credentials.Password, endpoint);
+                data = await _authManager.Authenticate(credentials.Username, credentials.Password, endpoint).ConfigureAwait(false);
 
                 return data != null;
-            });
+            }).ConfigureAwait(false);
 
             // cache new endpoints order
             _authManager.SetEndpoints(retrier.GetSteps());
@@ -55,7 +55,7 @@ namespace SwiftClient
 
             var isSuccessful = await retrier.DoAsync(async (endpoint) =>
             {
-                var auth = await GetOrSetAuthentication(endpoint);
+                var auth = await GetOrSetAuthentication(endpoint).ConfigureAwait(false);
 
                 if (auth == null)
                 {
@@ -63,7 +63,7 @@ namespace SwiftClient
                     return false;
                 }
 
-                resp = await func(auth);
+                resp = await func(auth).ConfigureAwait(false);
 
                 // authenticate again on same proxy node
                 if (resp.StatusCode == HttpStatusCode.Unauthorized)
@@ -73,9 +73,9 @@ namespace SwiftClient
                         _logger.LogUnauthorizedError(auth.AuthToken, endpoint);
                     }
 
-                    auth = await SetAuthentication(endpoint);
+                    auth = await SetAuthentication(endpoint).ConfigureAwait(false);
 
-                    resp = await func(auth);
+                    resp = await func(auth).ConfigureAwait(false);
                 }
 
                 // try next proxy node
@@ -91,7 +91,7 @@ namespace SwiftClient
 
                 // unknown status code => try next proxy node
                 return false;
-            });
+            }).ConfigureAwait(false);
 
             resp.IsSuccess = isSuccessful;
 
@@ -107,7 +107,7 @@ namespace SwiftClient
 
             if (cached == null)
             {
-                return await SetAuthentication(endpoint);
+                return await SetAuthentication(endpoint).ConfigureAwait(false);
             }
 
             return cached;
@@ -119,7 +119,7 @@ namespace SwiftClient
 
             if (credentials != null)
             {
-                var auth = await _authManager.Authenticate(credentials.Username, credentials.Password, endpoint);
+                var auth = await _authManager.Authenticate(credentials.Username, credentials.Password, endpoint).ConfigureAwait(false);
 
                 if (auth != null)
                 {

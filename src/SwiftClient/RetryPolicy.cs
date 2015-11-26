@@ -45,13 +45,13 @@ namespace SwiftClient
         {
             if (_iRetryGlobal < _nRetryGlobal)
             {
-                var success = await func();
+                var success = await func().ConfigureAwait(false);
 
                 if (success) return true;
 
                 _iRetryGlobal++;
 
-                return await DoAsync(func);
+                return await DoAsync(func).ConfigureAwait(false);
             }
 
             return false;
@@ -141,8 +141,8 @@ namespace SwiftClient
 
                 var success = await retrier.DoAsync(async () =>
                 {
-                    return await func(_steps.FirstOrDefault());
-                });
+                    return await func(_steps.FirstOrDefault()).ConfigureAwait(false);
+                }).ConfigureAwait(false);
 
                 if (success) return true;
 
@@ -157,7 +157,7 @@ namespace SwiftClient
 
                     _iRetryStep++;
 
-                    return await DoAsync(func);
+                    return await DoAsync(func).ConfigureAwait(false);
                 }
 
                 return false;

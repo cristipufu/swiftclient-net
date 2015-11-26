@@ -17,7 +17,7 @@ namespace SwiftClient
             string containerTemp = "tmp_" + Guid.NewGuid().ToString("N");
             int bytesRead, chunk = 0;
 
-            response = await client.PutContainer(containerTemp);
+            response = await client.PutContainer(containerTemp).ConfigureAwait(false);
 
             if (!response.IsSuccess)
             {
@@ -29,7 +29,7 @@ namespace SwiftClient
                 using (MemoryStream tmpStream = new MemoryStream())
                 {
                     tmpStream.Write(buffer, 0, bytesRead);
-                    response = await client.PutObjectChunk(containerTemp, objectId, tmpStream.ToArray(), chunk);
+                    response = await client.PutObjectChunk(containerTemp, objectId, tmpStream.ToArray(), chunk).ConfigureAwait(false);
                 }
 
                 if (progress != null)
@@ -40,7 +40,7 @@ namespace SwiftClient
                 if (!response.IsSuccess)
                 {
                     // cleanup
-                    await client.DeleteContainerWithContents(containerTemp);
+                    await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
 
                     return response;
                 }
@@ -60,40 +60,40 @@ namespace SwiftClient
 #endif
 
             // use manifest to merge chunks
-            response = await client.PutManifest(containerTemp, objectId, integrityHeaders);
+            response = await client.PutManifest(containerTemp, objectId, integrityHeaders).ConfigureAwait(false);
 
             if (!response.IsSuccess)
             {
                 // cleanup
-                await client.DeleteContainerWithContents(containerTemp);
+                await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
 
                 return response;
             }
 
             // copy chunks to new file
-            response = await client.CopyObject(containerTemp, objectId, containerId, objectId, headers);
+            response = await client.CopyObject(containerTemp, objectId, containerId, objectId, headers).ConfigureAwait(false);
 
             if (!response.IsSuccess)
             {
                 // cleanup
-                await client.DeleteContainerWithContents(containerTemp);
+                await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
 
                 return response;
             }
 
             // cleanup temp
-            return await client.DeleteContainerWithContents(containerTemp);
+            return await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
         }
 
         public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this Client client, string containerId, int limit = 1000)
         {
             // delete all container objects
-            var deleteRsp = await client.DeleteContainerContents(containerId, limit);
+            var deleteRsp = await client.DeleteContainerContents(containerId, limit).ConfigureAwait(false);
 
             if (deleteRsp.IsSuccess)
             {
                 //delete container
-                return await client.DeleteContainer(containerId);
+                return await client.DeleteContainer(containerId).ConfigureAwait(false);
             }
 
             return deleteRsp;
@@ -126,7 +126,7 @@ namespace SwiftClient
                 }
 
                 // get objects
-                var infoRsp = await client.GetContainer(containerId, null, queryParams);
+                var infoRsp = await client.GetContainer(containerId, null, queryParams).ConfigureAwait(false);
 
                 // no more objects => break
                 if (infoRsp.ObjectsCount == 0) return infoRsp;
@@ -138,7 +138,7 @@ namespace SwiftClient
                     var count = infoRsp.Objects.Count;
 
                     // delete them
-                    var deleteRsp = await client.DeleteObjects(objectIds);
+                    var deleteRsp = await client.DeleteObjects(objectIds).ConfigureAwait(false);
 
                     if (!deleteRsp.IsSuccess) return deleteRsp;
 

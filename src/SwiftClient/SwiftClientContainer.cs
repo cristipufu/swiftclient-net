@@ -21,7 +21,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         var result = GetResponse<SwiftContainerResponse>(response);
 
@@ -69,7 +69,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         var result = GetResponse<SwiftContainerResponse>(response);
 
@@ -87,7 +87,7 @@ namespace SwiftClient
                                 result.ObjectsCount = objectsCount;
                             }
 
-                            var info = await response.Content.ReadAsStringAsync();
+                            var info = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                             if (!string.IsNullOrEmpty(info))
                             {
@@ -117,7 +117,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         return GetResponse<SwiftResponse>(response);
                     }
@@ -141,7 +141,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         return GetResponse<SwiftResponse>(response);
                     }
@@ -165,7 +165,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         return GetResponse<SwiftResponse>(response);
                     }

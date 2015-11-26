@@ -23,7 +23,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         return GetResponse<SwiftResponse>(response);
                     }
@@ -47,14 +47,14 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         var result = GetResponse<SwiftResponse>(response);
 
                         if (response.IsSuccessStatusCode)
                         {
                             result.Stream = new MemoryStream();
-                            await response.Content.CopyToAsync(result.Stream);
+                            await response.Content.CopyToAsync(result.Stream).ConfigureAwait(false);
                             result.Stream.Position = 0;
                         }
 
@@ -92,7 +92,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         return GetResponse<SwiftResponse>(response);
                     }
@@ -118,14 +118,14 @@ namespace SwiftClient
                 {
                     request.Content = new StreamContent(data);
 
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         var result = GetResponse<SwiftResponse>(response);
 
                         // container not found
                         if (result.StatusCode == HttpStatusCode.NotFound)
                         {
-                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams));
+                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
                         }
 
                         return result;
@@ -152,14 +152,14 @@ namespace SwiftClient
                 {
                     request.Content = new ByteArrayContent(data);
 
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         var result = GetResponse<SwiftResponse>(response);
 
                         // container not found
                         if (result.StatusCode == HttpStatusCode.NotFound)
                         {
-                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams));
+                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
                         }
 
                         return result;
@@ -175,7 +175,7 @@ namespace SwiftClient
         private async Task<SwiftResponse> EnsurePutContainer(string containerId, Func<Task<SwiftResponse>> retryFunc)
         {
             // put container
-            var putContainerRsp = await PutContainer(containerId);
+            var putContainerRsp = await PutContainer(containerId).ConfigureAwait(false);
 
             if (!putContainerRsp.IsSuccess)
             {
@@ -183,7 +183,7 @@ namespace SwiftClient
             }
 
             // retry put object
-            return await retryFunc();
+            return await retryFunc().ConfigureAwait(false);
         }
 
         public Task<SwiftResponse> PutObjectChunk(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
@@ -238,7 +238,7 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         return GetResponse<SwiftResponse>(response);
                     }
@@ -306,14 +306,14 @@ namespace SwiftClient
 
                 try
                 {
-                    using (var response = await _client.SendAsync(request))
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
                         var result = GetResponse<SwiftResponse>(response);
 
                         if (response.IsSuccessStatusCode)
                         {
                             result.Stream = new MemoryStream();
-                            await response.Content.CopyToAsync(result.Stream);
+                            await response.Content.CopyToAsync(result.Stream).ConfigureAwait(false);
                             result.Stream.Position = 0;
                         }
 

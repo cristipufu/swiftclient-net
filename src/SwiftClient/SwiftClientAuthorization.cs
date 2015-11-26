@@ -34,7 +34,7 @@ namespace SwiftClient
 
             try
             {
-                using (var response = await _client.SendAsync(request))
+                using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                 {
                     response.EnsureSuccessStatusCode();
 
