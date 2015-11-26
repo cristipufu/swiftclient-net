@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Net.Http.Headers;
 
 namespace SwiftClient.Demo
 {
@@ -16,6 +16,7 @@ namespace SwiftClient.Demo
         // default buffer size as defined in BufferedStream type
         private const int BufferSize = 0x1000;
         private Stream _videoStream;
+        private string MultipartBoundary = "<q1w2e3r4t5y6u7i8o9p0>";
 
         /// <summary>
         /// Creates a new <see cref="VideoStreamResult"/> instance with
@@ -67,28 +68,43 @@ namespace SwiftClient.Demo
             }
         }
 
-        /// <inheritdoc />
+        private bool IsMultipartRequest(RangeHeaderValue range)
+        {
+            return range != null && range.Ranges != null && range.Ranges.Count > 1;
+        }
+
+        private bool IsRangeRequest(RangeHeaderValue range)
+        {
+            return range != null && range.Ranges != null && range.Ranges.Count > 0;
+        }
+
         protected async Task WriteVideoAsync(HttpResponse response, CancellationToken cancellation)
         {
-            var ranges = response.HttpContext.GetRange();
-
             var length = VideoStream.Length;
 
-            if (ranges.Ranges.Count > 0)
-            {
-                var range = ranges.Ranges.First();
+            var range = response.HttpContext.GetRanges(length);
 
-                response.Headers.Add("Content-Length", (range.To ?? length - range.From).ToString());
-                response.Headers.Add("Content-Range", string.Format("bytes {0}-{1}/{2}", 
-                    range.From, 
-                    range.To.HasValue ? range.To - 1 : null, 
-                    range.To.HasValue ? range.To : length - range.From));
-                response.Headers.Add("Expires", "-1");
-                response.Headers.Add("Cache-Control", "no-cache");
-                response.Headers.Add("Accept-Ranges", "bytes");
+            if (range != null && range.Ranges != null && range.Ranges.Count > 1)
+            {
+                response.ContentType = string.Format("multipart/byteranges; boundary={0}", MultipartBoundary);
+            }
+            else
+            {
+                response.ContentType = ContentType.ToString();
             }
 
-            response.StatusCode = (int)HttpStatusCode.PartialContent;
+            response.Headers.Add("Accept-Ranges", "bytes");
+
+            if (IsRangeRequest(range))
+            {
+                response.StatusCode = (int)HttpStatusCode.PartialContent;
+
+                response.Headers.Add("Content-Range", string.Format("bytes {0}-{1}/{2}",
+                        range.Ranges.First().From,
+                        range.Ranges.First().To,
+                        length));
+
+            }
 
             var outputStream = response.Body;
 
