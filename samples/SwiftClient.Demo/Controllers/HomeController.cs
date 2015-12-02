@@ -5,6 +5,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.OptionsModel;
 using System.Collections.Generic;
 using Microsoft.Framework.Caching.Memory;
+using Microsoft.Net.Http.Headers;
 
 namespace SwiftClient.Demo.Controllers
 {
@@ -122,9 +123,7 @@ namespace SwiftClient.Demo.Controllers
 
                 Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
 
-                return new FileStreamResult(stream, contentType);
-
-                //return new VideoStreamResult(stream, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("video/mp4"));
+                return new VideoStreamResult(stream, new MediaTypeHeaderValue("video/mp4"));
             }
 
             return new HttpNotFoundResult();

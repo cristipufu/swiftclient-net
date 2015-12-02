@@ -16,7 +16,7 @@ namespace SwiftClient.Demo
         // default buffer size as defined in BufferedStream type
         private const int BufferSize = 0x1000;
         private Stream _videoStream;
-        private string MultipartBoundary = "<q1w2e3r4t5y6u7i8o9p0>";
+        private string MultipartBoundary = "<qwe123>";
 
         /// <summary>
         /// Creates a new <see cref="VideoStreamResult"/> instance with
@@ -80,13 +80,16 @@ namespace SwiftClient.Demo
 
         protected async Task WriteVideoAsync(HttpResponse response, CancellationToken cancellation)
         {
+            var bufferingFeature = response.HttpContext.Features.Get<IHttpBufferingFeature>();
+            bufferingFeature?.DisableResponseBuffering();
+
             var length = VideoStream.Length;
 
             var range = response.HttpContext.GetRanges(length);
 
-            if (range != null && range.Ranges != null && range.Ranges.Count > 1)
+            if (IsMultipartRequest(range))
             {
-                response.ContentType = string.Format("multipart/byteranges; boundary={0}", MultipartBoundary);
+                response.ContentType = $"multipart/byteranges; boundary={MultipartBoundary}";
             }
             else
             {
@@ -99,21 +102,82 @@ namespace SwiftClient.Demo
             {
                 response.StatusCode = (int)HttpStatusCode.PartialContent;
 
-                response.Headers.Add("Content-Range", string.Format("bytes {0}-{1}/{2}",
-                        range.Ranges.First().From,
-                        range.Ranges.First().To,
-                        length));
+                if (!IsMultipartRequest(range))
+                {
+                    response.Headers.Add("Content-Range", $"bytes {range.Ranges.First().From}-{range.Ranges.First().To}/{length}");
+                }
 
+                foreach (var rangeValue in range.Ranges)
+                {
+                    if (IsMultipartRequest(range)) // dunno if multipart works
+                    {
+                        await response.WriteAsync($"--{MultipartBoundary}");
+                        await response.WriteAsync(Environment.NewLine);
+                        await response.WriteAsync($"Content-type: {ContentType.MediaType}");
+                        await response.WriteAsync(Environment.NewLine);
+                        await response.WriteAsync($"Content-Range: bytes {range.Ranges.First().From}-{range.Ranges.First().To}/{length}");
+                        await response.WriteAsync(Environment.NewLine);
+                    }
+
+                    await WriteDataToResponseBody(rangeValue, response);
+
+                    if (IsMultipartRequest(range))
+                    {
+                        await response.WriteAsync(Environment.NewLine);
+                    }
+                }
+
+                if (IsMultipartRequest(range))
+                {
+                    await response.WriteAsync($"--{MultipartBoundary}--");
+                    await response.WriteAsync(Environment.NewLine);
+                }
             }
-
-            var outputStream = response.Body;
-
-            using (VideoStream)
+            else
             {
-                var bufferingFeature = response.HttpContext.Features.Get<IHttpBufferingFeature>();
-                bufferingFeature?.DisableResponseBuffering();
+                await VideoStream.CopyToAsync(response.Body);
+            }
+        }
 
-                await VideoStream.CopyToAsync(outputStream, BufferSize, cancellation);
+        private async Task WriteDataToResponseBody(RangeItemHeaderValue rangeValue, HttpResponse response)
+        {
+            var startIndex = rangeValue.From ?? 0;
+            var endIndex = rangeValue.To ?? 0;
+
+            byte[] buffer = new byte[BufferSize];
+            long totalToSend = endIndex - startIndex;
+            int count = 0;
+
+            long bytesRemaining = totalToSend + 1;
+            response.ContentLength = bytesRemaining;
+
+            VideoStream.Seek(startIndex, SeekOrigin.Begin);
+
+            while (bytesRemaining > 0)
+            {
+                try
+                {
+                    if (bytesRemaining <= buffer.Length)
+                        count = VideoStream.Read(buffer, 0, (int)bytesRemaining);
+                    else
+                        count = VideoStream.Read(buffer, 0, buffer.Length);
+
+                    if (count == 0)
+                        return;
+
+                    await response.Body.WriteAsync(buffer, 0, count);
+
+                    bytesRemaining -= count;
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    await response.Body.FlushAsync();
+                    return;
+                }
+                finally
+                {
+                    await response.Body.FlushAsync();
+                }
             }
         }
 
