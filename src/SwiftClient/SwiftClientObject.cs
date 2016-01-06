@@ -47,16 +47,19 @@ namespace SwiftClient
 
                 try
                 {
-                    var response = await _client.SendAsync(request).ConfigureAwait(false);
-
-                    var result = GetResponse<SwiftResponse>(response);
-
-                    if (response.IsSuccessStatusCode)
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
-                        result.Stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                    }
+                        var result = GetResponse<SwiftResponse>(response);
 
-                    return result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            result.Stream = new MemoryStream();
+                            await response.Content.CopyToAsync(result.Stream).ConfigureAwait(false);
+                            result.Stream.Position = 0;
+                        }
+
+                        return result;
+                    }
                 }
                 catch (Exception ex)
                 {
