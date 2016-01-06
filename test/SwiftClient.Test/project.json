@@ -11,7 +11,7 @@
     "Microsoft.Framework.OptionsModel": "1.0.0-beta8",
     "SwiftClient": "1.2.0-rc-*",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-beta6-build191"
+    "xunit.runner.dnx": "2.1.0-rc1-*"
   },
   "commands": {
         "test": "xunit.runner.dnx"
