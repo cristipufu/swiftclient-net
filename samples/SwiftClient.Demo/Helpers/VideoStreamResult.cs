@@ -78,7 +78,7 @@ namespace SwiftClient.Demo
             return range != null && range.Ranges != null && range.Ranges.Count > 0;
         }
 
-        protected async Task WriteVideoAsync(HttpResponse response, CancellationToken cancellation)
+        protected async Task WriteVideoAsync(HttpResponse response)
         {
             var bufferingFeature = response.HttpContext.Features.Get<IHttpBufferingFeature>();
             bufferingFeature?.DisableResponseBuffering();
@@ -181,9 +181,9 @@ namespace SwiftClient.Demo
             }
         }
 
-        protected override Task WriteFileAsync(HttpResponse response, CancellationToken cancellation)
+        protected override Task WriteFileAsync(HttpResponse response)
         {
-            return WriteVideoAsync(response, cancellation);
+            return WriteVideoAsync(response);
         }
     }
 

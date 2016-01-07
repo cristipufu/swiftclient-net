@@ -1,12 +1,12 @@
-﻿using Microsoft.Framework.Configuration;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.OptionsModel;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.OptionsModel;
 
 namespace SwiftClient.Test
 {
     public static class CustomConfigReader
     {
-        public static T Get<T>(IConfiguration section) where T : new()
+        public static T Get<T>(IConfiguration section) where T : class, new()
         {
             var services = new ServiceCollection();
             services.Configure<T>(section);

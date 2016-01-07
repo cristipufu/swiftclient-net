@@ -2,10 +2,10 @@
 using System.IO;
 using System.Linq;
 using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.OptionsModel;
 using System.Collections.Generic;
-using Microsoft.Framework.Caching.Memory;
 using Microsoft.Net.Http.Headers;
+using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace SwiftClient.Demo.Controllers
 {

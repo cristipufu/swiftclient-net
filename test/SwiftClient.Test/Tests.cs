@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.Framework.Configuration;
+using Microsoft.Extensions.Configuration;
 
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Framework.DependencyInjection;
 using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SwiftClient.Test
 {
@@ -201,9 +201,10 @@ namespace SwiftClient.Test
             Assert.True(existsRsp.IsSuccess && existsRsp.ContentLength == maxBufferSize);
 
             // get
-            var getRsp = await client.GetObject(containerId, objectId);
-
-            Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize);
+            using (var getRsp = await client.GetObject(containerId, objectId))
+            {
+                Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize);
+            }
         }
 
         [Fact]
@@ -246,14 +247,16 @@ namespace SwiftClient.Test
             Assert.True(existsRsp.IsSuccess && existsRsp.ContentLength == maxBufferSize * Chunks);
 
             // get object
-            var getRsp = await client.GetObject(containerId, chunkedObjectId);
-
-            Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize * Chunks);
+            using (var getRsp = await client.GetObject(containerId, chunkedObjectId))
+            {
+                Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize * Chunks);
+            }
 
             // get chunk
-            var chunkResp = await client.GetObjectRange(containerId, chunkedObjectId, 0, maxBufferSize - 1);
-
-            Assert.True(chunkResp.IsSuccess && chunkResp.Stream != null && chunkResp.Stream.Length == maxBufferSize);
+            using (var chunkResp = await client.GetObjectRange(containerId, chunkedObjectId, 0, maxBufferSize - 1))
+            {
+                Assert.True(chunkResp.IsSuccess && chunkResp.Stream != null && chunkResp.Stream.Length == maxBufferSize);
+            }
         }
 
         [Fact]

@@ -6,18 +6,19 @@
   "projectUrl": "",
   "licenseUrl": "",
   "dependencies": {
-    "Microsoft.Framework.Configuration.Json": "1.0.0-beta8",
-    "Microsoft.Framework.DependencyInjection": "1.0.0-beta8",
-    "Microsoft.Framework.OptionsModel": "1.0.0-beta8",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
     "SwiftClient": "1.2.0-rc-*",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-rc1-*"
+    "xunit.runner.dnx": "2.1.0-rc1-build204"
+
   },
   "commands": {
         "test": "xunit.runner.dnx"
   },
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": { }
+    "dnx451": {},
+    "dnxcore50": {}
   }
 }
