@@ -158,9 +158,14 @@ public async Task<IActionResult> DownloadFile(string fileId)
 
 		var stream = new BufferedHTTPStream((start, end) =>
 		{
-			var response = client.GetObjectRange(containerId, fileId, start, end).Result;
-
-			return response.Stream;
+			using (var response = Client.GetObjectRange(containerId, objectId, start, end).Result)
+                    	{
+	                        var ms = new MemoryStream();
+	
+	                        response.Stream.CopyTo(ms);
+	
+	                        return ms;
+                    	}
 
 		}, () => headObject.ContentLength);
 
