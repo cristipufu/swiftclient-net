@@ -8,6 +8,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 
 namespace SwiftClient.Test
 {
@@ -203,7 +204,14 @@ namespace SwiftClient.Test
             // get
             using (var getRsp = await client.GetObject(containerId, objectId))
             {
-                Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize);
+                Assert.True(getRsp.IsSuccess && getRsp.Stream != null);
+
+                using (var ms = new MemoryStream())
+                {
+                    await getRsp.Stream.CopyToAsync(ms);
+
+                    Assert.True(ms.Length == maxBufferSize);
+                }
             }
         }
 
@@ -249,13 +257,27 @@ namespace SwiftClient.Test
             // get object
             using (var getRsp = await client.GetObject(containerId, chunkedObjectId))
             {
-                Assert.True(getRsp.IsSuccess && getRsp.Stream != null && getRsp.Stream.Length == maxBufferSize * Chunks);
+                Assert.True(getRsp.IsSuccess && getRsp.Stream != null);
+
+                using (var ms = new MemoryStream())
+                {
+                    await getRsp.Stream.CopyToAsync(ms);
+
+                    Assert.True(ms.Length == maxBufferSize * Chunks);
+                }
             }
 
             // get chunk
             using (var chunkResp = await client.GetObjectRange(containerId, chunkedObjectId, 0, maxBufferSize - 1))
             {
-                Assert.True(chunkResp.IsSuccess && chunkResp.Stream != null && chunkResp.Stream.Length == maxBufferSize);
+                Assert.True(chunkResp.IsSuccess && chunkResp.Stream != null);
+
+                using (var ms = new MemoryStream())
+                {
+                    await chunkResp.Stream.CopyToAsync(ms);
+
+                    Assert.True(ms.Length == maxBufferSize);
+                }
             }
         }
 

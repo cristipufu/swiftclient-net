@@ -13,25 +13,13 @@ namespace SwiftClient.Cli
 
             if (headObject.IsSuccess)
             {
-                var stream = new BufferedHTTPStream((start, end) =>
+                using (var response = client.GetObject(options.Container, options.Object).Result)
                 {
-                    var response = client.GetObjectRange(options.Container, options.Object, start, end).Result;
-
-                    if (!response.IsSuccess)
+                    using (Stream streamToWriteTo = File.OpenWrite(options.File))
                     {
-                        Logger.LogError(response.Reason);
+                        response.Stream.CopyTo(streamToWriteTo, bufferSize);
                     }
-
-                    return response.Stream;
-
-                }, () => headObject.ContentLength);
-
-                using (var fs = File.OpenWrite(options.File))
-                {
-                    stream.CopyTo(fs, bufferSize);
                 }
-
-                stream.Dispose();
 
                 Console.WriteLine($"{options.Container}/{options.Object} downloaded to {options.File} ");
                 return 0;

@@ -7,6 +7,9 @@ namespace SwiftClient
     {
         bool disposed = false;
 
+        /// <summary>
+        /// Reference to network stream
+        /// </summary>
         public Stream Stream { get; set; }
 
         public void Dispose()

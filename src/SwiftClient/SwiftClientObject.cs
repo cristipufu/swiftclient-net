@@ -47,7 +47,7 @@ namespace SwiftClient
 
                 try
                 {
-                    var response = await _client.SendAsync(request).ConfigureAwait(false);
+                    var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
                     var result = GetResponse<SwiftResponse>(response);
 

@@ -115,9 +115,14 @@ namespace SwiftClient.Demo.Controllers
 
                 var stream = new BufferedHTTPStream((start, end) =>
                 {
-                    var response = Client.GetObjectRange(containerId, objectId, start, end).Result;
+                    using (var response = Client.GetObjectRange(containerId, objectId, start, end).Result)
+                    {
+                        var ms = new MemoryStream();
 
-                    return response.Stream;
+                        response.Stream.CopyTo(ms);
+
+                        return ms;
+                    }
 
                 }, () => headObject.ContentLength);
 
@@ -142,9 +147,14 @@ namespace SwiftClient.Demo.Controllers
 
                 var stream = new BufferedHTTPStream((start, end) =>
                 {
-                    var response = Client.GetObjectRange(containerId, objectId, start, end).Result;
+                    using (var response = Client.GetObjectRange(containerId, objectId, start, end).Result)
+                    {
+                        var ms = new MemoryStream();
 
-                    return response.Stream;
+                        response.Stream.CopyTo(ms);
+
+                        return ms;
+                    }
 
                 }, () => headObject.ContentLength);
 
