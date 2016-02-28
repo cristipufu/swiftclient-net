@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Linq;
-using System.Text;
 using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+using SwiftClient.Extensions;
 
 namespace SwiftClient
 {
@@ -101,7 +103,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PutObject(string containerId, string objectId, Stream data, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutObject(string containerId, string objectId, Stream data, Dictionary<string, string> headers = null, Dictionary<string, string> contentHeaders = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -114,6 +116,7 @@ namespace SwiftClient
                 try
                 {
                     request.Content = new StreamContent(data);
+                    request.Content.SetHeaders(contentHeaders);
 
                     using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
@@ -135,7 +138,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PutObject(string containerId, string objectId, byte[] data, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutObject(string containerId, string objectId, byte[] data, Dictionary<string, string> headers = null, Dictionary<string, string> contentHeaders = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -148,6 +151,7 @@ namespace SwiftClient
                 try
                 {
                     request.Content = new ByteArrayContent(data);
+                    request.Content.SetHeaders(contentHeaders);
 
                     using (var response = await _client.SendAsync(request).ConfigureAwait(false))
                     {
@@ -216,7 +220,7 @@ namespace SwiftClient
         }
 
         /// <summary>
-        /// Delete object. 
+        /// Delete object.
         /// If ([filter:slo]) is configured and you want to delete SLO file including segments add {"multipart-manifest", "delete"} to queryParams
         /// </summary>
         /// <param name="containerId"></param>
@@ -249,7 +253,7 @@ namespace SwiftClient
 
         /// <summary>
         /// Delete object chunk.
-        /// Unfortunately no api support for DLO delete ([filter:dlo]). 
+        /// Unfortunately no api support for DLO delete ([filter:dlo]).
         /// Deleting the manifest file won't delete the object segments.
         /// </summary>
         /// <param name="containerId"></param>
@@ -275,7 +279,7 @@ namespace SwiftClient
         /// <summary>
         /// Bulk delete objects (option available for [filter:bulk] in proxy-server.conf)
         /// Object id can be <container_id>, <container_id>/<object_id>
-        /// Example input: 
+        /// Example input:
         /// alpha/one.txt
         /// alpha/two.txt
         /// alpha
