@@ -12,7 +12,7 @@ It can be installed via NuGet from [nuget.org/packages/SwiftClient](https://www.
 ### Usage
 
 The client implements a configurable retry mechanism, so you don't have to worry about the token expiration date or a temporary request failure. 
-It also supports multiple endpoints (Swift proxy address), it will iterate throw each endpoint till it finds one that's available, if the maximum retry count is reached an exception will be thrown.
+It also supports multiple endpoints (Swift proxy address), it will iterate through each endpoint till it finds one that's available, if the maximum retry count is reached an exception will be thrown.
 If you want to log failure events, just pass the client your implementation of the `ISwiftLogger` interface. In the demo project there is a [stdout log example](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Demo/SwiftLogger.cs).
 
 ```cs
