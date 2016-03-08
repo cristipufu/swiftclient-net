@@ -9,7 +9,8 @@ namespace SwiftClient
     /// </summary>
     public class SwiftRetryManager
     {
-        private ISwiftAuthManager _authManager;
+        public ISwiftAuthManager AuthManager;
+
         private ISwiftLogger _logger;
 
         protected int _retryPerEndpointCount = 1;
@@ -17,29 +18,29 @@ namespace SwiftClient
 
         public SwiftRetryManager(ISwiftAuthManager authManager)
         {
-            _authManager = authManager;
+            AuthManager = authManager;
         }
 
         public async Task<SwiftAuthData> Authenticate()
         {
             var retrier = RetryPolicy<string>.Create()
-                .WithSteps(_authManager.GetEndpoints())
+                .WithSteps(AuthManager.GetEndpoints())
                 .WithCount(_retryCount)
                 .WithCountPerStep(_retryPerEndpointCount);
 
             SwiftAuthData data = null;
 
-            var credentials = _authManager.Credentials;
+            var credentials = AuthManager.Credentials;
 
             var success = await retrier.DoAsync(async (endpoint) =>
             {
-                data = await _authManager.Authenticate(credentials.Username, credentials.Password, endpoint).ConfigureAwait(false);
+                data = await AuthManager.Authenticate(credentials.Username, credentials.Password, endpoint).ConfigureAwait(false);
 
                 return data != null;
             }).ConfigureAwait(false);
 
             // cache new endpoints order
-            _authManager.SetEndpoints(retrier.GetSteps());
+            AuthManager.SetEndpoints(retrier.GetSteps());
 
             return data;
         }
@@ -49,7 +50,7 @@ namespace SwiftClient
             T resp = new T();
 
             var retrier = RetryPolicy<string>.Create()
-                .WithSteps(_authManager.GetEndpoints())
+                .WithSteps(AuthManager.GetEndpoints())
                 .WithCount(_retryCount)
                 .WithCountPerStep(_retryPerEndpointCount);
 
@@ -96,14 +97,14 @@ namespace SwiftClient
             resp.IsSuccess = isSuccessful;
 
             // cache new endpoints order
-            _authManager.SetEndpoints(retrier.GetSteps());
+            AuthManager.SetEndpoints(retrier.GetSteps());
 
             return resp;
         }
 
         private async Task<SwiftAuthData> GetOrSetAuthentication(string endpoint)
         {
-            var cached = _authManager.GetAuthData();
+            var cached = AuthManager.GetAuthData();
 
             if (cached == null)
             {
@@ -115,15 +116,15 @@ namespace SwiftClient
 
         private async Task<SwiftAuthData> SetAuthentication(string endpoint)
         {
-            var credentials = _authManager.Credentials;
+            var credentials = AuthManager.Credentials;
 
             if (credentials != null)
             {
-                var auth = await _authManager.Authenticate(credentials.Username, credentials.Password, endpoint).ConfigureAwait(false);
+                var auth = await AuthManager.Authenticate(credentials.Username, credentials.Password, endpoint).ConfigureAwait(false);
 
                 if (auth != null)
                 {
-                    _authManager.SetAuthData(auth);
+                    AuthManager.SetAuthData(auth);
                 }
 
                 return auth;

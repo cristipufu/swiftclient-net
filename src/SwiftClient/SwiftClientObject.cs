@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Text;
 using System.Net;
+using SwiftClient.Extensions;
 
 namespace SwiftClient
 {
@@ -201,6 +202,43 @@ namespace SwiftClient
             headers[SwiftHeaderKeys.ContentLength] = contentLength.ToString();
 
             return PutObject(containerId, objectId, new byte[contentLength], headers, queryParams);
+        }
+
+        public Task<SwiftResponse> PutPseudoDirectory(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        {
+            return AuthorizeAndExecute(async (auth) =>
+            {
+                var url = SwiftUrlBuilder.GetObjectUrl(auth.StorageUrl, containerId, objectId, queryParams);
+
+                var request = new HttpRequestMessage(HttpMethod.Put, url);
+
+                FillRequest(request, auth, headers);
+
+                try
+                {
+                    var data = new byte[0];
+
+                    request.Content = new ByteArrayContent(data);
+                    request.Content.SetHeaders(new Dictionary<string, string> { { SwiftHeaderKeys.ContentType, "application/directory" } });
+
+                    using (var response = await _client.SendAsync(request).ConfigureAwait(false))
+                    {
+                        var result = GetResponse<SwiftResponse>(response);
+
+                        // container not found
+                        if (result.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
+                        }
+
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return GetExceptionResponse<SwiftResponse>(ex, url);
+                }
+            });
         }
 
         public Task<SwiftResponse> CopyObject(string containerFromId, string objectFromId, string containerToId, string objectToId, Dictionary<string, string> headers = null)

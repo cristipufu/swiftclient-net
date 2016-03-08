@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 namespace SwiftClient.Extensions
 {
-    internal static class HttpMessageExtensions
+    internal static class HttpExtensions
     {
         public static void SetHeaders(this HttpRequestMessage request, Dictionary<string, string> headers = null)
         {
@@ -13,6 +13,15 @@ namespace SwiftClient.Extensions
             foreach (var header in headers)
             {
                 request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+        }
+
+        public static void SetHeaders(this HttpContent content, Dictionary<string, string> headers)
+        {
+            if (headers == null) return;
+            foreach (var header in headers)
+            {
+                content.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
         }
 

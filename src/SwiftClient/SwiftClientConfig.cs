@@ -12,7 +12,7 @@ namespace SwiftClient
         /// <returns></returns>
         public Client WithCredentials(SwiftCredentials credentials)
         {
-            if (_manager == null)
+            if (RetryManager == null)
             {
                 var authManager = new SwiftAuthManager(credentials);
 
@@ -20,7 +20,7 @@ namespace SwiftClient
 
                 authManager.Credentials = credentials;
 
-                _manager = new SwiftRetryManager(authManager);
+                RetryManager = new SwiftRetryManager(authManager);
             }
 
             return this;
@@ -34,7 +34,7 @@ namespace SwiftClient
         public Client SetLogger(ISwiftLogger logger)
         {
             _logger = logger;
-            _manager.SetLogger(logger);
+            RetryManager.SetLogger(logger);
 
             return this;
         }
@@ -46,7 +46,7 @@ namespace SwiftClient
         /// <returns></returns>
         public Client SetRetryCount(int retryCount)
         {
-            _manager.SetRetryCount(retryCount);
+            RetryManager.SetRetryCount(retryCount);
 
             return this;
         }
@@ -58,7 +58,7 @@ namespace SwiftClient
         /// <returns></returns>
         public Client SetRetryPerEndpointCount(int retryPerEndpointCount)
         {
-            _manager.SetRetryPerEndpointCount(retryPerEndpointCount);
+            RetryManager.SetRetryPerEndpointCount(retryPerEndpointCount);
 
             return this;
         }

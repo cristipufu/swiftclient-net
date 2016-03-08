@@ -17,7 +17,7 @@ namespace SwiftClient
         /// <returns></returns>
         public Task<SwiftAuthData> Authenticate()
         {
-            return _manager.Authenticate();
+            return RetryManager.Authenticate();
         }
 
         private async Task<SwiftAuthData> Authenticate(string username, string password, string endpoint)
@@ -58,7 +58,7 @@ namespace SwiftClient
 
         private Task<T> AuthorizeAndExecute<T>(Func<SwiftAuthData, Task<T>> func) where T : SwiftBaseResponse, new()
         {
-            return _manager.AuthorizeAndExecute(func);
+            return RetryManager.AuthorizeAndExecute(func);
         }
     }
 }

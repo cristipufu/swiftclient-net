@@ -26,6 +26,7 @@ namespace SwiftClient
         public static string ObjectMetaFormat = "X-Object-Meta-{0}";
         public static string ObjectMeta = "X-Object-Meta";
 
+        public static string ContentType = "Content-Type";
         public static string ContentLength = "Content-Length";
         public static string Range = "Range";
         public static string RangeValueFormat = "bytes={0}-{1}";

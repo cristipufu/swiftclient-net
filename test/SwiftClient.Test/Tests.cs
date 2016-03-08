@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using System.IO;
 
 namespace SwiftClient.Test
 {
@@ -16,6 +15,7 @@ namespace SwiftClient.Test
     {
         public SwiftCredentials Credentials;
         public string ContainerId = "testcontainer";
+        public string PseudoDirectoryId = "pseudodirectory";
         public string ObjectId = "testfile";
         public string ChunkedObjectId = "testfilechunks";
         public int MaxBufferSize = 10 * 1024;
@@ -23,7 +23,7 @@ namespace SwiftClient.Test
 
         public SwiftInitFixture()
         {
-            Credentials = GetConfigCredentials();   
+            Credentials = GetConfigCredentials();
         }
 
         public void Dispose()
@@ -65,7 +65,7 @@ namespace SwiftClient.Test
     public class Tests : IClassFixture<SwiftInitFixture>
     {
         #region Ctor and Properties
-        
+
         SwiftInitFixture fixture;
         ITestOutputHelper output;
 
@@ -90,6 +90,14 @@ namespace SwiftClient.Test
             get
             {
                 return fixture.ContainerId;
+            }
+        }
+
+        string pseudoDirectoryId
+        {
+            get
+            {
+                return fixture.ObjectId;
             }
         }
 
@@ -138,7 +146,7 @@ namespace SwiftClient.Test
         [Fact]
         public async Task AuthenticateTest()
         {
-            using(var client = GetClient())
+            using (var client = GetClient())
             {
                 await Authenticate(client);
             }
@@ -172,6 +180,31 @@ namespace SwiftClient.Test
             var existsRsp = await client.HeadContainer(containerId);
 
             Assert.True(existsRsp.IsSuccess);
+        }
+
+        [Fact]
+        public async Task PutPseudoDirectoryTest()
+        {
+            using (var client = GetClient())
+            {
+                await PutContainer(client);
+
+                await PutPseudoDirectory(client);
+            }
+        }
+
+        public async Task PutPseudoDirectory(Client client)
+        {
+            var createRsp = await client.PutPseudoDirectory(containerId, pseudoDirectoryId);
+
+            Assert.True(createRsp.IsSuccess);
+
+            var get = await client.GetObject(containerId, pseudoDirectoryId);
+
+            using (var getRsp = await client.GetObject(containerId, pseudoDirectoryId))
+            {
+                Assert.True(getRsp.IsSuccess);
+            }
         }
 
         [Fact]

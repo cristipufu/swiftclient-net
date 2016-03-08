@@ -9,8 +9,9 @@ namespace SwiftClient
 {
     public partial class Client : ISwiftClient, IDisposable
     {
+        public SwiftRetryManager RetryManager;
+
         protected ISwiftLogger _logger;
-        protected SwiftRetryManager _manager;
         protected HttpClient _client = new HttpClient();
 
         public Client() { }
@@ -29,7 +30,7 @@ namespace SwiftClient
                 authManager.Authenticate = Authenticate;
             }
 
-            _manager = new SwiftRetryManager(authManager);
+            RetryManager = new SwiftRetryManager(authManager);
         }
 
         public Client(ISwiftAuthManager authManager, ISwiftLogger logger) : this(authManager)
