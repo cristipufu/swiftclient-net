@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "OpenStack Swift client for .NET 4.5 and 5.0",
   "authors": [ "Cristi Pufu" ],
   "tags": [ "OpenStack Swift" ],
