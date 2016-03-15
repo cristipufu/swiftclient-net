@@ -46,7 +46,19 @@ namespace SwiftClient.Cli
             }
             else
             {
-                var containerData = client.GetContainer(options.Container).Result;
+                var queryParams = new Dictionary<string, string>();
+
+                if (!string.IsNullOrEmpty(options.Delimiter))
+                {
+                    queryParams.Add("delimiter", options.Delimiter);
+                }
+
+                if (!string.IsNullOrEmpty(options.Prefix))
+                {
+                    queryParams.Add("prefix", options.Prefix);
+                }
+
+                var containerData = client.GetContainer(options.Container, null, queryParams).Result;
                 if (containerData.IsSuccess)
                 {
                     if (containerData.Objects != null && containerData.Objects.Count > 0)

@@ -13,5 +13,11 @@ namespace SwiftClient.Cli
     {
         [Option('c', "container", Required = false, HelpText = "container name")]
         public string Container { get; set; }
+
+        [Option('d', "delimiter", Required = false, HelpText = "delimiter")]
+        public string Delimiter { get; set; }
+
+        [Option('p', "prefix", Required = false, HelpText = "prefix")]
+        public string Prefix { get; set; }
     }
 }
