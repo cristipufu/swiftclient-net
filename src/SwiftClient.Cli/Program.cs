@@ -17,7 +17,9 @@ namespace SwiftClient.Cli
 
         public async Task Main(string[] args)
         {
-            client = await new AuthManager(args).Connect();
+            var authManager = new AuthManager(args);
+
+            client = await authManager.Connect();
 
             var command = Console.ReadLine();
 
@@ -25,16 +27,18 @@ namespace SwiftClient.Cli
             {
                 try
                 {
-                    var exitCode = CommandLine.Parser.Default.ParseArguments<
+                    var exitCode = Parser.Default.ParseArguments<
                         StatsOptions,
                         PutOptions, 
                         GetOptions, 
                         ListOptions, 
+                        ExportOptions,
                         DeleteOptions>(command.ParseArguments()).MapResult(
                         (StatsOptions opts) => StatsCommand.Run(opts, client),
                         (PutOptions opts) => PutCommand.Run(opts, client),
                         (GetOptions opts) => GetCommand.Run(opts, client),
                         (ListOptions opts) => ListCommand.Run(opts, client),
+                        (ExportOptions opts) => ExportCommand.Run(opts, client, authManager),
                         (DeleteOptions opts) => DeleteCommand.Run(opts, client),
                         errs => 1);
                 }

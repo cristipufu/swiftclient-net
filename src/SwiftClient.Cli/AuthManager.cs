@@ -44,6 +44,11 @@ namespace SwiftClient.Cli
             return client;
         }
 
+        public SwiftCredentials Credentials()
+        {
+            return credentials;
+        }
+
         private bool ValidateLogin()
         {
             bool exists = true;
