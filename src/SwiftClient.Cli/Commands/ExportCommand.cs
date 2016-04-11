@@ -36,7 +36,7 @@ namespace SwiftClient.Cli
                 public string FilePath { get; set; }
             }
 
-            Queue<FailedObject> failedQueue = new Queue<FailedObject>();
+            ConcurrentQueue<FailedObject> failedQueue = new ConcurrentQueue<FailedObject>();
             ConcurrentBag<DownloadObject> downloadBag = new ConcurrentBag<DownloadObject>();
             int counter = 0;
 

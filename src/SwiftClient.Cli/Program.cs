@@ -33,12 +33,14 @@ namespace SwiftClient.Cli
                         GetOptions, 
                         ListOptions, 
                         ExportOptions,
+                        ImportOptions,
                         DeleteOptions>(command.ParseArguments()).MapResult(
                         (StatsOptions opts) => StatsCommand.Run(opts, client),
                         (PutOptions opts) => PutCommand.Run(opts, client),
                         (GetOptions opts) => GetCommand.Run(opts, client),
                         (ListOptions opts) => ListCommand.Run(opts, client),
                         (ExportOptions opts) => ExportCommand.Run(opts, client, authManager),
+                        (ImportOptions opts) => ImportCommand.Run(opts, client, authManager),
                         (DeleteOptions opts) => DeleteCommand.Run(opts, client),
                         errs => 1);
                 }
