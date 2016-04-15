@@ -36,10 +36,17 @@ namespace SwiftClient.Cli
                 public string FilePath { get; set; }
             }
 
+            public class ContainerRequest
+            {
+                public string Container { get; set; }
+                public Dictionary<string, string> Query { get; set; }
+            }
+
             ConcurrentQueue<FailedObject> failedQueue = new ConcurrentQueue<FailedObject>();
             ConcurrentBag<DownloadObject> downloadBag = new ConcurrentBag<DownloadObject>();
-            int counter = 0;
+            ConcurrentQueue<ContainerRequest> listQueue = new ConcurrentQueue<ContainerRequest>();
 
+            int counter = 0;
             Client client;
             SwiftCredentials credentials;
             int bufferSize = 2000000;
@@ -67,17 +74,55 @@ namespace SwiftClient.Cli
             {
                 foreach (var container in containers)
                 {
-                    var containerData = client.GetContainer(container.Container, null, queryParams).Result;
-                    if (containerData.IsSuccess)
+                    listQueue.Enqueue(new ContainerRequest
                     {
-                        var target = Path.Combine(path, container.Container);
+                        Container = container.Container,
+                        Query = queryParams
+                    });
+                }
 
-                        if (!Directory.Exists(target))
+                while (!listQueue.IsEmpty)
+                {
+                    ContainerRequest request = null;
+
+                    if (listQueue.TryDequeue(out request))
+                    {
+                        var containerData = client.GetContainer(request.Container, null, request.Query).Result;
+                        if (containerData.IsSuccess)
                         {
-                            Directory.CreateDirectory(target);
-                        }
+                            if (containerData.Objects.Count > 0)
+                            {
+                                if (containerData.Objects.Count < containerData.ObjectsCount)
+                                {
+                                    var marker = containerData.Objects.OrderByDescending(x => x.Object).Select(x => x.Object).FirstOrDefault();
 
-                        EnqueueObjects(container.Container, containerData.Objects, target);
+                                    var newRequest = new ContainerRequest()
+                                    {
+                                        Container = request.Container,
+                                        Query = request.Query
+                                    };
+
+                                    if (newRequest.Query == null)
+                                    {
+                                        newRequest.Query = new Dictionary<string, string>();
+                                    }
+
+                                    newRequest.Query["marker"] = marker;
+
+                                    listQueue.Enqueue(newRequest);
+                                }
+
+                                var target = Path.Combine(path, request.Container);
+
+                                if (!Directory.Exists(target))
+                                {
+                                    Directory.CreateDirectory(target);
+                                }
+
+                                EnqueueObjects(request.Container, containerData.Objects, target);
+                            }
+                            
+                        }
                     }
                 }
 
