@@ -1,24 +1,37 @@
 ﻿{
   "version": "1.0.0-*",
-  "description": "SwiftClient.Test Class Library",
-  "authors": [ "Cristi Pufu" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
-  "dependencies": {
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
-    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
-    "SwiftClient": "1.2.1",
-    "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-rc1-build204"
 
+  "dependencies": {
+    "dotnet-test-xunit": "1.0.0-rc2-*",
+    "SwiftClient": {
+      "version": "2.0.0-*",
+      "target": "project"
+    },
+    "Microsoft.AspNetCore.TestHost": "1.0.0",
+    "xunit": "2.1.0",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0",
+    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0"
   },
-  "commands": {
-        "test": "xunit.runner.dnx"
+  "buildOptions": {
+    "copyToOutput": {
+      "include": [ "appsettings.json" ]
+    }
   },
+  "testRunner": "xunit",
   "frameworks": {
-    "dnx451": {},
-    "dnxcore50": {}
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0",
+          "type": "platform"
+        },
+        "System.Diagnostics.Process": "4.1.0-*",
+        "System.Diagnostics.TraceSource": "4.0.0"
+      },
+      "imports": [
+        "dotnet5.6",
+        "portable-net451+win8"
+      ]
+    }
   }
 }
