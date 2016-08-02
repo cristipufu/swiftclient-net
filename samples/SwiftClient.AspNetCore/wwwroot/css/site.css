@@ -1,0 +1,91 @@
+﻿body {
+   padding-top: 70px;
+}
+
+
+/* Set widths on the form inputs since otherwise they're 100% wide */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.alert {
+   word-break: break-word;
+}
+
+
+h2 {
+    font-size: 16px;
+    text-transform: uppercase;
+    margin: 30px 0 10px;
+}
+
+.upload-file {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px dashed #BDBDBD;
+    border-radius: 4px;
+}
+
+.list-group {
+    margin: 11px 0 0;
+}
+
+.list-group .list-group-item > .glyphicon {
+    margin-right: 5px;
+ }
+
+.glyphicon-folder-open {
+    background: #337ab7;
+    color: #fff;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.glyphicon-file {
+    background: #31b0d5;
+    color: #fff;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.list-group .list-group-item > .tree-toogle {
+   color: #999;
+    width: 55px;
+    line-height: 55px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: center;
+    margin: 0;
+    border-left: 1px solid #BDBDBD;
+}
+
+.list-group .list-group-item > .tree-toogle:hover {
+    color: #666;
+    cursor: pointer;
+}
+
+.error_page {
+    background: #337ab7;
+    color: #fff;
+    padding: 20px;
+    border-radius: 3px;
+}
+.error_page h1 {
+    margin: 0 0 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #6A9FCC;
+}
+.error_page p {
+    font-size: 17px;
+}
+
+@media (max-width: 991px) {
+    .btn-group {
+        margin-top: 15px;
+        width: 100%;
+    }
+
+}

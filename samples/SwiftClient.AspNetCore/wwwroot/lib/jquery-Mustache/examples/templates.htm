@@ -1,0 +1,20 @@
+<script id="hello-world" type="text/html">
+	<p>Hello, {{name}}, this is a basic template rendering example!</p>
+</script>
+
+<script id="partial-example" type="text/html">
+	<h5>Title: {{title}}</h5>
+	{{>hello-world}}
+</script>
+
+<script id="plaintext" type="text/html">
+	This template doesn't contain any HTML elements.
+</script>
+
+<script id="peeps-list-item" type="text/html">
+    <li>{{name}} is fueled by {{fuel}}</li>
+</script>
+
+<script>
+	alert("I'm not a template!");
+</script>
