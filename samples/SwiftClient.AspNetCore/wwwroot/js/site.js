@@ -33,13 +33,12 @@ ctrl.prototype.renderTree = function (data) {
 ctrl.prototype.refreshTree = function () {
     $.ajax({
         url: 'home/refreshtree',
-        data: {
-        },
+        data: { },
         dataType: 'json',
         success: (function (response) {
-            if (response.Data) {
-                this.renderTree(response.Data);
-                $('.js-uploadStatus').html('');
+            if (response.data) {
+                this.renderTree(response.data);
+                this.initVideo();
             }
         }).bind(this)
     });
@@ -77,6 +76,8 @@ ctrl.prototype.getFormData = function () {
 ctrl.prototype.uploadProgress = function (e, data) {
     var progress = (data.loaded / data.total * 100).toFixed(2) + '%';
     $('.js-uploadStatus').html('Uploaded ' + progress + ' (' + this.formatSize(data.loaded) + ' of ' + this.formatSize(data.total) + ')');
+    $('.js-uploadStatus').css('width', progress);
+    $('.js-uploadStatus').parents('.js-uploadStatusContainer').show();
 };
 
 ctrl.prototype.formatSize = function (bytes) {
@@ -93,17 +94,23 @@ ctrl.prototype.formatSize = function (bytes) {
 };
 
 ctrl.prototype.fileUploadDone = function (e, data) {
-    if (data.result.Success) {
+
+    $('.js-uploadStatus').html('File chunks uploaded in temporary container! Please wait for transfer and cleanup...');
+
+    if (data.result.success) {
         $.ajax({
             url: 'home/uploaddone',
             data: {
                 segmentsCount: this.currentChunkIndex,
-                fileName: data.result.FileName,
-                contentType: data.result.ContentType
+                fileName: data.result.fileName,
+                contentType: data.result.contentType
             },
             dataType: 'json',
             success: (function (response) {
-                $('.js-uploadStatus').html('Upload done');
+
+                $('.js-uploadStatus').html('');
+                $('.js-uploadStatus').parents('.js-uploadStatusContainer').hide();
+
                 this.refreshTree();
             }).bind(this)
         });
@@ -117,16 +124,16 @@ ctrl.prototype.resetIndex = function () {
 };
 
 ctrl.prototype.initVideo = function () {
-    var $video = $('#videoPlayer');
+    var $video = $('.js-video');
 
     if ($video.length) {
 
         var videoPlayer = videojs($video.get(0), {
-            controls: true,
-            preload: 'none',
-            width: 640,
-            height: 360,
-        }, function () {
+                controls: true,
+                preload: 'none',
+                width: 640,
+                height: 360,
+            }, function () {
         });
     }
 };

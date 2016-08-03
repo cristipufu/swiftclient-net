@@ -43,7 +43,7 @@ h2 {
     border-radius: 50%;
 }
 
-.glyphicon-file {
+.glyphicon-file, .glyphicon-facetime-video {
     background: #31b0d5;
     color: #fff;
     padding: 10px;

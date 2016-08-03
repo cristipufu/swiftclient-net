@@ -10,72 +10,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SwiftClient.AspNetCore
 {
-    public class VideoStreamResult : FileResult
+    public class VideoStreamResult : FileStreamResult
     {
         // default buffer size as defined in BufferedStream type
         private const int BufferSize = 0x1000;
-        private Stream _videoStream;
         private string MultipartBoundary = "<qwe123>";
 
-        public VideoStreamResult(Stream stream, string contentType)
-            : base(contentType)
+        public VideoStreamResult(Stream fileStream, string contentType)
+            : base(fileStream, contentType)
         {
-            if (contentType == null)
-            {
-                throw new ArgumentNullException(nameof(contentType));
-            }
-
-            VideoStream = stream;
+            
         }
 
-        /// <summary>
-        /// Creates a new <see cref="VideoStreamResult"/> instance with
-        /// the provided <paramref name="stream"/> and the
-        /// provided <paramref name="contentType"/>.
-        /// </summary>
-        /// <param name="stream">The stream with the file.</param>
-        /// <param name="contentType">The Content-Type header of the response.</param>
-        //public VideoStreamResult(Stream stream, string contentType)
-        //    : this(stream, new MediaTypeHeaderValue(contentType))
-        //{
-        //}
-
-        /// <summary>
-        /// Creates a new <see cref="VideoStreamResult"/> instance with
-        /// the provided <paramref name="stream"/> and the
-        /// provided <paramref name="contentType"/>.
-        /// </summary>
-        /// <param name="stream">The stream with the file.</param>
-        /// <param name="contentType">The Content-Type header of the response.</param>
-        //public VideoStreamResult(Stream stream, MediaTypeHeaderValue contentType)
-        //    : base(contentType)
-        //{
-        //    if (contentType == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(contentType));
-        //    }
-
-        //    VideoStream = stream;
-        //}
-
-        /// <summary>
-        /// Gets or sets the stream with the file that will be sent back as the response.
-        /// </summary>
-        public Stream VideoStream
+        public VideoStreamResult(Stream fileStream, MediaTypeHeaderValue contentType) 
+            : base(fileStream, contentType)
         {
-            get
-            {
-                return _videoStream;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
 
-                _videoStream = value;
-            }
         }
 
         private bool IsMultipartRequest(RangeHeaderValue range)
@@ -93,7 +43,7 @@ namespace SwiftClient.AspNetCore
             var bufferingFeature = response.HttpContext.Features.Get<IHttpBufferingFeature>();
             bufferingFeature?.DisableResponseBuffering();
 
-            var length = VideoStream.Length;
+            var length = FileStream.Length;
 
             var range = response.HttpContext.GetRanges(length);
 
@@ -145,7 +95,7 @@ namespace SwiftClient.AspNetCore
             }
             else
             {
-                await VideoStream.CopyToAsync(response.Body);
+                await FileStream.CopyToAsync(response.Body);
             }
         }
 
@@ -161,16 +111,16 @@ namespace SwiftClient.AspNetCore
             long bytesRemaining = totalToSend + 1;
             response.ContentLength = bytesRemaining;
 
-            VideoStream.Seek(startIndex, SeekOrigin.Begin);
+            FileStream.Seek(startIndex, SeekOrigin.Begin);
 
             while (bytesRemaining > 0)
             {
                 try
                 {
                     if (bytesRemaining <= buffer.Length)
-                        count = VideoStream.Read(buffer, 0, (int)bytesRemaining);
+                        count = FileStream.Read(buffer, 0, (int)bytesRemaining);
                     else
-                        count = VideoStream.Read(buffer, 0, buffer.Length);
+                        count = FileStream.Read(buffer, 0, buffer.Length);
 
                     if (count == 0)
                         return;
@@ -191,10 +141,10 @@ namespace SwiftClient.AspNetCore
             }
         }
 
-        //protected override Task WriteFileAsync(HttpResponse response)
-        //{
-        //    return WriteVideoAsync(response);
-        //}
+        public override async Task ExecuteResultAsync(ActionContext context)
+        {
+            await WriteVideoAsync(context.HttpContext.Response);
+        }
     }
 
 }

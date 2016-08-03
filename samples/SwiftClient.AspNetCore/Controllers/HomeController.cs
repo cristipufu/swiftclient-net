@@ -95,7 +95,7 @@ namespace SwiftClient.AspNetCore.Controllers
             });
 
             // cleanup temp
-            await Client.DeleteContainerContents(containerTempId);
+            await Client.DeleteContainerWithContents(containerTempId);
 
             return new JsonResult(new
             {
@@ -179,11 +179,11 @@ namespace SwiftClient.AspNetCore.Controllers
 
             if (accountData.IsSuccess)
             {
-                tree.Text = Credentials.Username;
+                tree.text = Credentials.Username;
 
                 if (accountData.Containers != null)
                 {
-                    tree.Nodes = new List<TreeViewModel>();
+                    tree.nodes = new List<TreeViewModel>();
 
                     var tasks = new List<Task<TreeViewModel>>();
 
@@ -194,7 +194,7 @@ namespace SwiftClient.AspNetCore.Controllers
 
                     await Task.WhenAll(tasks).ContinueWith((rsp) =>
                     {
-                        tree.Nodes.AddRange(rsp.Result);
+                        tree.nodes.AddRange(rsp.Result);
                     });
                 }
             }
@@ -208,19 +208,19 @@ namespace SwiftClient.AspNetCore.Controllers
 
             TreeViewModel result = new TreeViewModel
             {
-                Text = containerId,
-                ContainerId = containerId
+                text = containerId,
+                containerId = containerId
             };
 
             if (containerData.IsSuccess)
             {
                 if (containerData.Objects != null && containerData.ObjectsCount > 0)
                 {
-                    result.Nodes = GetObjectBranch(containerId, "", containerData.Objects.Select(x => x.Object).ToList()).ToList();
+                    result.nodes = GetObjectBranch(containerId, "", containerData.Objects.Select(x => x.Object).ToList()).ToList();
 
-                    if (result.Nodes != null && result.Nodes.Any())
+                    if (result.nodes != null && result.nodes.Any())
                     {
-                        result.HasNodes = true;
+                        result.hasNodes = true;
                     }
                 }
             }
@@ -244,16 +244,32 @@ namespace SwiftClient.AspNetCore.Controllers
 
                     var tree = new TreeViewModel
                     {
-                        ObjectId = newPrefix,
-                        ContainerId = containerId,
-                        Text = prefix
+                        objectId = newPrefix,
+                        containerId = containerId,
+                        text = prefix
                     };
 
                     var prefixedObjs = objectIds.Where(x => x.StartsWith(prefix + "\\")).Select(x => x.Split(new[] { '\\' }, 2)[1]).ToList();
 
-                    tree.Nodes = GetObjectBranch(containerId, newPrefix, prefixedObjs);
+                    tree.nodes = GetObjectBranch(containerId, newPrefix, prefixedObjs);
 
-                    if (tree.Nodes == null) { tree.IsFile = true; }
+                    if (tree.nodes == null)
+                    {
+                        tree.isExpandable = false;
+
+                        if (tree.objectId.EndsWith(".mp4"))
+                        {
+                            tree.isVideo = true;
+                        }
+                        else
+                        {
+                            tree.isFile = true;
+                        }
+                    }
+                    else
+                    {
+                        tree.isExpandable = true;
+                    }
 
                     result.Add(tree);
                 }

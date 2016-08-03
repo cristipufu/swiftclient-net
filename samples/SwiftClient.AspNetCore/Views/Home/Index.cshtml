@@ -14,60 +14,77 @@
 <div class="upload-file form-group">
     <label for="fileupload">Upload file</label>
     <input id="fileupload" type="file" name="file" data-url="home/uploadchunk/" multiple>
-    <p class="js-uploadStatus">
-    </p>
+    <div class="js-uploadStatusContainer" style="display: none;">
+        <hr />
+        <div class="progress">
+            <div class="progress-bar js-uploadStatus" role="progressbar" aria-valuenow="70"
+                 aria-valuemin="0" aria-valuemax="100">
+            </div>
+        </div>
+    </div>
 </div>
 
 <h2>Your files</h2>
 
 <div id="tree" data-tree="@JsonConvert.SerializeObject(Model.Tree)"></div>
 
-@*<div>
-        <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" preload="none" poster="~/images/cinema.png" data-error="~/images/default-video-thumb.png">
-            <source src="/home/playvideo" type='video/mp4'>
-            <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
-        </video>
-    </div>*@
-
 <script type="text/html" id="tree-branch-template">
-    {{#Nodes}}
+    {{#nodes}}
     <li class="list-group-item">
-        {{#IsFile}}
+        {{#isFile}}
         <span class="glyphicon glyphicon-file"></span>
-        {{/IsFile}}
-        {{^IsFile}}
+        {{/isFile}}
+        {{#isVideo}}
+        <span class="glyphicon glyphicon-facetime-video"></span>
+        {{/isVideo}}
+        {{#isExpandable}}
         <span class="glyphicon glyphicon-plus pull-right tree-toogle js-treeToggle"></span>
         <span class="glyphicon glyphicon-folder-open"></span>
-        {{/IsFile}}
-        <span>{{Text}}</span>
+        {{/isExpandable}}
+        <span>{{text}}</span>
         <ul class="list-group" style="display: none;">
             {{>tree-branch-template}}
         </ul>
-        {{#IsFile}}
+        {{#isFile}}
         <div class="btn-group btn-group-sm pull-right" role="group">
-            <a href="home/downloadfile?objectId={{ObjectId}}&containerId={{ContainerId}}" class="btn btn-primary js-downloadBtn">
+            <a href="home/downloadfile?objectId={{objectId}}&containerId={{containerId}}" class="btn btn-primary js-downloadBtn">
                 <span class="glyphicon glyphicon-download"></span> Download
             </a>
         </div>
         <div class="clearfix"></div>
-        {{/IsFile}}
+        {{/isFile}}
+        {{#isVideo}}
+        <div class="btn-group btn-group-sm pull-right" role="group">
+            <a href="home/downloadfile?objectId={{objectId}}&containerId={{containerId}}" class="btn btn-primary js-downloadBtn">
+                <span class="glyphicon glyphicon-download"></span> Download
+            </a>
+        </div>
+        <hr/>
+        <div>
+            <video class="video-js vjs-default-skin vjs-big-play-centered js-video" preload="none" poster="~/images/cinema.png" data-error="~/images/default-video-thumb.png">
+                <source src="/home/playvideo?objectId={{objectId}}&containerId={{containerId}}" type='video/mp4'>
+                <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+            </video>
+        </div>
+        <div class="clearfix"></div>
+        {{/isVideo}}
     </li>
-    {{/Nodes}}
+    {{/nodes}}
 </script>
 
 <script type="text/html" id="tree-template">
     <ul class="list-group">
-        {{#Nodes}}
+        {{#nodes}}
         <li class="list-group-item">
-            {{#HasNodes}}
-            <span class="glyphicon glyphicon-plus pull-right tree-toogle js-treeToggle"></span>
-            {{/HasNodes}}
+            {{#hasNodes}}
+            <span class="glyphicon glyphicon-minus pull-right tree-toogle js-treeToggle"></span>
+            {{/hasNodes}}
             <span class="glyphicon glyphicon-folder-open"></span>
-            <span>{{Text}}</span>
-            <ul class="list-group" style="display: none;">
+            <span>{{text}}</span>
+            <ul class="list-group">
                 {{>tree-branch-template}}
             </ul>
         </li>
-        {{/Nodes}}
+        {{/nodes}}
     </ul>
 </script>
