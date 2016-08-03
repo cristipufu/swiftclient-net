@@ -2,6 +2,30 @@
 
 Docker file forked from [docker-swift-onlyone](https://github.com/MorrisJobke/docker-swift-onlyone)
 
+Install from docker hub:
+
+```bash
+docker run -v /srv --name SWIFT_DATA busybox
+docker run --name SWIFT_AIO -d -p 8080:8080 --volumes-from SWIFT_DATA -t morrisjobke/docker-swift-onlyone
+```
+
+Test on windows:
+```bash
+Invoke-RestMethod -Method Get -Headers @{'X-Auth-User'= 'test:tester';'X-Auth-Key'='testing'} -Uri http://localhost:8080/auth/v1.0/
+```
+
+Test on linux:
+```bash
+curl -i -H "X-Auth-User:test:tester" -H "X-Auth-Key:testing" http://localhost:8080/auth/v1.0/
+```
+
+Tear down:
+```bash
+docker stop SWIFT_AIO
+docker rm SWIFT_AIO
+docker rm SWIFT_DATA
+``` 
+
 ## Windows Prerequisites
 
 Install [Docker for Windows](https://docs.docker.com/docker-for-windows/), works on Windows 10 64bit only.
@@ -9,7 +33,6 @@ Install [Docker for Windows](https://docs.docker.com/docker-for-windows/), works
 ## Run OpenStack Swift docker image
 
 You'll need to copy all files inside `vtfuture/SwiftClient/tools/docker-swift` and run `up.ps1`, this will build and start a swift container that exposes port 8080 on your windows.
-
 
 Optionally you could follow these steps:
 
