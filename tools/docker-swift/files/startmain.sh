@@ -55,7 +55,7 @@ if [ ! -z "${SWIFT_STORAGE_URL_SCHEME}" ]; then
 fi
 
 if [ ! -z "${SWIFT_SET_PASSWORDS}" ]; then
-	echo "Setting passwords in /etc/swift/proxy-server.conf"
+	echo "Setting passwords in /etc/swift/proxy-server.conf..."
 	PASS=`pwgen 12 1`
 	sed -i -e "s/user_admin_admin = admin .admin .reseller_admin/user_admin_admin = $PASS .admin .reseller_admin/g" /etc/swift/proxy-server.conf
 	sed -i -e "s/user_test_tester = testing .admin/user_test_tester = $PASS .admin/g" /etc/swift/proxy-server.conf
@@ -67,6 +67,21 @@ fi
 # Start supervisord
 echo "Starting supervisord..."
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+
+# Create default container
+if [ ! -z "${SWIFT_DEFAULT_CONTAINER}" ]; then
+	echo "Creating default container..."
+	for container in ${SWIFT_DEFAULT_CONTAINER} ; do
+	    echo "Creating container...${container}"
+	    swift -A http://localhost:8080/auth/v1.0 -U admin:admin -K admin post ${container}
+	done
+fi
+
+# Create meta-url-key to allow temp download url generation
+if [ ! -z "${SWIFT_TEMP_URL_KEY}" ]; then
+  echo "Setting X-Account-Meta-Temp-URL-Key..."
+  swift -A http://localhost:8080/auth/v1.0 -U test:tester -K testing post -m "Temp-URL-Key:${SWIFT_TEMP_URL_KEY}"
+fi
 
 #
 # Tail the log file for "docker log $CONTAINER_ID"
