@@ -1,6 +1,5 @@
 # OpenStack Swift client for .NET
 
-(http://tcoss.veritech.io/viewType.html?buildTypeId=SwiftClient_Windows&guest=1)
 [![NuGet version](https://img.shields.io/nuget/vpre/SwiftClient.svg)](https://www.nuget.org/packages/SwiftClient/)
 
 SwiftClient is an async HTTP wrapper over OpenStack Swift REST API and follows the [Object Storage API Reference](http://developer.openstack.org/api-ref-objectstorage-v1.html). 
