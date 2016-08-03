@@ -1,0 +1,20 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "SwiftClient Command-line interface",
+  "authors": [ "Stefan Prodan" ],
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "SwiftClient": "2.0.0-beta-*",
+    "Newtonsoft.Json": "9.0.1",
+    "CommandLineParser": "2.0.275-beta",
+    "Humanizer": "1.37.7"
+  },
+
+  "frameworks": {
+    "net451": {
+    }
+  }
+}
