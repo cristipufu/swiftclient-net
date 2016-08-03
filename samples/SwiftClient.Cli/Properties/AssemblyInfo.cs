@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SwiftClient")]
+[assembly: AssemblyProduct("SwiftClient.Cli")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -16,4 +16,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c855aa03-fd6c-422f-99fa-4a0bfcb67f39")]
+[assembly: Guid("ba84d7d5-c30d-4097-a4d3-7ba574db13bf")]
