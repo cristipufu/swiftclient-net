@@ -6,7 +6,7 @@ Install from docker hub:
 
 ```bash
 docker run -v /srv --name SWIFT_DATA busybox
-docker run --name SWIFT_AIO -d -p 8080:8080 --volumes-from SWIFT_DATA -t morrisjobke/docker-swift-onlyone
+docker run --restart=unless-stopped --name SWIFT_AIO -d -p 8080:8080 --volumes-from SWIFT_DATA -t morrisjobke/docker-swift-onlyone
 ```
 
 Test on windows:
