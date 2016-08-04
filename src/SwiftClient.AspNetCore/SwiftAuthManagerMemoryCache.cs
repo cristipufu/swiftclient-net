@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
-namespace SwiftClient.AspNetCore.Demo
+namespace SwiftClient.AspNetCore
 {
-    public class SwiftAuthManagerWithCache : ISwiftAuthManager
+    public class SwiftAuthManagerMemoryCache : ISwiftAuthManager
     {
-        IMemoryCache cache;
-        string authCacheKey = "swift_authdata";
-        string endpointsKey = "swift_endpoints";
+        private readonly IMemoryCache cache;
+        private readonly string authCacheKey = "swift_authdata";
+        private readonly string endpointsKey = "swift_endpoints";
 
-        public SwiftAuthManagerWithCache(SwiftCredentials credentials, IMemoryCache cache)
+        public SwiftAuthManagerMemoryCache(IOptions<SwiftServiceOptions> options, IMemoryCache cache)
         {
-            Credentials = credentials;
+            var _options = options.Value;
+            Credentials = new SwiftCredentials {
+                Endpoints = _options.Endpoints,
+                Password = _options.Password,
+                Username = _options.Username
+            };
             this.cache = cache;
         }
 

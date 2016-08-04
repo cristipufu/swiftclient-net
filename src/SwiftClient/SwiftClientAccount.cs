@@ -10,6 +10,11 @@ namespace SwiftClient
     public partial class Client : ISwiftClient, IDisposable
     {
 
+        public SwiftCredentials GetCredentials()
+        {
+            return RetryManager.AuthManager.Credentials;
+        }
+
         public Task<SwiftAccountResponse> HeadAccount()
         {
             return AuthorizeAndExecute(async (auth) =>

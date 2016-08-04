@@ -1,9 +1,9 @@
 {
-  "version": "2.0.0-beta-*",
-  "description": "OpenStack Swift client for .NET 4.5 and .NET Core",
+  "version": "1.0.0-beta-*",
+  "description": "OpenStack Swift client for ASP.NET Core MVC",
   "authors": [ "Cristi Pufu", "Stefan Prodan" ],
   "packOptions": {
-    "tags": [ "OpenStack", "Swift" ],
+    "tags": [ "aspnetcore", "OpenStack", "Swift" ],
     "projectUrl": "https://github.com/vtfuture/SwiftClient",
     "licenseUrl": "http://opensource.org/licenses/MIT",
     "summary": "SwiftClient is an async HTTP wrapper over OpenStack Swift REST API and follows the Object Storage API Reference.",
@@ -14,16 +14,14 @@
     }
   },
   "dependencies": {
+    "Microsoft.AspNetCore.Mvc": "1.0.0",
     "NETStandard.Library": "1.6.0",
-    "Newtonsoft.Json": "9.0.1",
-    "System.Net.Requests": "4.0.0"
+    "SwiftClient": "2.0.0-*"
   },
 
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50"
-    },
-    "net45": {
     }
   }
 }

@@ -2,9 +2,9 @@
 using Microsoft.Net.Http.Headers;
 using System;
 
-namespace SwiftClient.AspNetCore.Demo
+namespace SwiftClient.AspNetCore
 {
-    public static class ParseHeaders
+    public static class HttpExtensions
     {
         public static RangeHeaderValue GetRanges(this HttpContext context, long contentSize)
         {

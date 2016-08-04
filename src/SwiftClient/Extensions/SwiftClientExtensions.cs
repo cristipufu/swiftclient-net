@@ -10,7 +10,7 @@ namespace SwiftClient
 {
     public static class ClientExtensions
     {
-        public static async Task<SwiftBaseResponse> PutLargeObject(this Client client, string containerId, string objectId, Stream stream, Dictionary<string, string> headers = null, Action<long, long> progress = null, long bufferSize = 1000000)
+        public static async Task<SwiftBaseResponse> PutLargeObject(this ISwiftClient client, string containerId, string objectId, Stream stream, Dictionary<string, string> headers = null, Action<long, long> progress = null, long bufferSize = 1000000, bool checkIntegrity = false)
         {
             SwiftBaseResponse response = null;
             byte[] buffer = new byte[bufferSize];
@@ -32,10 +32,7 @@ namespace SwiftClient
                     response = await client.PutObjectChunk(containerTemp, objectId, tmpStream.ToArray(), chunk).ConfigureAwait(false);
                 }
 
-                if (progress != null)
-                {
-                    progress(chunk, bytesRead);
-                }
+                progress?.Invoke(chunk, bytesRead);
 
                 if (!response.IsSuccess)
                 {
@@ -50,14 +47,16 @@ namespace SwiftClient
 
             Dictionary<string, string> integrityHeaders = null;
 
-#if !DNXCORE50
-            using (var md5 = MD5.Create())
+            if (checkIntegrity)
             {
-                var eTag = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLower();
+                using (var md5 = MD5.Create())
+                {
+                    var eTag = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLower();
 
-                integrityHeaders = new Dictionary<string, string>() { { "ETag", eTag } };
+                    integrityHeaders = new Dictionary<string, string>() { { "ETag", eTag } };
+                }
             }
-#endif
+
 
             // use manifest to merge chunks
             response = await client.PutManifest(containerTemp, objectId, integrityHeaders).ConfigureAwait(false);
@@ -85,7 +84,7 @@ namespace SwiftClient
             return await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
         }
 
-        public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this Client client, string containerId, int limit = 1000)
+        public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this ISwiftClient client, string containerId, int limit = 1000)
         {
             // delete all container objects
             var deleteRsp = await client.DeleteContainerContents(containerId, limit).ConfigureAwait(false);
@@ -99,7 +98,7 @@ namespace SwiftClient
             return deleteRsp;
         }
 
-        public static async Task<SwiftBaseResponse> DeleteContainerContents(this Client client, string containerId, int limit = 1000)
+        public static async Task<SwiftBaseResponse> DeleteContainerContents(this ISwiftClient client, string containerId, int limit = 1000)
         {
             var limitHeaderKey = "limit";
             var markerHeaderKey = "marker";
