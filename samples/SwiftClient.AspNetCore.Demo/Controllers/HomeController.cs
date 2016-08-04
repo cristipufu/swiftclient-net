@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.IO;
 using Microsoft.Extensions.Options;
 
-namespace SwiftClient.AspNetCore.Controllers
+namespace SwiftClient.AspNetCore.Demo.Controllers
 {
     public class HomeController : Controller
     {

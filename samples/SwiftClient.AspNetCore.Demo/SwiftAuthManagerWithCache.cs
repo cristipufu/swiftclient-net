@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace SwiftClient.AspNetCore
+namespace SwiftClient.AspNetCore.Demo
 {
     public class SwiftAuthManagerWithCache : ISwiftAuthManager
     {

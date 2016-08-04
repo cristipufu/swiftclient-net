@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace SwiftClient.AspNetCore.Controllers
+namespace SwiftClient.AspNetCore.Demo.Controllers
 {
     public class ErrorController : Controller
     {

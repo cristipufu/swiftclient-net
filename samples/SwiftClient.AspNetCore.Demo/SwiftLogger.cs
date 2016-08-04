@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net;
 
-namespace SwiftClient.AspNetCore
+namespace SwiftClient.AspNetCore.Demo
 {
     public class SwiftLogger : ISwiftLogger
     {
