@@ -2,7 +2,7 @@
 using Microsoft.Net.Http.Headers;
 using System;
 
-namespace SwiftClient.AspNetCore
+namespace SwiftClient.AspNetCore.Demo
 {
     public static class ParseHeaders
     {

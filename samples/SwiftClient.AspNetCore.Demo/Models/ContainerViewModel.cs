@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SwiftClient.AspNetCore
+namespace SwiftClient.AspNetCore.Demo
 {
     public class PageViewModel
     {
