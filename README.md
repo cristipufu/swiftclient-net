@@ -13,7 +13,7 @@ It also supports multiple endpoints (Swift proxy address), it will iterate throu
 If you want to log failure events, just pass the client your implementation of the `ISwiftLogger` interface. In the demo project there is a [stdout log example](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore/SwiftLogger.cs).
 
 ```cs
-var swiftClient = new SwiftClient()
+var swiftClient = new SwiftClient.Client()
 .WithCredentials(new SwiftCredentials
 {
      Username = "test:tester",
