@@ -10,7 +10,7 @@ It can be installed via NuGet from [nuget.org/packages/SwiftClient](https://www.
 
 The client implements a configurable retry mechanism, so you don't have to worry about the token expiration date or a temporary request failure. 
 It also supports multiple endpoints (Swift proxy address), it will iterate through each endpoint till it finds one that's available, if the maximum retry count is reached an exception will be thrown.
-If you want to log failure events, just pass the client your implementation of the `ISwiftLogger` interface. In the demo project there is a [stdout log example](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore/SwiftLogger.cs).
+If you want to log failure events, just pass the client your implementation of the `ISwiftLogger` interface. In the CLI project there is a [stdout log example](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.Cli/SwiftConsoleLog.cs).
 
 ```cs
 var swiftClient = new SwiftClient.Client()
@@ -28,35 +28,51 @@ var swiftClient = new SwiftClient.Client()
 .SetLogger(new SwiftLogger());
 ```
 
-You have to supply your own implementation of `ISwiftAuthManager` class and provide a caching mechanism for the ***authentication token*** so that each Swift request is not being preceded by an authentication request. It is recommended to use a dedicated cache storage like Redis so multiple instances of your app can reuse the authentication token. In the demo project there is a `ISwiftAuthManager` [implementation](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore/SwiftAuthManagerWithCache.cs) that uses ASP.NET Core in memory cache.
+You have to supply your own implementation of `ISwiftAuthManager` class and provide a caching mechanism for the ***authentication token*** so that each Swift request is not being preceded by an authentication request. It is recommended to use a dedicated cache storage like Redis so multiple instances of your app can reuse the authentication token. In the AspNetCore project there is a `ISwiftAuthManager` [implementation](https://github.com/vtfuture/SwiftClient/blob/master/src/SwiftClient.AspNetCore/SwiftAuthManagerMemoryCache.cs) that uses ASP.NET Core in memory cache.
 
 ### Running the ASP.NET Core MVC demo
 
-The [SwiftClient.AspNetCore](https://github.com/vtfuture/SwiftClient/tree/master/samples/SwiftClient.AspNetCore) project is an example of how to authenticate against Swift, do chunked upload for a large file and download it. 
+The [SwiftClient.AspNetCore](https://github.com/vtfuture/SwiftClient/tree/master/samples/SwiftClient.AspNetCore.Demo) project is an example of how to authenticate against Swift, do chunked upload for a large file and download it. 
 
 You will need at least one Ubuntu 14.04 box to host OpenStack Swift proxy and storage. For dev/test environments we provide a docker image with a single Swift proxy and storage, follow the setup instruction from [docker-swift](https://github.com/vtfuture/SwiftClient/tree/master/tools/docker-swift) to build and run the Swift container. After you've started the Swift all-in-one container, put your Ubuntu box IP in the `appsettings.json` from the demo project and your good to go. You can also use Docker for Windows to host the Swift dev container.
 
 If you want to setup Swift for production on a Ubuntu cluster check out the [documentation](https://github.com/vtfuture/SwiftClient/wiki) from our wiki.
 
-### ASP.NET Core usage
+### ASP.NET Core MVC usage
 
-You can load Swift credentials from an json file in ASP.NET Core project. Add an [`appsettings.json`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore/appsettings.json) file in the root your project and load the settings in [`Startup.cs`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore/Startup.cs).
+Install NuGet package:
 
-Create a new instance of `SwiftClient.Client` using the specified `SwiftCredentials` in your controller:
+```
+Install-Package SwiftClient.AspNetCore
+```
+
+You can load Swift credentials from an json file in ASP.NET Core projects. Add an [`appsettings.json`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore.Demo/appsettings.json) file in the root your project and load the settings in [`Startup.cs`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore.Demo/Startup.cs).
+
+Configure SwiftClient service in Startup.cs:
 
 ```cs
-public class HomeController : Controller
+public void ConfigureServices(IServiceCollection services)
 {
-        SwiftClient.Client client;
+	services.AddOptions();
+	services.AddMemoryCache();
 
-        public HomeController(IOptions<SwiftCredentials> credentials)
-        {
-            client = new SwiftClient.Client(credentials.Value);
+	services.AddMvc();
 
-            client.SetRetryCount(2)
-                  .SetLogger(new SwiftLogger());
+	services.Configure<SwiftServiceOptions>(Configuration.GetSection("SwiftCluster"));
+	services.AddSingleton<ISwiftLogger, SwiftServiceLogger>();
+	services.AddSingleton<ISwiftAuthManager, SwiftAuthManagerMemoryCache>();
+	services.AddTransient<ISwiftClient, SwiftService>();
+}
+```
 
-        }
+Use the `SwiftService` in your controller:
+
+```cs
+private readonly ISwiftClient _swiftService;
+
+public HomeController(ISwiftClient swiftService)
+{
+	_swiftService = swiftService;
 }
 ```
 
@@ -70,7 +86,7 @@ public async Task<IActionResult> UploadFile(IFormFile file)
         {
             await fileStream.CopyToAsync(memoryStream);
 
-            var resp = await client.PutObject(containerId, fileId, memoryStream);
+            var resp = await _swiftService.PutObject(containerId, fileId, memoryStream);
 
             return new JsonResult(new
             {
@@ -82,7 +98,7 @@ public async Task<IActionResult> UploadFile(IFormFile file)
 
 public async Task<IActionResult> DownloadFile(string fileId)
 {
-    var rsp = await client.GetObject("containerId", fileId);
+    var rsp = await _swiftService.GetObject("containerId", fileId);
 
     if (rsp.IsSuccess)
     {
@@ -111,7 +127,7 @@ public async Task<IActionResult> UploadChunk(int segment)
 				await fileStream.CopyToAsync(memoryStream);
 
 				// upload file chunk
-				await client.PutChunkedObject(containerTempId, fileName, memoryStream.ToArray(), segment);
+				await _swiftService.PutChunkedObject(containerTempId, fileName, memoryStream.ToArray(), segment);
 			}
 		}
 	}
@@ -125,17 +141,17 @@ public async Task<IActionResult> UploadChunk(int segment)
 public async Task<IActionResult> UploadDone(string fileName, string contentType)
 {
 	// use manifest to merge chunks
-        await client.PutManifest(containerTempId, fileName);
+        await _swiftService.PutManifest(containerTempId, fileName);
 
         // copy chunks to new file and set some meta data info about the file (filename, contentype)
-        await client.CopyObject(containerTempId, fileName, containerDemoId, fileName, new Dictionary<string, string>
+        await _swiftService.CopyObject(containerTempId, fileName, containerDemoId, fileName, new Dictionary<string, string>
         {
             { $"X-Object-Meta-{metaFileName}", fileName },
             { $"X-Object-Meta-{metaContentType}", contentType }
         });
 
         // cleanup temp
-        await client.DeleteContainerContents(containerTempId);
+        await _swiftService.DeleteContainerContents(containerTempId);
 }
 ```
 
@@ -144,7 +160,7 @@ Buffered download example using `BufferedHTTPStream`
 ```cs
 public async Task<IActionResult> DownloadFile(string fileId)
 {
-	var headObject = await client.HeadObject(containerId, fileId);
+	var headObject = await _swiftService.HeadObject(containerId, fileId);
 
 	if (headObject.IsSuccess && headObject.ContentLength > 0)
 	{
@@ -155,7 +171,7 @@ public async Task<IActionResult> DownloadFile(string fileId)
 
 		var stream = new BufferedHTTPStream((start, end) =>
 		{
-			using (var response = Client.GetObjectRange(containerId, objectId, start, end).Result)
+			using (var response = _swiftService.GetObjectRange(containerId, objectId, start, end).Result)
            {
 	                var ms = new MemoryStream();
 	
