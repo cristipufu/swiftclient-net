@@ -207,6 +207,40 @@ public async Task<IActionResult> DownloadFile(string fileId)
 }
 ```
 
+MP4 streaming that works with any HTML5 player:
+
+```cs
+public async Task<IActionResult> PlayVideo(string containerId, string objectId)
+{
+	var headObject = await _swiftService.HeadObject(containerId, objectId);
+
+	if (headObject.IsSuccess)
+	{
+		var fileName = headObject.GetMeta(metaFileName);
+		var contentType = headObject.GetMeta(metaContentType);
+
+		var stream = new BufferedHTTPStream((start, end) =>
+		{
+			using (var response = _swiftService.GetObjectRange(containerId, objectId, start, end).Result)
+			{
+				var ms = new MemoryStream();
+
+				response.Stream.CopyTo(ms);
+
+				return ms;
+			}
+
+		}, () => headObject.ContentLength);
+
+		Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
+
+		return new VideoStreamResult(stream, "video/mp4");
+	}
+
+	return new NotFoundResult();
+}
+```
+
 ### Running the ASP.NET Core MVC demo
 
 The [SwiftClient.AspNetCore.Demo](https://github.com/vtfuture/SwiftClient/tree/master/samples/SwiftClient.AspNetCore.Demo) project is an example of how to authenticate against Swift, do chunked upload for a large file and download it and also video streaming. 
