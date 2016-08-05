@@ -50,6 +50,21 @@ Install-Package SwiftClient.AspNetCore
 
 You can load Swift credentials from an json file in ASP.NET Core projects. Add an [`appsettings.json`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore.Demo/appsettings.json) file in the root your project and load the settings in [`Startup.cs`](https://github.com/vtfuture/SwiftClient/blob/master/samples/SwiftClient.AspNetCore.Demo/Startup.cs).
 
+Configure Swift in appsettings.json:
+
+```json
+  "SwiftCluster": {
+    "Username": "test:tester",
+    "Password": "testing",
+    "Endpoints": [
+      "http://localhost:8080",
+      "http://localhost:8081"
+    ],
+    "RetryCount": 1,
+    "RetryPerEndpointCount": 2
+  }
+```
+
 Configure SwiftClient service in Startup.cs:
 
 ```cs
