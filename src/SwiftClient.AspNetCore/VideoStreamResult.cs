@@ -14,7 +14,7 @@ namespace SwiftClient.AspNetCore
     {
         // default buffer size as defined in BufferedStream type
         private const int BufferSize = 0x1000;
-        private string MultipartBoundary = "<qwe123>";
+        private string MultipartBoundary = "c239926cc5b64b";
 
         public VideoStreamResult(Stream fileStream, string contentType)
             : base(fileStream, contentType)
@@ -45,9 +45,11 @@ namespace SwiftClient.AspNetCore
 
             var length = FileStream.Length;
 
-            var range = response.HttpContext.GetRanges(length);
+            var rangeHeaderValue = response.HttpContext.GetRanges(length);
 
-            if (IsMultipartRequest(range))
+            var isMultipart = IsMultipartRequest(rangeHeaderValue);
+
+            if (isMultipart)
             {
                 response.ContentType = $"multipart/byteranges; boundary={MultipartBoundary}";
             }
@@ -58,39 +60,29 @@ namespace SwiftClient.AspNetCore
 
             response.Headers.Add("Accept-Ranges", "bytes");
 
-            if (IsRangeRequest(range))
+            if (IsRangeRequest(rangeHeaderValue))
             {
                 response.StatusCode = (int)HttpStatusCode.PartialContent;
 
-                if (!IsMultipartRequest(range))
+                foreach (var range in rangeHeaderValue.Ranges)
                 {
-                    response.Headers.Add("Content-Range", $"bytes {range.Ranges.First().From}-{range.Ranges.First().To}/{length}");
-                }
-
-                foreach (var rangeValue in range.Ranges)
-                {
-                    if (IsMultipartRequest(range)) // dunno if multipart works
+                    if (isMultipart)
                     {
-                        await response.WriteAsync($"--{MultipartBoundary}");
-                        await response.WriteAsync(Environment.NewLine);
-                        await response.WriteAsync($"Content-type: {ContentType}");
-                        await response.WriteAsync(Environment.NewLine);
-                        await response.WriteAsync($"Content-Range: bytes {range.Ranges.First().From}-{range.Ranges.First().To}/{length}");
-                        await response.WriteAsync(Environment.NewLine);
+                        await response.WriteAsync($"--{MultipartBoundary}{Environment.NewLine}");
+                        await response.WriteAsync($"Content-type: {ContentType}{Environment.NewLine}");
+                        await response.WriteAsync($"Content-Range: bytes {range.From}-{range.To}/{length}{Environment.NewLine}");
+                    }
+                    else
+                    {
+                        response.Headers.Add("Content-Range", $"bytes {range.From}-{range.To}/{length}");
                     }
 
-                    await WriteDataToResponseBody(rangeValue, response);
+                    await WriteDataToResponseBody(response, range);
 
-                    if (IsMultipartRequest(range))
+                    if (isMultipart)
                     {
-                        await response.WriteAsync(Environment.NewLine);
+                        await response.WriteAsync($"{Environment.NewLine}--{MultipartBoundary}--{Environment.NewLine}");
                     }
-                }
-
-                if (IsMultipartRequest(range))
-                {
-                    await response.WriteAsync($"--{MultipartBoundary}--");
-                    await response.WriteAsync(Environment.NewLine);
                 }
             }
             else
@@ -99,7 +91,7 @@ namespace SwiftClient.AspNetCore
             }
         }
 
-        private async Task WriteDataToResponseBody(RangeItemHeaderValue rangeValue, HttpResponse response)
+        private async Task WriteDataToResponseBody(HttpResponse response, RangeItemHeaderValue rangeValue)
         {
             var startIndex = rangeValue.From ?? 0;
             var endIndex = rangeValue.To ?? 0;
@@ -146,5 +138,4 @@ namespace SwiftClient.AspNetCore
             await WriteVideoAsync(context.HttpContext.Response);
         }
     }
-
 }

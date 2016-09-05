@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
 
   "dependencies": {
@@ -10,7 +10,8 @@
     "Microsoft.AspNetCore.TestHost": "1.0.0",
     "xunit": "2.1.0",
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
-    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0"
+    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
+    "SwiftClient.AspNetCore.Demo": "1.0.0-*"
   },
   "buildOptions": {
     "copyToOutput": {
