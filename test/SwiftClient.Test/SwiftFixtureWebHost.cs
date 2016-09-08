@@ -13,7 +13,7 @@ namespace SwiftClient.Test
     {
         private readonly TestServer _server;
 
-        public SwiftFixtureWebHost(string baseUri)
+        public SwiftFixtureWebHost(string baseUri) : base()
         {
             var builder = new WebHostBuilder().UseStartup<TStartup>();
             _server = new TestServer(builder);

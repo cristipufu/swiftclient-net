@@ -52,7 +52,7 @@ namespace SwiftClient.Test
 
             IConfigurationRoot configuration = builder.Build();
 
-            var section = configuration.GetSection("Credentials");
+            var section = configuration.GetSection("SwiftCluster");
 
             return CustomConfigReader.Get<SwiftCredentials>(section);
         }
