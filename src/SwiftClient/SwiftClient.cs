@@ -12,18 +12,23 @@ namespace SwiftClient
         public SwiftRetryManager RetryManager;
 
         protected ISwiftLogger _logger;
-        protected HttpClient _client = new HttpClient();
+        protected HttpClient _client;
+        
+        public Client(TimeSpan? timeout = null)
+        {
+            _client = new HttpClient();
+            if (timeout.HasValue)
+                _client.Timeout = timeout.Value;
+        }
 
-        public Client() { }
+        public Client(SwiftCredentials credentials, TimeSpan? timeout = null) : this(new SwiftAuthManager(credentials), timeout) { }
 
-        public Client(SwiftCredentials credentials) : this(new SwiftAuthManager(credentials)) { }
-
-        public Client(SwiftCredentials credentials, ISwiftLogger logger) : this(credentials)
+        public Client(SwiftCredentials credentials, ISwiftLogger logger, TimeSpan? timeout = null) : this(credentials, timeout)
         {
             SetLogger(logger);
         }
 
-        public Client(ISwiftAuthManager authManager)
+        public Client(ISwiftAuthManager authManager, TimeSpan? timeout = null) :this(timeout)
         {
             if (authManager.Authenticate == null)
             {
@@ -33,7 +38,7 @@ namespace SwiftClient
             RetryManager = new SwiftRetryManager(authManager);
         }
 
-        public Client(ISwiftAuthManager authManager, ISwiftLogger logger) : this(authManager)
+        public Client(ISwiftAuthManager authManager, ISwiftLogger logger, TimeSpan? timeout = null) : this(authManager, timeout)
         {
             SetLogger(logger);
         }
