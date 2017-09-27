@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>OpenStack Swift client for .NET 4.5 and .NET Core</Description>
+    <VersionPrefix>2.0.0-beta</VersionPrefix>
+    <Authors>Cristi Pufu;Stefan Prodan</Authors>
+    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
+    <AssemblyName>SwiftClient</AssemblyName>
+    <PackageId>SwiftClient</PackageId>
+    <PackageTags>OpenStack;Swift</PackageTags>
+    <PackageProjectUrl>https://github.com/vtfuture/SwiftClient</PackageProjectUrl>
+    <PackageLicenseUrl>http://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/vtfuture/SwiftClient</RepositoryUrl>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="System.Net.Requests" Version="4.0.11" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>
