@@ -58,9 +58,7 @@ namespace SwiftClient
         {
             var result = new T();
 
-            var webException = ex as WebException;
-
-            if (webException != null)
+            if (ex is WebException webException)
             {
                 var rsp = ((HttpWebResponse)webException.Response);
 
@@ -84,15 +82,14 @@ namespace SwiftClient
             return result;
         }
 
-        private T GetResponse<T>(HttpResponseMessage rsp) where T : SwiftBaseResponse, new()
-        {
-            var result = new T();
-            result.StatusCode = rsp.StatusCode;
-            result.Headers = rsp.Headers.ToDictionary();
-            result.Reason = rsp.ReasonPhrase;
-            result.ContentLength = rsp.Content.Headers.ContentLength ?? 0;
-            return result;
-        }
+        private T GetResponse<T>(HttpResponseMessage rsp) where T : SwiftBaseResponse, new() =>
+            new T
+            {
+                StatusCode = rsp.StatusCode,
+                Headers = rsp.Headers.ToDictionary(),
+                Reason = rsp.ReasonPhrase,
+                ContentLength = rsp.Content.Headers.ContentLength ?? 0
+            };
 
         bool disposed = false;
 
