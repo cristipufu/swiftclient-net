@@ -4,7 +4,7 @@
     <Description>OpenStack Swift client for ASP.NET Core MVC</Description>
     <VersionPrefix>1.0.0-beta</VersionPrefix>
     <Authors>Cristi Pufu;Stefan Prodan</Authors>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <AssemblyName>SwiftClient.AspNetCore</AssemblyName>
     <PackageId>SwiftClient.AspNetCore</PackageId>
     <PackageTags>aspnetcore;OpenStack;Swift</PackageTags>
