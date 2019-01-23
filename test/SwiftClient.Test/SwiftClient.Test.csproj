@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SwiftClient\SwiftClient.csproj" />
-    <ProjectReference Include="..\..\samples\SwiftClient.AspNetCore.Demo\SwiftClient.AspNetCore.Demo.csproj" />
   </ItemGroup>
 
   <ItemGroup>

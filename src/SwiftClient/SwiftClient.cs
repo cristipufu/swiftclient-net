@@ -12,7 +12,8 @@ namespace SwiftClient
         public SwiftRetryManager RetryManager;
 
         protected ISwiftLogger _logger;
-        protected HttpClient _client = new HttpClient();
+        protected HttpClient _client;
+        protected bool _customClient;
 
         public Client() { }
 
@@ -36,6 +37,15 @@ namespace SwiftClient
         public Client(ISwiftAuthManager authManager, ISwiftLogger logger) : this(authManager)
         {
             SetLogger(logger);
+        }
+
+        public void SetHttpClient(IHttpClientFactory clientFactory, bool noDispose = true)
+        {
+            _client = clientFactory.CreateClient("swift");
+            if (noDispose)
+            {
+                _customClient = true;
+            }
         }
 
         private void FillRequest(HttpRequestMessage request, SwiftAuthData auth, Dictionary<string, string> headers = null)
@@ -104,7 +114,7 @@ namespace SwiftClient
             if (disposed)
                 return;
 
-            if (disposing)
+            if (disposing && !_customClient)
             {
                 _client.Dispose();
             }
