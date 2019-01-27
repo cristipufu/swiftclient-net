@@ -34,9 +34,7 @@ namespace SwiftClient.AspNetCore.Demo
             services.AddMvc();
 
             services.Configure<SwiftServiceOptions>(Configuration.GetSection("SwiftCluster"));
-            services.AddSingleton<ISwiftLogger, SwiftServiceLogger>();
-            services.AddSingleton<ISwiftAuthManager, SwiftAuthManagerMemoryCache>();
-            services.AddTransient<ISwiftClient, SwiftService>();
+            services.AddSwift();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

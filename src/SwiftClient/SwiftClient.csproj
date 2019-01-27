@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <Description>OpenStack Swift client for .NET 4.5 and .NET Core</Description>
-    <VersionPrefix>2.1.4-beta</VersionPrefix>
+    <VersionPrefix>2.1.5-beta</VersionPrefix>
     <Authors>Cristi Pufu;Stefan Prodan</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>SwiftClient</AssemblyName>
     <PackageId>SwiftClient</PackageId>
     <PackageTags>OpenStack;Swift</PackageTags>
@@ -17,6 +16,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />

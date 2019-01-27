@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>OpenStack Swift client for ASP.NET Core MVC</Description>
-    <VersionPrefix>2.1.8-beta</VersionPrefix>
+    <VersionPrefix>2.1.9-beta</VersionPrefix>
     <Authors>Cristi Pufu;Stefan Prodan</Authors>
     <AssemblyName>SwiftClient.AspNetCore</AssemblyName>
     <PackageId>SwiftClient.AspNetCore</PackageId>
@@ -20,7 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SwiftClient" Version="2.1.4-beta" />
+    <ProjectReference Include="..\..\src\SwiftClient\SwiftClient.csproj" />
+  </ItemGroup>          
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.3" />
   </ItemGroup>
 
