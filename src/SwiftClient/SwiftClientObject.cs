@@ -327,7 +327,7 @@ namespace SwiftClient
         {
             return AuthorizeAndExecute(async (auth) =>
             {
-                var url = auth.StorageUrl + "?bulk-delete";
+                var url = auth.StorageUrl + "?bulk-delete=true";
 
                 var request = new HttpRequestMessage(HttpMethod.Delete, url);
 

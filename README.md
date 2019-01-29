@@ -76,9 +76,7 @@ public void ConfigureServices(IServiceCollection services)
 	services.AddMvc();
 
 	services.Configure<SwiftServiceOptions>(Configuration.GetSection("SwiftCluster"));
-	services.AddSingleton<ISwiftLogger, SwiftServiceLogger>();
-	services.AddSingleton<ISwiftAuthManager, SwiftAuthManagerMemoryCache>();
-	services.AddTransient<ISwiftClient, SwiftService>();
+	services.AddSwift();
 }
 ```
 

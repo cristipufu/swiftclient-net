@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace SwiftClient
 {
     public interface ISwiftClient
-    {
+    {       
+        void SetHttpClient(IHttpClientFactory httpClientFactory = null, bool noDispose = true);
+
         Task<SwiftAuthData> Authenticate();
         Task<SwiftResponse> CopyObject(string containerFromId, string objectFromId, string containerToId, string objectToId, Dictionary<string, string> headers = null);
         Task<SwiftResponse> DeleteContainer(string containerId, Dictionary<string, string> headers = null);
@@ -31,7 +34,7 @@ namespace SwiftClient
         Task<SwiftResponse> PutObjectChunk(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null);
         Task<SwiftResponse> PutPseudoDirectory(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null);
         SwiftCredentials GetCredentials();
-        Client SetLogger(ISwiftLogger logger);
+        Client SetLogger(ISwiftLogger logger);        
         Client SetRetryCount(int retryCount);
         Client SetRetryPerEndpointCount(int retryPerEndpointCount);
         Client WithCredentials(SwiftCredentials credentials);

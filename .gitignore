@@ -24,6 +24,8 @@ nuget.exe
 *.ipch
 .vs/
 project.lock.json
-
+.envrc
+.DS_Store
 bower_components/
 node_modules/
+.idea
