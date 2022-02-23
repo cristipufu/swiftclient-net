@@ -39,9 +39,9 @@ namespace SwiftClient
             SetLogger(logger);
         }
 
-        public void SetHttpClient(IHttpClientFactory clientFactory, bool noDispose = true)
+        public void SetHttpClient(IHttpClientFactory clientFactory, string httpClientName = "swift", bool noDispose = true)
         {
-            _client = clientFactory.CreateClient("swift");
+            _client = clientFactory.CreateClient(httpClientName);
             if (noDispose)
             {
                 _customClient = true;

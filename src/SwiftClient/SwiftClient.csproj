@@ -1,22 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>OpenStack Swift client for .NET 4.5 and .NET Core</Description>
-    <VersionPrefix>2.1.5-beta</VersionPrefix>
-    <Authors>Cristi Pufu;Stefan Prodan</Authors>
+    <Description>OpenStack Swift client for .NET 4.5 and .NET Core (NetStandard 2)</Description>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>Antoine Mangallon (Cristi Pufu;Stefan Prodan)</Authors>
     <AssemblyName>SwiftClient</AssemblyName>
-    <PackageId>SwiftClient</PackageId>
+    <PackageId>SwiftClient.NetStandard</PackageId>
     <PackageTags>OpenStack;Swift</PackageTags>
-    <PackageProjectUrl>https://github.com/vtfuture/SwiftClient</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/amangallon/AM.SwiftClient</PackageProjectUrl>
     <PackageLicenseUrl>http://opensource.org/licenses/MIT</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/vtfuture/SwiftClient</RepositoryUrl>
+    <RepositoryUrl>https://github.com/amangallon/AM.SwiftClient</RepositoryUrl>
     <NetStandardImplicitPackageVersion>2.0</NetStandardImplicitPackageVersion>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

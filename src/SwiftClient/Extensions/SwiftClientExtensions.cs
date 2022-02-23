@@ -17,7 +17,7 @@ namespace SwiftClient
             string containerTemp = "tmp_" + Guid.NewGuid().ToString("N");
             int bytesRead, chunk = 0;
 
-            response = await client.PutContainer(containerTemp).ConfigureAwait(false);
+            response = await client.PutContainerAsync(containerTemp).ConfigureAwait(false);
 
             if (!response.IsSuccess)
             {
@@ -29,7 +29,7 @@ namespace SwiftClient
                 using (MemoryStream tmpStream = new MemoryStream())
                 {
                     tmpStream.Write(buffer, 0, bytesRead);
-                    response = await client.PutObjectChunk(containerTemp, objectId, tmpStream.ToArray(), chunk).ConfigureAwait(false);
+                    response = await client.PutObjectChunkAsync(containerTemp, objectId, tmpStream.ToArray(), chunk).ConfigureAwait(false);
                 }
 
                 progress?.Invoke(chunk, bytesRead);
@@ -59,7 +59,7 @@ namespace SwiftClient
 
 
             // use manifest to merge chunks
-            response = await client.PutManifest(containerTemp, objectId, integrityHeaders).ConfigureAwait(false);
+            response = await client.PutManifestAsync(containerTemp, objectId, integrityHeaders).ConfigureAwait(false);
 
             if (!response.IsSuccess)
             {
@@ -70,7 +70,7 @@ namespace SwiftClient
             }
 
             // copy chunks to new file
-            response = await client.CopyObject(containerTemp, objectId, containerId, objectId, headers).ConfigureAwait(false);
+            response = await client.CopyObjectAsync(containerTemp, objectId, containerId, objectId, headers).ConfigureAwait(false);
 
             if (!response.IsSuccess)
             {
@@ -92,7 +92,7 @@ namespace SwiftClient
             if (deleteRsp.IsSuccess)
             {
                 //delete container
-                return await client.DeleteContainer(containerId).ConfigureAwait(false);
+                return await client.DeleteContainerAsync(containerId).ConfigureAwait(false);
             }
 
             return deleteRsp;
@@ -125,7 +125,7 @@ namespace SwiftClient
                 }
 
                 // get objects
-                var infoRsp = await client.GetContainer(containerId, null, queryParams).ConfigureAwait(false);
+                var infoRsp = await client.GetContainerAsync(containerId, null, queryParams).ConfigureAwait(false);
 
                 // no more objects => break
                 if (infoRsp.ObjectsCount == 0) return infoRsp;
@@ -137,7 +137,7 @@ namespace SwiftClient
                     var count = infoRsp.Objects.Count;
 
                     // delete them
-                    var deleteRsp = await client.DeleteObjects(objectIds).ConfigureAwait(false);
+                    var deleteRsp = await client.DeleteObjectsAsync(objectIds).ConfigureAwait(false);
 
                     if (!deleteRsp.IsSuccess) return deleteRsp;
 

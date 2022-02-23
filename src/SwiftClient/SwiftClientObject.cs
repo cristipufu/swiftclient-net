@@ -12,7 +12,7 @@ namespace SwiftClient
 {
     public partial class Client : ISwiftClient, IDisposable
     {
-        public Task<SwiftResponse> HeadObject(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> HeadObjectAsync(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -36,7 +36,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> GetObject(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> GetObjectAsync(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -66,7 +66,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> GetObjectRange(string containerId, string objectId, long start, long end, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> GetObjectRangeAsync(string containerId, string objectId, long start, long end, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             if (headers == null)
             {
@@ -75,10 +75,10 @@ namespace SwiftClient
 
             headers[SwiftHeaderKeys.Range] = string.Format(SwiftHeaderKeys.RangeValueFormat, start, end);
 
-            return GetObject(containerId, objectId, headers, queryParams);
+            return GetObjectAsync(containerId, objectId, headers, queryParams);
         }
 
-        public Task<SwiftResponse> PostObject(string containerId, string objectId, Dictionary<string, string> headers = null)
+        public Task<SwiftResponse> PostObjectAsync(string containerId, string objectId, Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -102,7 +102,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PutObject(string containerId, string objectId, Stream data, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutObjectAsync(string containerId, string objectId, Stream data, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -123,7 +123,7 @@ namespace SwiftClient
                         // container not found
                         if (result.StatusCode == HttpStatusCode.NotFound)
                         {
-                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
+                            return await EnsurePutContainer(containerId, () => PutObjectAsync(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
                         }
 
                         return result;
@@ -136,7 +136,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PutObject(string containerId, string objectId, byte[] data, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutObjectAsync(string containerId, string objectId, byte[] data, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -157,7 +157,7 @@ namespace SwiftClient
                         // container not found
                         if (result.StatusCode == HttpStatusCode.NotFound)
                         {
-                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
+                            return await EnsurePutContainer(containerId, () => PutObjectAsync(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
                         }
 
                         return result;
@@ -173,7 +173,7 @@ namespace SwiftClient
         private async Task<SwiftResponse> EnsurePutContainer(string containerId, Func<Task<SwiftResponse>> retryFunc)
         {
             // put container
-            var putContainerRsp = await PutContainer(containerId).ConfigureAwait(false);
+            var putContainerRsp = await PutContainerAsync(containerId).ConfigureAwait(false);
 
             if (!putContainerRsp.IsSuccess)
             {
@@ -184,12 +184,12 @@ namespace SwiftClient
             return await retryFunc().ConfigureAwait(false);
         }
 
-        public Task<SwiftResponse> PutObjectChunk(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutObjectChunkAsync(string containerId, string objectId, byte[] data, int segment, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
-            return PutObject(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment), data, headers, queryParams);
+            return PutObjectAsync(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment), data, headers, queryParams);
         }
 
-        public Task<SwiftResponse> PutManifest(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutManifestAsync(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             if (headers == null)
             {
@@ -201,10 +201,10 @@ namespace SwiftClient
             headers[SwiftHeaderKeys.ObjectManifest] = SwiftHeaderKeys.GetObjectManifestValue(containerId, objectId);
             headers[SwiftHeaderKeys.ContentLength] = contentLength.ToString();
 
-            return PutObject(containerId, objectId, new byte[contentLength], headers, queryParams);
+            return PutObjectAsync(containerId, objectId, new byte[contentLength], headers, queryParams);
         }
 
-        public Task<SwiftResponse> PutPseudoDirectory(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> PutPseudoDirectoryAsync(string containerId, string objectId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -228,7 +228,7 @@ namespace SwiftClient
                         // container not found
                         if (result.StatusCode == HttpStatusCode.NotFound)
                         {
-                            return await EnsurePutContainer(containerId, () => PutObject(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
+                            return await EnsurePutContainer(containerId, () => PutObjectAsync(containerId, objectId, data, headers, queryParams)).ConfigureAwait(false);
                         }
 
                         return result;
@@ -241,7 +241,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> CopyObject(string containerFromId, string objectFromId, string containerToId, string objectToId, Dictionary<string, string> headers = null)
+        public Task<SwiftResponse> CopyObjectAsync(string containerFromId, string objectFromId, string containerToId, string objectToId, Dictionary<string, string> headers = null)
         {
             if (headers == null)
             {
@@ -250,7 +250,7 @@ namespace SwiftClient
 
             headers[SwiftHeaderKeys.CopyFrom] = SwiftHeaderKeys.GetObjectManifestValue(containerFromId, objectFromId);
 
-            return PutObject(containerToId, objectToId, new byte[0], headers);
+            return PutObjectAsync(containerToId, objectToId, new byte[0], headers);
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace SwiftClient
         /// <param name="objectId"></param>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        public Task<SwiftResponse> DeleteObject(string containerId, string objectId, Dictionary<string, string> queryParams = null)
+        public Task<SwiftResponse> DeleteObjectAsync(string containerId, string objectId, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -294,9 +294,9 @@ namespace SwiftClient
         /// <param name="objectId"></param>
         /// <param name="segment"></param>
         /// <returns></returns>
-        public Task<SwiftResponse> DeleteObjectChunk(string containerId, string objectId, int segment)
+        public Task<SwiftResponse> DeleteObjectChunkAsync(string containerId, string objectId, int segment)
         {
-            return DeleteObject(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment));
+            return DeleteObjectAsync(containerId, SwiftUrlBuilder.GetObjectChunkId(objectId, segment));
         }
 
         /// <summary>
@@ -305,9 +305,9 @@ namespace SwiftClient
         /// <param name="containerId"></param>
         /// <param name="objectIds"></param>
         /// <returns></returns>
-        public Task<SwiftResponse> DeleteObjects(string containerId, IEnumerable<string> objectIds)
+        public Task<SwiftResponse> DeleteObjectsAsync(string containerId, IEnumerable<string> objectIds)
         {
-            return DeleteObjects(objectIds.Select(x => containerId + "/" + x).ToList());
+            return DeleteObjectsAsync(objectIds.Select(x => containerId + "/" + x).ToList());
         }
 
         /// <summary>
@@ -323,7 +323,7 @@ namespace SwiftClient
         /// </summary>
         /// <param name="objectIds"></param>
         /// <returns>Json formatted string with info about the delete operation</returns>
-        public Task<SwiftResponse> DeleteObjects(IEnumerable<string> objectIds)
+        public Task<SwiftResponse> DeleteObjectsAsync(IEnumerable<string> objectIds)
         {
             return AuthorizeAndExecute(async (auth) =>
             {

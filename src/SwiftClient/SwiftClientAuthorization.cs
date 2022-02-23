@@ -15,7 +15,7 @@ namespace SwiftClient
         /// <param name="password"></param>
         /// <param name="endpoint"></param>
         /// <returns></returns>
-        public Task<SwiftAuthData> Authenticate()
+        public Task<SwiftAuthData> AuthenticateAsync()
         {
             return RetryManager.Authenticate();
         }

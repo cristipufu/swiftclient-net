@@ -9,7 +9,7 @@ namespace SwiftClient
 {
     public partial class Client : ISwiftClient, IDisposable
     {
-        public Task<SwiftContainerResponse> HeadContainer(string containerId, Dictionary<string, string> headers = null)
+        public Task<SwiftContainerResponse> HeadContainerAsync(string containerId, Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -50,7 +50,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftContainerResponse> GetContainer(string containerId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
+        public Task<SwiftContainerResponse> GetContainerAsync(string containerId, Dictionary<string, string> headers = null, Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -105,7 +105,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PutContainer(string containerId, Dictionary<string, string> headers = null)
+        public Task<SwiftResponse> PutContainerAsync(string containerId, Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -129,7 +129,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PostContainer(string containerId, Dictionary<string, string> headers = null)
+        public Task<SwiftResponse> PostContainerAsync(string containerId, Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -153,7 +153,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> DeleteContainer(string containerId, Dictionary<string, string> headers = null)
+        public Task<SwiftResponse> DeleteContainerAsync(string containerId, Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {

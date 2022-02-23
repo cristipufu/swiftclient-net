@@ -15,7 +15,7 @@ namespace SwiftClient
             return RetryManager.AuthManager.Credentials;
         }
 
-        public Task<SwiftAccountResponse> HeadAccount()
+        public Task<SwiftAccountResponse> HeadAccountAsync()
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -61,7 +61,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftAccountResponse> GetAccount(Dictionary<string, string> queryParams = null)
+        public Task<SwiftAccountResponse> GetAccountAsync(Dictionary<string, string> queryParams = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
@@ -121,7 +121,7 @@ namespace SwiftClient
             });
         }
 
-        public Task<SwiftResponse> PostAccount(Dictionary<string, string> headers = null)
+        public Task<SwiftResponse> PostAccountAsync(Dictionary<string, string> headers = null)
         {
             return AuthorizeAndExecute(async (auth) =>
             {
