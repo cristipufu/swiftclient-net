@@ -1,10 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SwiftClient.Test.Utils;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Linq;
-using System;
-using System.IO;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -15,78 +11,39 @@ namespace SwiftClient.Test
     {
         #region Ctor and Properties
 
-        SwiftFixture fixture;
-        ITestOutputHelper output;
+        private readonly SwiftFixture _fixture;
+        private readonly ITestOutputHelper _output;
 
-        int maxBufferSize
-        {
-            get
-            {
-                return fixture.MaxBufferSize;
-            }
-        }
+        private int MaxBufferSize => _fixture.MaxBufferSize;
 
-        int Chunks
-        {
-            get
-            {
-                return fixture.Chunks;
-            }
-        }
+        private int Chunks => _fixture.Chunks; 
 
-        string containerId
-        {
-            get
-            {
-                return fixture.ContainerId;
-            }
-        }
+        private string ContainerId => _fixture.ContainerId; 
 
-        string pseudoDirectoryId
-        {
-            get
-            {
-                return fixture.ObjectId;
-            }
-        }
+        private string PseudoDirectoryId => _fixture.ObjectId;
 
-        string objectId
-        {
-            get
-            {
-                return fixture.ObjectId;
-            }
-        }
+        private string ObjectId => _fixture.ObjectId; 
 
-        string chunkedObjectId
-        {
-            get
-            {
-                return fixture.ChunkedObjectId;
-            }
-        }
+        private string ChunkedObjectId => _fixture.ChunkedObjectId; 
 
-        SwiftCredentials credentials
-        {
-            get
-            {
-                return fixture.Credentials;
-            }
-        }
+        private SwiftCredentials Credentials => _fixture.Credentials;
+
+        private IHttpClientFactory HttpClientFactory => _fixture.HttpClientFactory;
 
         public SwiftClientTests(SwiftFixture fixture, ITestOutputHelper output)
         {
-            this.fixture = fixture;
-            this.output = output;
+            _fixture = fixture;
+            _output = output;
         }
 
         #endregion
 
         public Client GetClient()
         {
-            var client = new Client(credentials);
+            var client = new Client(Credentials);
 
-            client.SetLogger(new SwiftLogger(output));
+            client.SetLogger(new SwiftLogger(_output));
+            client.SetHttpClient(HttpClientFactory);
             client.SetRetryCount(2);
 
             return client;
@@ -95,16 +52,8 @@ namespace SwiftClient.Test
         [Fact]
         public async Task AuthenticateTest()
         {
-            using (var client = GetClient())
-            {
-                await Authenticate(client);
-            }
-        }
-
-        public async Task Authenticate(Client client)
-        {
-            // auth
-            var rsp = await client.Authenticate();
+            using var client = GetClient();
+            var rsp = await client.AuthenticateAsync();
 
             Assert.True(rsp != null && !string.IsNullOrEmpty(rsp.AuthToken));
         }
@@ -112,197 +61,50 @@ namespace SwiftClient.Test
         [Fact]
         public async Task PutContainerTest()
         {
-            using (var client = GetClient())
-            {
-                await PutContainer(client);
-            }
+            using var client = GetClient();
+            await client.PutContainerAsserts(ContainerId);
         }
 
-        public async Task PutContainer(Client client)
-        {
-            // create
-            var createRsp = await client.PutContainer(containerId);
-
-            Assert.True(createRsp.IsSuccess);
-
-            // exists
-            var existsRsp = await client.HeadContainer(containerId);
-
-            Assert.True(existsRsp.IsSuccess);
-        }
 
         [Fact]
         public async Task PutPseudoDirectoryTest()
         {
-            using (var client = GetClient())
-            {
-                await PutContainer(client);
-
-                await PutPseudoDirectory(client);
-            }
-        }
-
-        public async Task PutPseudoDirectory(Client client)
-        {
-            var createRsp = await client.PutPseudoDirectory(containerId, pseudoDirectoryId);
-
-            Assert.True(createRsp.IsSuccess);
-
-            var get = await client.GetObject(containerId, pseudoDirectoryId);
-
-            using (var getRsp = await client.GetObject(containerId, pseudoDirectoryId))
-            {
-                Assert.True(getRsp.IsSuccess);
-            }
+            using var client = GetClient();
+            await client.PutContainerAsserts(ContainerId);
+            await client.PutPseudoDirectoryAsserts(ContainerId, PseudoDirectoryId);
         }
 
         [Fact]
         public async Task PutObjectTest()
         {
-            using (var client = GetClient())
-            {
-                await PutContainer(client);
-
-                await PutObject(client);
-            }
-        }
-
-        public async Task PutObject(Client client)
-        {
-            // generate random byte array
-            RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
-            var data = generator.GenerateBufferFromSeed(maxBufferSize);
-
-            // upload
-            var createRsp = await client.PutObject(containerId, objectId, data);
-
-            Assert.True(createRsp.IsSuccess);
-
-            // exists
-            var existsRsp = await client.HeadObject(containerId, objectId);
-
-            Assert.True(existsRsp.IsSuccess && existsRsp.ContentLength == maxBufferSize);
-
-            // get
-            using (var getRsp = await client.GetObject(containerId, objectId))
-            {
-                Assert.True(getRsp.IsSuccess && getRsp.Stream != null);
-
-                using (var ms = new MemoryStream())
-                {
-                    await getRsp.Stream.CopyToAsync(ms);
-
-                    Assert.True(ms.Length == maxBufferSize);
-                }
-            }
+            using var client = GetClient();
+            await client.PutContainerAsserts(ContainerId);
+            await client.PutObjectAsserts(ContainerId, ObjectId, MaxBufferSize);
         }
 
         [Fact]
         public async Task PutChunkedObjectTest()
         {
-            using (var client = GetClient())
-            {
-                await PutContainer(client);
-
-                await PutChunkedObject(client);
-            }
-        }
-
-        public async Task PutChunkedObject(Client client)
-        {
-            var tasks = new List<Task>();
-
-            // upload chunks
-            for (var i = 0; i < Chunks; i++)
-            {
-                // generate random byte array
-                RandomBufferGenerator generator = new RandomBufferGenerator(maxBufferSize);
-                var data = generator.GenerateBufferFromSeed(maxBufferSize);
-
-                var task = client.PutObjectChunk(containerId, chunkedObjectId, data, i);
-
-                tasks.Add(task);
-            }
-
-            await Task.WhenAll(tasks);
-
-            // upload manifest
-            var manifestResp = await client.PutManifest(containerId, chunkedObjectId);
-
-            Assert.True(manifestResp.IsSuccess);
-
-            // exists
-            var existsRsp = await client.HeadObject(containerId, chunkedObjectId);
-
-            Assert.True(existsRsp.IsSuccess && existsRsp.ContentLength == maxBufferSize * Chunks);
-
-            // get object
-            using (var getRsp = await client.GetObject(containerId, chunkedObjectId))
-            {
-                Assert.True(getRsp.IsSuccess && getRsp.Stream != null);
-
-                using (var ms = new MemoryStream())
-                {
-                    await getRsp.Stream.CopyToAsync(ms);
-
-                    Assert.True(ms.Length == maxBufferSize * Chunks);
-                }
-            }
-
-            // get chunk
-            using (var chunkResp = await client.GetObjectRange(containerId, chunkedObjectId, 0, maxBufferSize - 1))
-            {
-                Assert.True(chunkResp.IsSuccess && chunkResp.Stream != null);
-
-                using (var ms = new MemoryStream())
-                {
-                    await chunkResp.Stream.CopyToAsync(ms);
-
-                    Assert.True(ms.Length == maxBufferSize);
-                }
-            }
+            using var client = GetClient();
+            await client.PutObjectAsserts(ContainerId, ObjectId, MaxBufferSize);
+            await client.PutChunkedObjectAsserts(ContainerId, ChunkedObjectId, Chunks, MaxBufferSize);
         }
 
         [Fact]
         public async Task GetAccountTest()
         {
-            using (var client = GetClient())
-            {
-                await PutContainer(client);
-
-                await GetAccount(client);
-            }
-        }
-
-        public async Task GetAccount(Client client)
-        {
-            var resp = await client.GetAccount();
-
-            Assert.True(resp.IsSuccess);
-
-            Assert.True(resp.Containers.Any(x => x.Container == containerId));
+            using var client = GetClient();
+            await client.PutObjectAsserts(ContainerId, ObjectId, MaxBufferSize);
+            await client.GetAccountAsserts(ContainerId);
         }
 
         [Fact]
         public async Task GetContainerTest()
         {
-            using (var client = GetClient())
-            {
-                await PutContainer(client);
-
-                await PutObject(client);
-
-                await GetContainer(client);
-            }
-        }
-
-        public async Task GetContainer(Client client)
-        {
-            var resp = await client.GetContainer(containerId);
-
-            Assert.True(resp.IsSuccess);
-
-            Assert.True(resp.ObjectsCount > 0 && resp.Objects[0].Bytes == maxBufferSize);
+            using var client = GetClient();
+            await client.PutContainerAsserts(ContainerId);
+            await client.PutObjectAsserts(ContainerId, ObjectId, MaxBufferSize);
+            await client.GetContainerAsserts(ContainerId, MaxBufferSize);
         }
     }
 }
