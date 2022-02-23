@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Net.Http;
 
 namespace SwiftClient.AspNetCore
 {
@@ -19,6 +18,11 @@ namespace SwiftClient.AspNetCore
         /// Account user password
         /// </summary>
         public string Password { get; set; }
+
+        /// <summary>
+        /// Default container to use for requests on objects
+        /// </summary>
+        public string DefaultContainer { get; set; }
 
         /// <summary>
         /// Set retries count for all proxy nodes

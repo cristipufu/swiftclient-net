@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
+using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.Net.Http.Headers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
 
 namespace SwiftClient.AspNetCore
 {
@@ -19,13 +18,11 @@ namespace SwiftClient.AspNetCore
         public VideoStreamResult(Stream fileStream, string contentType)
             : base(fileStream, contentType)
         {
-            
         }
 
         public VideoStreamResult(Stream fileStream, MediaTypeHeaderValue contentType) 
             : base(fileStream, contentType)
         {
-
         }
 
         private bool IsMultipartRequest(RangeHeaderValue range)

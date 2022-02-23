@@ -7,15 +7,11 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class SwiftClientServiceCollectionExtensions
     {
 
-        public static IServiceCollection AddSwift(
-            this IServiceCollection serviceCollection)
+        public static IServiceCollection AddSwift(this IServiceCollection serviceCollection, string httpClientName = "swift")
         {
-            if (serviceCollection == null)
-            {
-                throw new ArgumentNullException(nameof(serviceCollection));
-            }
+            _ = serviceCollection ?? throw new ArgumentNullException(nameof(serviceCollection));
 
-            serviceCollection.AddHttpClient("swift");
+            serviceCollection.AddHttpClient(httpClientName);
             serviceCollection.AddOptions();
             serviceCollection.AddSingleton<ISwiftLogger, SwiftServiceLogger>();
             serviceCollection.AddSingleton<ISwiftAuthManager, SwiftAuthManagerMemoryCache>();
@@ -26,20 +22,14 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddSwift(
             this IServiceCollection serviceCollection,
-            Action<SwiftServiceOptions> configure)
+            Action<SwiftServiceOptions> configure,
+            string httpClientName = "swift")
         {
-            if (serviceCollection == null)
-            {
-                throw new ArgumentNullException(nameof(serviceCollection));
-            }
-
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
+            _ = serviceCollection ?? throw new ArgumentNullException(nameof(serviceCollection));
+            _ = configure ?? throw new ArgumentNullException(nameof(configure));
 
             serviceCollection.Configure(configure);
-            return serviceCollection.AddSwift();
+            return serviceCollection.AddSwift(httpClientName);
         }
     }
 }
