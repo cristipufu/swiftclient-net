@@ -1,13 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyName>SwiftClient.AspNetCore.Demo</AssemblyName>
-    <OutputType>Exe</OutputType>
     <PackageId>SwiftClient.AspNetCore.Demo</PackageId>
-    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>3.1.0</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
