@@ -58,7 +58,7 @@ namespace SwiftClient.Cli
             var response = new SwiftBaseResponse();
             var fileName = Path.GetFileName(options.File);
 
-            response = client.PutContainer(options.Container).Result;
+            response = client.PutContainerAsync(options.Container).Result;
 
             if (!response.IsSuccess)
             {

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SwiftClient.Cli
 {
@@ -11,7 +9,7 @@ namespace SwiftClient.Cli
         {
             if (string.IsNullOrEmpty(options.Container))
             {
-                var accountData = client.GetAccount().Result;
+                var accountData = client.GetAccountAsync().Result;
                 if (accountData.IsSuccess)
                 {
                     if (accountData.Containers != null && accountData.Containers.Count > 0)
@@ -58,7 +56,7 @@ namespace SwiftClient.Cli
                     queryParams.Add("prefix", options.Prefix);
                 }
 
-                var containerData = client.GetContainer(options.Container, null, queryParams).Result;
+                var containerData = client.GetContainerAsync(options.Container, null, queryParams).Result;
                 if (containerData.IsSuccess)
                 {
                     if (containerData.Objects != null && containerData.Objects.Count > 0)

@@ -9,11 +9,11 @@ namespace SwiftClient.Cli
         public static int Run(GetOptions options, Client client)
         {
             int bufferSize = Convert.ToInt32(ByteSize.FromMegabytes(options.BufferSize).Bytes);
-            var headObject = client.HeadObject(options.Container, options.Object).Result;
+            var headObject = client.HeadObjectAsync(options.Container, options.Object).Result;
 
             if (headObject.IsSuccess)
             {
-                using (var response = client.GetObject(options.Container, options.Object).Result)
+                using (var response = client.GetObjectAsync(options.Container, options.Object).Result)
                 {
                     using (Stream streamToWriteTo = File.OpenWrite(options.File))
                     {

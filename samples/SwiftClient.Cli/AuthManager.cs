@@ -123,7 +123,7 @@ namespace SwiftClient.Cli
                 .SetRetryCount(1)
                 .SetLogger(new SwiftConsoleLog());
 
-            var data = await client.Authenticate();
+            var data = await client.AuthenticateAsync();
 
             if (data != null)
             {

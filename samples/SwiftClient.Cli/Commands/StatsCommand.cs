@@ -9,7 +9,7 @@ namespace SwiftClient.Cli
     {
         public static int Run(StatsOptions options, Client client)
         {
-                var accountData = client.GetAccount().Result;
+                var accountData = client.GetAccountAsync().Result;
                 if (accountData.IsSuccess)
                 {
 

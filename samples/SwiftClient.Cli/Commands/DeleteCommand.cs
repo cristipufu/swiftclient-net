@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SwiftClient.Cli
 {
@@ -25,7 +21,7 @@ namespace SwiftClient.Cli
             }
             else
             {
-                var response = client.DeleteObject(options.Container, options.Object).Result;
+                var response = client.DeleteObjectAsync(options.Container, options.Object).Result;
                 if (response.IsSuccess)
                 {
                     Console.WriteLine($"{options.Container}/{options.Object} deleted");

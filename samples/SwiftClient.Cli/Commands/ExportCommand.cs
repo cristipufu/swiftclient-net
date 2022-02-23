@@ -87,7 +87,7 @@ namespace SwiftClient.Cli
 
                     if (listQueue.TryDequeue(out request))
                     {
-                        var containerData = client.GetContainer(request.Container, null, request.Query).Result;
+                        var containerData = client.GetContainerAsync(request.Container, null, request.Query).Result;
                         if (containerData.IsSuccess)
                         {
                             if (containerData.Objects.Count > 0)
@@ -197,7 +197,7 @@ namespace SwiftClient.Cli
                         .SetRetryCount(2)
                         .SetLogger(new SwiftConsoleLog());
 
-                using (var response = await downloadClient.GetObject(downloadObj.Container, downloadObj.Object.Object))
+                using (var response = await downloadClient.GetObjectAsync(downloadObj.Container, downloadObj.Object.Object))
                 {
                     if (response.IsSuccess)
                     {
@@ -256,7 +256,7 @@ namespace SwiftClient.Cli
 
             if (string.IsNullOrEmpty(options.Container))
             {
-                var accountData = client.GetAccount().Result;
+                var accountData = client.GetAccountAsync().Result;
                 if (accountData.IsSuccess)
                 {
                     if (accountData.Containers != null && accountData.Containers.Count > 0)
