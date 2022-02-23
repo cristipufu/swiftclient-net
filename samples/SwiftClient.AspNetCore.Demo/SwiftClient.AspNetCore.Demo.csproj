@@ -4,7 +4,7 @@
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyName>SwiftClient.AspNetCore.Demo</AssemblyName>
     <PackageId>SwiftClient.AspNetCore.Demo</PackageId>
-    <RuntimeFrameworkVersion>3.1.0</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>3.1.1</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <OutputType>WinExe</OutputType>
