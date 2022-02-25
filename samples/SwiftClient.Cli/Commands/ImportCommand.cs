@@ -133,7 +133,7 @@ namespace SwiftClient.Cli
 
                 using (var stream = File.OpenRead(obj.Path))
                 {
-                    var response = await uploadClient.PutLargeObject(obj.Container, obj.Object, stream, null, null, Convert.ToInt64(ByteSize.FromMegabytes(10).Bytes));
+                    var response = await uploadClient.PutLargeObjectAsync(obj.Container, obj.Object, stream, null, null, Convert.ToInt64(ByteSize.FromMegabytes(10).Bytes));
 
                     if (response.IsSuccess)
                     {

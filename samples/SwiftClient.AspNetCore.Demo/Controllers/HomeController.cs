@@ -89,7 +89,7 @@ namespace SwiftClient.AspNetCore.Demo.Controllers
             });
 
             // cleanup temp
-            await _swiftService.DeleteContainerWithContents(containerTempId);
+            await _swiftService.DeleteContainerWithContentsAsync(containerTempId);
 
             return new JsonResult(new
             {

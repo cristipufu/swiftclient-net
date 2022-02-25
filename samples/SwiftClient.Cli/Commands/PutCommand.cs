@@ -77,7 +77,7 @@ namespace SwiftClient.Cli
                     { $"X-Object-Meta-Contenttype", MimeTypeMap.GetMimeType(Path.GetExtension(options.File)) }
                 };
 
-                response = client.PutLargeObject(options.Container, options.Object, stream, headers, (chunk, bytesRead) =>
+                response = client.PutLargeObjectAsync(options.Container, options.Object, stream, headers, (chunk, bytesRead) =>
                 {
                     if (showProgress)
                         Console.Write($"\rUploaded {((chunk * options.BufferSize).Megabytes() + bytesRead.Bytes()).Humanize("MB")}");

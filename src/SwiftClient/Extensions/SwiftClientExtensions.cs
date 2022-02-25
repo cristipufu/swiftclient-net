@@ -10,7 +10,7 @@ namespace SwiftClient
 {
     public static class ClientExtensions
     {
-        public static async Task<SwiftBaseResponse> PutLargeObject(this ISwiftClient client, string containerId, string objectId, Stream stream, Dictionary<string, string> headers = null, Action<long, long> progress = null, long bufferSize = 1000000, bool checkIntegrity = false)
+        public static async Task<SwiftBaseResponse> PutLargeObjectAsync(this ISwiftClient client, string containerId, string objectId, Stream stream, Dictionary<string, string> headers = null, Action<long, long> progress = null, long bufferSize = 1000000, bool checkIntegrity = false)
         {
             SwiftBaseResponse response = null;
             byte[] buffer = new byte[bufferSize];
@@ -37,7 +37,7 @@ namespace SwiftClient
                 if (!response.IsSuccess)
                 {
                     // cleanup
-                    await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
+                    await client.DeleteContainerWithContentsAsync(containerTemp).ConfigureAwait(false);
 
                     return response;
                 }
@@ -64,7 +64,7 @@ namespace SwiftClient
             if (!response.IsSuccess)
             {
                 // cleanup
-                await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
+                await client.DeleteContainerWithContentsAsync(containerTemp).ConfigureAwait(false);
 
                 return response;
             }
@@ -75,19 +75,19 @@ namespace SwiftClient
             if (!response.IsSuccess)
             {
                 // cleanup
-                await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
+                await client.DeleteContainerWithContentsAsync(containerTemp).ConfigureAwait(false);
 
                 return response;
             }
 
             // cleanup temp
-            return await client.DeleteContainerWithContents(containerTemp).ConfigureAwait(false);
+            return await client.DeleteContainerWithContentsAsync(containerTemp).ConfigureAwait(false);
         }
 
-        public static async Task<SwiftBaseResponse> DeleteContainerWithContents(this ISwiftClient client, string containerId, int limit = 1000)
+        public static async Task<SwiftBaseResponse> DeleteContainerWithContentsAsync(this ISwiftClient client, string containerId, int limit = 1000)
         {
             // delete all container objects
-            var deleteRsp = await client.DeleteContainerContents(containerId, limit).ConfigureAwait(false);
+            var deleteRsp = await client.DeleteContainerContentsAsync(containerId, limit).ConfigureAwait(false);
 
             if (deleteRsp.IsSuccess)
             {
@@ -98,7 +98,7 @@ namespace SwiftClient
             return deleteRsp;
         }
 
-        public static async Task<SwiftBaseResponse> DeleteContainerContents(this ISwiftClient client, string containerId, int limit = 1000)
+        public static async Task<SwiftBaseResponse> DeleteContainerContentsAsync(this ISwiftClient client, string containerId, int limit = 1000)
         {
             var limitHeaderKey = "limit";
             var markerHeaderKey = "marker";
