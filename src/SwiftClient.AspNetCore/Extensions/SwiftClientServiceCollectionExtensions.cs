@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddOptions();
             serviceCollection.AddSingleton<ISwiftLogger, SwiftServiceLogger>();
             serviceCollection.AddSingleton<ISwiftAuthManager, SwiftAuthManagerMemoryCache>();
-            serviceCollection.AddTransient<ISwiftClient, SwiftService>();
+            serviceCollection.AddTransient<ISwiftService, SwiftService>();
 
             return serviceCollection;
         }

@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using System.IO;
-using Microsoft.Extensions.Options;
 
 namespace SwiftClient.AspNetCore.Demo.Controllers
 {
@@ -16,11 +14,11 @@ namespace SwiftClient.AspNetCore.Demo.Controllers
         string metaFileName = "Filename";
         string metaContentType = "Contenttype";
 
-        private readonly ISwiftClient _swiftService;
+        private readonly ISwiftService _swiftService;
 
-        public HomeController(ISwiftClient swiftClient)
+        public HomeController(ISwiftService swiftService)
         {
-            _swiftService = swiftClient;
+            _swiftService = swiftService;
         }
 
         public async Task<IActionResult> Index()
