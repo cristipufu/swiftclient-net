@@ -12,7 +12,7 @@ namespace SwiftClient
         public SwiftRetryManager RetryManager;
 
         protected ISwiftLogger _logger;
-        protected HttpClient _client;
+        protected HttpClient _client = new HttpClient();
         protected bool _customClient;
 
         public Client() { }
